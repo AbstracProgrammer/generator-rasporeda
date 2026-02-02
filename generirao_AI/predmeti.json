@@ -1,0 +1,32 @@
+[
+  {
+    "id": 501,
+    "naziv": "Matematika",
+    "potreban_tip_ucionice": "opca"
+  },
+  {
+    "id": 502,
+    "naziv": "Tjelesna i zdravstvena kultura",
+    "potreban_tip_ucionice": "tjelesni"
+  },
+  {
+    "id": 503,
+    "naziv": "Kemija",
+    "potreban_tip_ucionice": "kemija"
+  },
+  {
+    "id": 504,
+    "naziv": "Informatika",
+    "potreban_tip_ucionice": "informatika"
+  },
+  {
+    "id": 505,
+    "naziv": "Etika",
+    "potreban_tip_ucionice": "opca"
+  },
+  {
+    "id": 506,
+    "naziv": "Vjeronauk",
+    "potreban_tip_ucionice": "opca"
+  }
+]

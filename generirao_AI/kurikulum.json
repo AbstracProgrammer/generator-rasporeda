@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "naziv_zaduženja": "Matematika 1.a",
+    "predmet_id": 501,
+    "profesor_id": 101,
+    "razredi_id": [1001],
+    "sati_tjedno": 4,
+    "zeljeni_blok_sat": true,
+    "fiksna_ucionica_id": null,
+    "paralelna_grupa_id": null
+  },
+  {
+    "id": 2,
+    "naziv_zaduženja": "Etika 1.a (Grupa A)",
+    "predmet_id": 505,
+    "profesor_id": 105,
+    "razredi_id": [1001],
+    "sati_tjedno": 1,
+    "zeljeni_blok_sat": false,
+    "fiksna_ucionica_id": null,
+    "paralelna_grupa_id": "grupa_1a_etika_vjeronauk"
+  },
+  {
+    "id": 3,
+    "naziv_zaduženja": "Vjeronauk 1.a (Grupa B)",
+    "predmet_id": 506,
+    "profesor_id": 106,
+    "razredi_id": [1001],
+    "sati_tjedno": 1,
+    "zeljeni_blok_sat": false,
+    "fiksna_ucionica_id": null,
+    "paralelna_grupa_id": "grupa_1a_etika_vjeronauk"
+  }
+]

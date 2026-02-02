@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "naziv": "Učionica 17",
+    "tip": ["kemija", "opca"],
+    "kapacitet": 30,
+    "prioritet": 10
+  },
+  {
+    "id": 2,
+    "naziv": "Dvorana 3",
+    "tip": ["tjelesni"],
+    "kapacitet": 60,
+    "prioritet": 10
+  },
+  {
+    "id": 3,
+    "naziv": "Učionica 20",
+    "tip": ["informatika"],
+    "kapacitet": 24,
+    "prioritet": 10
+  },
+  {
+    "id": 4,
+    "naziv": "Učionica 11",
+    "tip": ["opca"],
+    "kapacitet": 30,
+    "prioritet": 5
+  },
+  {
+    "id": 5,
+    "naziv": "Čitaonica",
+    "tip": ["opca", "izborna"],
+    "kapacitet": 40,
+    "prioritet": 2
+  }
+]

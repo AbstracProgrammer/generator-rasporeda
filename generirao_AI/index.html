@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Generator Rasporeda</title>
+  </head>
+  <body>
+    <h1>Generator Rasporeda</h1>
+    <button id="startBtn" disabled>Generiraj Raspored</button>
+    <div id="output">Učitavam podatke...</div>
+
+    <script src="models.js"></script>
+    <script src="skola.js"></script>
+    <script src="generator.js"></script>
+
+    <script>
+      // Inicijalizacija
+      const skola = new Skola();
+      const output = document.getElementById("output");
+      const btn = document.getElementById("startBtn");
+
+      // Učitavanje podataka odmah pri startu
+      skola.ucitajSvePodatke().then((uspjeh) => {
+        if (uspjeh) {
+          output.innerText = "Podaci učitani! Spreman za rad.";
+          btn.disabled = false;
+
+          // Ispis za provjeru
+          console.log("Učionice:", skola.ucionice);
+          console.log("Zaduženja:", skola.zaduzenja);
+        } else {
+          output.innerText = "Greška pri učitavanju podataka.";
+        }
+      });
+
+      // Klik na gumb
+      btn.addEventListener("click", () => {
+        const generator = new GeneratorRasporeda(skola);
+        generator.generiraj();
+      });
+    </script>
+  </body>
+</html>

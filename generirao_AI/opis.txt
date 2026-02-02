@@ -1,0 +1,62 @@
+UPUTE: NEMOJ MI PISATI KOD, vodi me kako da napravim projekt.
+
+Kontekst: natjecanjem se u natjecanju iz informatike, Razvoj Softvera. Za projekt sam odabrao automatski generator rasporeda. Mislim da ovo neće biti jednostavno pa mi treba tvoja pomoć. Planiram ga napraviti pomoću HTML, CSS i JS te PHP za back end. A kako je ovo još proba sve planiram spremati u JSON (kasnije ću ti pokazati kako raspored izgleda na web stranici)
+
+Mentalni plan: na papir sam napisao mentalni plan za koje sve stavke treba sve imati ovaj program, znači satničar škole bi trebao sve o školi ubaciti u program (razredi, profesori, učionice, itd.) i ograničenja (npr. ne može raditi petkom i naravno ostala ograničenja, kasnije ću spomenuti). Na kraju bi satničar također trebao ubacivati specifičnosti o njima ću kasnije pisati.
+
+Sada ću spomenuti stavke, redoslijed njih ću kasnije objasniti kako bi trebalo ići ili ćeš mi ti dati prijedlog. Sve stvari poput imena, specijalizacija, ograničenja razmisli kao polja za opis za neki element. Npr. profesor će imati polja: ime i prezime, struka, ograničenje vremensko (kada ne može raditi) i mjesno (gdje može raditi). Tako će biti i za druge stvari poput učionica, predmeta, itd.
+
+UČIONICE: treba postojati popis učionica koji će se ubaciti u program, korisnik sam daje ime učionici.
+Za neke učionice će trebati postojati polje "specijalizacija" tamo korisnik upisuje ako je to posebna učionica, npr. za tjelesni ili informatiku. Dalje, korisnik može naznačiti da ta učionica ima prioritet pri rađenju rasporeda, prvo se ona treba popuniti pa onda tek druga koja ima istu specijalizaciju. Te naravno mora postojati ograničenja, kada se učionica ne može koristiti.
+
+PREDMETI: korisnik treba dati popis predmeta te ako taj predmet zahtjeva posebnu učionicu mora je spojiti s učionicom. Ovdje mi je potrebna tvoja pomoć, što bih prvo trebao korisnik unijeti učionice ili predmete?
+Nadalje, postoji "rubni" slučaj, u većini škola razredi se znaju dijeliti ili udruživati. Odličan primjer je etika/vjeronauk. U mojoj školi paralelno učenici imaju isti sat etiku i vjeronauk (jedan dio ide etika, jedan vjeronauk). Kako je etika popularnija, ona je svoj poseban sat, a kako je vjeronauk manje popularan, različiti razredi budu spojeni kako bi veličina razreda bila dobra. Isti primjer je izborna nastava, npr. 4 i 5 sat četvrtkom svi drugi razredi imaju izbornu nastavu. Oni su podijeljeni na više različitih grupa (tj. predmeta) te se oni međusobno udruže te se na kraju vrate natrag u različite razrede. Ja sam to mislio riješiti tako što bi korisnik definirao poseban predmet koji uključuje više predmeta odjednom koji bi kasnije bio povezan s kurikulumom (kasnije pišem o njemu).
+
+PROFESORI: korisnik upisuje ime i prezime profesora te njegovu struku (njegov predmet, a može ih biti i više). Nadalje, ograničenje je bitno jer neki profesori npr. ne mogu raditi utorkom i četvrtkom. A neki profesori mogu raditi samo u jednoj učionici.
+
+RAZREDI: treba se stvoriti popis svih razreda koji postoje u cijeloj školi. Prvo bih da korisnik doda godine te odjeljenja, važna stvar koju treba uzeti u obzir jest da neke škole imaju mješovite razrede. Npr. može imati trogodišnje i četverogodišnje programa. Pa npr. odjeljenje "a" može imati četiri godine (tj razreda 1.a, 2.a, ...), a odjeljenje "b" ne jer je ono trogodišnje pa može biti samo do 3.b. Za ovo još nisam siguran, ali da postoji i za razreda ograničenje, tj. npr. da neki učenik slomi nogu da se ograniče učionice u kojima može biti.
+
+KURIKULUM: korisnik mora definirati za sve razrede njihov kurikulum. Kurikulum je zna biti drugačiji iz godine u godinu i iz odjeljenju od odjeljenja. Tako da će korisnik mora napraviti kurikulum za npr. 2.a razred. Međutim kurikulum može isto vrijediti za više razreda. (Kasnije o tome). Kurikulum se definira tako što se napraviti popis svih predmeta te njihova satnica. Npr. Matematika će imati 4 sata tjedno, a Fizika 2, itd. Tu će se stvoriti tjedni kurikulum.
+Ovdje se javlja ona stvar o kojoj sam govorio, može se dogoditi da kurikulum mora uzeti u obzir dijeljenje razreda u situaciji poput etika/vjeronauk.
+
+
+SVE POVEZANO: ovdje korisnik praktički sve povezuje u jednu cjelinu, mora napraviti sljedeće stvari.
+KURIKULUM+RAZRED: svakom razredu mora dodijeliti njegov kurikulum iz definira liste "KURIKULUMI".
+PROFESOR+RAZRED: korisnik mora definirati sam kojeg profesora dobiva koji razred za koji točno predmet. Te na kraju mu dodjeljuje i razrednika koji je profesor iz prije definirane liste "PROFESORI".
+
+STVARI KOJE TREBA OSIGURATI PROGRAM:
+- ne smije biti "rupa" u rasporedu, nikako se ne smije dogoditi da razred ima nastavu tri sata pa dva sata pauze pa onda opet nastavu. Raspored za dan treba biti u JEDNOJ cjelini.
+Idealno bi bilo da počne od prvog sata, međutim dopušteno je da počne i od drugih sati, međutim mora ostati kao jedna cjelina i ne nadmašivati zadnji broj sati drugih dana (ako svi dani završavaju do 7. sata, ne smije taj dana trajati do 9. ako nema 1. sat, već bi trebao imati 1. sat kako bi imali samo do 8.
+IZNIMKA: učenici imaju prioritet, tako da ako nije moguće učenike i profesore uskladiti, profesori smiju imati rubu, ali opet i to treba biti na minimumu
+- nastava je organizirana tijekom radnih dana (od ponedjeljka do petka)
+- raspored mora biti usklađen i ravnomjeran, ne smije jedna dan biti 8 sati, a neki dan 6, trebalo bi oba dana biti po 7 sati. Ako je tjedna satnica 34 sati, to znači da će biti 4 dana po 7 sati i jedan po 6 sati (tjedni raspored ponedjeljak/petak)
+- blok satovi se koriste kada predmet ima više od 2 sata, koriste ste kako bi u jednom danu odjednom bilo 2 sata tog predmeta. To se većinom samo jednom koristi, ali za predmete s puno sati, npr, 5 i više se može više puta koristiti
+- kada se dodjeljuju učionice treba se pobrinuti da ta učionica ostane za taj predmet, npr. da se za Kemiju odredila učionica broj 17, za sve sate Kemije neka bude učionica broj 17. Međutim, ako nije moguće dopušteno je da bude u različitim učionicama.
+- ovo je više želja već pravilo, ako je moguće treba osigurati da razmak između sljedećeg nastavnog sata istog predmeta je barem jedan dan. To jest, da ne bude taj predmet dan za danom, već da postoji razmak
+
+LOGIČKA PRAVILA: raspored mora biti logički smislen što znači da tijekom jednog sata jedan razred se nalazi u jednoj učionici, a predaje im jedan profesor jedan predmet. Znači ne smiju se dogoditi apsurdi poput toga da se razred nalazi u dvije različite učionice ili slično. Međutim IZNIMKA: ono što sam spominjao oko grupa, ako postoje grupe smije se dogoditi da isti razred bude u npr. dvije učionice, ali to je više do toga jer je jedna grupa u jednoj, a druga u drugoj učionici.
+
+Prilažem datoteku "raspored.json", u njoj je zapisano sve što se tiče rasporeda moje škole. Tamo gdje se nalazi "//", nije ništa važno već je placeholder. Analiziraj je i reci mi ako su uvjeti i upute koje sam naveo tebi prije dobre za stvaranje programa koji bi bio sposoban to izraditi.
+
+
+
+Koliko vidim kod radi.
+Jest da program vraća grešku: "Nemoguće generirati raspored s ovim uvjetima.", ali primijetio sam da je to u kodu već predviđeno komentarom:
+// Ovdje ćemo kasnije pisati logiku traženja termina...
+// Za sada samo simuliramo da ne radi
+// console.log(`Pokušavam smjestiti: ${zaduzenje.naziv}`);
+
+Tako da je spremno za implementaciju metode rijesi(), jedino prije toga imam par pitanja.
+
+Priložio sam ti skicu vizualnog dizajna (slika.png) ovog projekta, planiram organizirati svaki element u blok sa svojim rednim brojem (da korisniku bude intuitivno koji blok mora prvo napraviti) te na samom kraju gumb generiraj koji bi pokrenuo samo generaciju samog rasporeda. Planirao sam da kada korisnik klikne na blok da ga ne vodi na novu stranicu nego da se on kao uveća te u njemu definira stvari bitne za taj blok (npr. blok razred: koliko odjeljenja, godina, itd.). Naravno da bih morao poduzeti mjere poput onemogućavanja brisanja i mijenjanja nekih stavki jer su one lančano povezane. Npr. ne može se izbrisati predmet ako već postoji profesor koji ga predaje, prvo mora profesora (tj. sve ovisnosti o toj stavci) izbrisati te onda tek može izbrisati predmet (stavku). Prvo bih stavio da su blokovi bijele boje da se simbolizira da još nisu odrađeni, blokove koji su odrađeni bih obojao zelenom nijansom da korisnik zna da je to već napravio. Pitanje: da li da dodam neki posebni stil za sljedeći blok da se zna da ga korisnik mora sljedećeg napraviti ili su redni brojevi dovoljno dobri?
+
+Tijekom ovog projekta želim se koristiti Gemini CLI i primijetio sam da za najbolje korištenje treba se postojati GEMINI.md datoteka. Želim da mi je generiraš tako da Gemini CLI shvaća što smo ti i ja se dogovarali oko ovog projekta, znači prebaci i prilagodi naš razgovor u format GEMINI.md datoteke. Pobrini se da uzmeš u obzir sve zamjene koje smo napravili od originalnog plana (npr. da koristimo JS umjesto PHP, da ne stavljamo kapacitet učionica). Ti procjeni ako je bolje to napisati engleski ili hrvatskim. Pitanje: kada se dopisujem s Gemini CLI da koristim hrvatski ili engleski?
+
+
+
+Ja mislim da je za sada to što se tiče tvoje pomoći, puno si mi pomogao.
+
+
+Sada jedino što želim da mi potpuno, detaljno, temeljito objasniš tvoj kod. Kako on točno točno radi te objasni mi logiku tijekom stvaranja koda. Znači doslovno sve mi objasni (ne moraš sada svaku liniju, ali svaki funkciju da razumijem kako to točno radi). Objasni mi kako program komunicira međusobno, kako učitava JSON, kako stvari. Kako radi algoritam i sve ostale stvari!
+
+Volio bih to sam probati isprogramirati.
