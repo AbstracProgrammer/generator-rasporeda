@@ -1,28 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generator Rasporeda</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <h1>Generator Rasporeda</h1>
 
-    <section id="ucionice">
-        <h2>Učionice</h2>
-        <form id="form-ucionice">
-            <input type="text" id="ucionica-naziv" placeholder="Naziv učionice" required>
-            <input type="text" id="ucionica-tip" placeholder="Tip (npr. opca, kemija)" required>
-            <label>
-                <input type="checkbox" id="ucionica-prioritet">
-                Prioritetna
-            </label>
-            <button type="submit">Dodaj učionicu</button>
-        </form>
-        <ul id="ucionice-list"></ul>
-    </section>
-    
-    <script src="js/app.js"></script>
-</body>
+    <!--Font import begin-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Audiowide&family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <!--Font import end-->
+    <link rel="stylesheet" href="css/template.css" />
+    <link rel="stylesheet" href="css/korak.css" />
+    <link rel="stylesheet" href="css/korak-prozor.css" />
+    <script defer src="js/index.js"></script>
+  </head>
+  <body>
+    <header class="title">Generator rasporeda</header>
+    <main>
+      <div class="korak">
+        <h3>1. Učionice</h3>
+        <p>Upišite sve učionice Vaše škole</p>
+      </div>
+      <div class="korak">
+        <h3>2. Predmeti</h3>
+        <p>Upišite sve predmete koje Vaša škola predaje</p>
+      </div>
+      <div class="korak">
+        <h3>3. Profesori</h3>
+        <p>Upišite sve profesore koji predaju u Vašoj školi</p>
+      </div>
+      <div class="korak">
+        <h3>4. Razredi</h3>
+        <p>Upišite sve razrede koji pohađaju Vašu školu</p>
+      </div>
+      <div class="korak">
+        <h3>5. Programi</h3>
+        <p>Upišite sve programe koje Vaša škola nudi</p>
+      </div>
+      <div class="korak">
+        <h3>6. Kurikulum</h3>
+        <p>Povežite sve što ste do sada upisivali.</p>
+      </div>
+      <button class="button locked main-button">Generiraj raspored</button>
+    </main>
+    <div class="modal-backdrop"></div>
+    <div class="korak-prozor">
+      <button class="exit">X</button>
+      <h3></h3>
+      <p class="error"></p>
+      <button class="completed save-step button">Spremi</button>
+    </div>
+  </body>
 </html>

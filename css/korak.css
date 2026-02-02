@@ -1,0 +1,21 @@
+.korak {
+  width: 80%;
+  height: 80%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black; /* For visualization during development */
+  border-radius: 12px;
+  box-sizing: border-box; /* Include padding in width/height */
+}
+
+.korak:hover {
+  box-shadow: rgba(0, 0, 0, 0.35) 0 5px 11px;
+  transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.korak > h3 {
+  font-size: 2em;
+}

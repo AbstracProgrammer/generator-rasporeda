@@ -1,0 +1,73 @@
+/* Backdrop for the modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none; /* Initially hidden */
+}
+
+/* The modal window itself */
+.korak-prozor {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  max-width: 800px;
+  min-height: 400px;
+  background-color: white;
+  border-radius: 15px;
+  padding: 20px;
+  z-index: 1000;
+  display: none; /* Changed from inline style to class-based */
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.korak-prozor.show {
+  display: flex;
+}
+
+.modal-backdrop.show {
+  display: block;
+}
+
+/* Exit button */
+.korak-prozor .exit {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Title */
+.korak-prozor h3 {
+  font-size: 2em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* Error message */
+.korak-prozor .error {
+  font-size: 1.2em; /* Slightly smaller than title */
+  color: red;
+  text-align: center;
+  min-height: 20px; /* Reserve space */
+}
+
+/* Done button */
+.korak-prozor .save-step {
+  margin-top: auto; /* Push to the bottom */
+  align-self: center;
+  padding: 10px 20px;
+  font-size: 1.2em;
+}

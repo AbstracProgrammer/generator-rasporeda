@@ -78,4 +78,7 @@ The generator must solve the **Timetabling Problem (NP-Hard)** using a backtrack
 ## 5. Development Guidelines
 
 - Write modular, clean ES6+ JavaScript.
+- when adding JavaScript put it in head tag and use defer keyword.
 - Use English language when writing code, classes, etc. However use Croatian when writing to JSON and writing comments.
+- Always use classes css/template.css when generating new HTML, for example if you generate a button, you have to use the .button
+- Make sure that the elements are always responsive, use methods like clamp() function in CSS
