@@ -17,11 +17,12 @@
     <link rel="stylesheet" href="css/korak.css" />
     <link rel="stylesheet" href="css/korak-prozor.css" />
     <script defer src="js/index.js"></script>
+    <script defer src="js/korakProzor.js"></script>
   </head>
   <body>
     <header class="title">Generator rasporeda</header>
     <main>
-      <div class="korak">
+      <div class="korak active" data-step="ucionice">
         <h3>1. Učionice</h3>
         <p>Upišite sve učionice Vaše škole</p>
       </div>
@@ -52,7 +53,9 @@
       <button class="exit">X</button>
       <h3></h3>
       <p class="error"></p>
-      <button class="completed save-step button">Spremi</button>
+      <div class="modal-content"></div>
+      <!-- Cleared content -->
+      <button class="save-step button">Spremi</button>
     </div>
   </body>
 </html>

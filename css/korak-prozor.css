@@ -16,16 +16,102 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 60%;
-  max-width: 800px;
-  min-height: 400px;
+  width: 80%; /* Increased width */
+  max-width: 1000px; /* Increased max-width */
+  min-height: 500px; /* Increased height */
   background-color: white;
   border-radius: 15px;
   padding: 20px;
   z-index: 1000;
-  display: none; /* Changed from inline style to class-based */
+  display: none;
   flex-direction: column;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content {
+  flex-grow: 1; /* Allows this area to expand */
+  padding: 20px 0;
+  overflow-y: auto; /* Add scroll if content overflows */
+}
+
+/* Base styles for input fields */
+.input-field,
+.autocomplete-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.field-label {
+  flex-basis: 200px; /* Fixed width for the label */
+  flex-shrink: 0;
+  font-weight: bold;
+  padding-right: 15px;
+}
+
+.input-field input,
+.autocomplete-wrapper {
+  flex-grow: 1;
+}
+
+.input-field input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+/* Autocomplete specific styles */
+.autocomplete-wrapper {
+  position: relative;
+  display: flex;
+}
+
+.autocomplete-wrapper input {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  font-size: 1em;
+  border-right: none;
+}
+
+.autocomplete-wrapper .add-button {
+  flex-shrink: 0;
+  padding: 0 15px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  z-index: 1001;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
 }
 
 .korak-prozor.show {
