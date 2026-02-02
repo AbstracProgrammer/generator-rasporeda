@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Rasporeda</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Generator Rasporeda</h1>
+
+    <section id="ucionice">
+        <h2>Učionice</h2>
+        <form id="form-ucionice">
+            <input type="text" id="ucionica-naziv" placeholder="Naziv učionice" required>
+            <input type="text" id="ucionica-tip" placeholder="Tip (npr. opca, kemija)" required>
+            <label>
+                <input type="checkbox" id="ucionica-prioritet">
+                Prioritetna
+            </label>
+            <button type="submit">Dodaj učionicu</button>
+        </form>
+        <ul id="ucionice-list"></ul>
+    </section>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
