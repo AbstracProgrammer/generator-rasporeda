@@ -1,25 +1,17 @@
 [
     {
-        "id": 1,
-        "naziv": "123",
-        "tipovi_id": [
-            1
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 2,
-        "naziv": "321",
-        "tipovi_id": [
-            1
-        ],
-        "prioritet": 0
-    },
-    {
         "id": 3,
         "naziv": "432423",
         "tipovi_id": [
             2
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 4,
+        "naziv": "fdsdf",
+        "tipovi_id": [
+            1
         ],
         "prioritet": 0
     }

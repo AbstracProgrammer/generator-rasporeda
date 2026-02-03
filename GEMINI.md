@@ -26,31 +26,35 @@ They are empty when program is first started, whey users enters information they
     - `naziv`: name that the user gave for the classroom
     - `tipovi_id`: array of ints (IDs from `tipoviUcionica.json`) - determines capability.
     - `prioritet`: int (0 or 1) - 0 = not a priority, 1 = priority / fill first.
-2.  **`predmeti.json`** (Subjects):
+3.  **`predmeti.json`** (Subjects):
     - `id`: unique int
     - `naziv`: name that the user gave for the subject
-    - `potreban_tip_ucionice`: string (matches values in `ucionice.json`).
-3.  **`profesori.json`** (Teachers):
+    - `potreban_tip_ucionice_id`: int (ID from `tipoviUcionica.json`) or null (doesn't need specific type).
+4.  **`profesori.json`** (Teachers):
     - `id`: unique int
     - `ime`: name of the teacher
     - `prezime`: surname of the teacher
     - `struka_predmeti_id`: array of subject IDs they can teach.
     - `nedostupan`: object defining unavailable times (e.g., `{"1": [1, 2]}` means Monday 1st and 2nd hour unavailable).
     - `fiksna_ucionica_id`: ID or null (if teacher is bound to a specific room).
-4.  **`razredi.json`** (Classes):
+5.  **`razredi.json`** (Classes):
     - `id`: unique int
     - `godina`: year of the class
     - `odjeljenje`: what class they are inside the year (one year, multiple classes)
     - `oznaka`: "full name" of a class. Format: {`godina`}.{`odjeljenje`}
-5.  **`program.json`** (weekly workload of a school program):
+6.  **`program.json`** (weekly workload of a school program):
     - `id`: unique int
     - `naziv`: name of the program
-    - `popis_predmeta`: array of subjects and their weekly requirement. Format for items inside list: { `predmet_id`: id of a subject, `weekly_requirement`: number representing how many times a week it needs to be scheduled}
-6.  **`kurikulum.json`** (Assignments/Workload) - _The Key Input_ NOT COMPLETELY DEFINED YET:
+    - `popis_predmeta`: array of subjects and their weekly requirement.
+      Format for items inside list: {
+      `predmet_id`: id of a subject,
+      `weekly_requirement`: number representing how many times a week it needs to be scheduled,
+      `teacher_id`: at time will be null (placeholder), it will be later replaced by teacher id when refrenced
+      }
+7.  **`kurikulum.json`** (Assignments/Workload) - _The Key Input_ NOT COMPLETELY DEFINED YET:
+    - `id`: unique int
+    - `program_id`: id of a program.
     - `razredi_id`: array of class IDs (handles merged classes).
-    - `profesor_id`: int.
-    - `predmet_id`: int.
-    - `sati_tjedno`: int.
     - `paralelna_grupa_id`: string or null. (CRITICAL: If two assignments share this ID, they MUST be scheduled at the same time).
 
 ## 3. Algorithm Requirements (Backtracking)
