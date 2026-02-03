@@ -6,14 +6,20 @@
  * The message will disappear after 3 seconds.
  * @param {string} message - The error message to display.
  */
+let timeoutID = null;
+
 function displayError(message) {
   const errorElement = document.querySelector(".korak-prozor .error");
-  if (errorElement) {
-    errorElement.textContent = message;
-    setTimeout(() => {
-      errorElement.textContent = "";
-    }, 3000);
+  if (errorElement.textContent === message) {
+    return;
+  } else {
+    clearTimeout(timeoutID);
   }
+
+  errorElement.textContent = message;
+  timeoutID = setTimeout(() => {
+    errorElement.textContent = "";
+  }, 3000);
 }
 
 /**
@@ -41,52 +47,22 @@ function createAutocompleteInput(labelText, placeholder) {
   return `
     <div class="autocomplete-field">
       <span class="field-label">${labelText}</span>
-      <div class="autocomplete-content">
-        <div class="autocomplete-wrapper">
-          <input type="text" class="autocomplete-input" placeholder="${placeholder || ""}" autocomplete="off">
-          <button class="add-button button">+</button>
-          <div class="suggestions-list" style="display: none;"></div>
-        </div>
-        <div class="added-items-list"></div>
+      <div class="autocomplete-wrapper">
+        <input type="text" class="autocomplete-input" placeholder="${placeholder || ""}" autocomplete="off">
+        <button class="add-button button">+</button>
+        <div class="suggestions-list" style="display: none;"></div>
       </div>
     </div>
   `;
 }
 
 /**
- * Renders the list of added items below the autocomplete input.
- * @param {HTMLElement} container - The '.added-items-list' container element.
- * @param {string[]} items - The array of items to render.
- */
-function renderAddedItems(container, items) {
-  container.innerHTML = ""; // Clear current list
-  items.forEach((itemText) => {
-    const itemElement = document.createElement("div");
-    itemElement.classList.add("added-item");
-    itemElement.textContent = itemText;
-    // Optional: Add a delete button for each item
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "X";
-    deleteBtn.classList.add("delete-item-btn");
-    deleteBtn.addEventListener("click", () => {
-      // Remove item from array and re-render
-      const index = items.indexOf(itemText);
-      if (index > -1) {
-        items.splice(index, 1);
-        renderAddedItems(container, items);
-      }
-    });
-    itemElement.appendChild(deleteBtn);
-    container.appendChild(itemElement);
-  });
-}
-
-/**
  * Initializes the functionality for the 'add' button in an autocomplete component.
+ * The button adds the input's value to the suggestions array.
  * @param {HTMLButtonElement} addButton - The button element to attach the listener to.
- * @param {string[]} targetArray - The array that stores the added items.
+ * @param {string[]} suggestionsArray - The array that stores the autocomplete suggestions.
  */
-function initializeAddButton(addButton, targetArray) {
+function initializeAddButton(addButton, suggestionsArray) {
   addButton.addEventListener("click", () => {
     const wrapper = addButton.closest(".autocomplete-wrapper");
     const input = wrapper.querySelector(".autocomplete-input");
@@ -99,50 +75,43 @@ function initializeAddButton(addButton, targetArray) {
 
     // Case-insensitive check for duplicates
     if (
-      targetArray.some((item) => item.toLowerCase() === value.toLowerCase())
+      suggestionsArray.some(
+        (item) => item.toLowerCase() === value.toLowerCase(),
+      )
     ) {
-      displayError("Stavka već postoji na popisu.");
+      displayError("Prijedlog već postoji na popisu.");
+      input.value = ""; // Clear on duplicate as well
       return;
     }
 
-    targetArray.push(value);
-    input.value = ""; // Clear input
+    suggestionsArray.push(value);
+    input.value = ""; // Clear input after adding
     displayError(""); // Clear any previous errors
-
-    const listContainer = addButton
-      .closest(".autocomplete-content")
-      .querySelector(".added-items-list");
-    renderAddedItems(listContainer, targetArray);
   });
 }
 
 /**
- * Initializes the autocomplete functionality for a given input and suggestion list.
- * @param {HTMLInputElement} inputElement - The input element to attach the listener to.
- * @param {string[]} suggestions - An array of suggestion strings.
+ * Initializes the autocomplete functionality for a given input.
+ * @param {HTMLInputElement} inputElement - The input element to attach listeners to.
+ * @param {string[]} suggestionsArray - An array of suggestion strings.
  */
-function initializeAutocomplete(inputElement, suggestions) {
-  const suggestionsList = inputElement.nextElementSibling.nextElementSibling;
+function initializeAutocomplete(inputElement, suggestionsArray) {
+  const suggestionsList =
+    inputElement.parentElement.querySelector(".suggestions-list");
 
-  inputElement.addEventListener("input", () => {
-    const inputValue = inputElement.value.toLowerCase();
+  const showSuggestions = (filter = "") => {
     suggestionsList.innerHTML = "";
-
-    if (inputValue.length === 0) {
-      suggestionsList.style.display = "none";
-      return;
-    }
-
-    const filteredSuggestions = suggestions.filter((s) =>
-      s.toLowerCase().startsWith(inputValue),
+    const filtered = suggestionsArray.filter((s) =>
+      s.toLowerCase().includes(filter.toLowerCase()),
     );
 
-    if (filteredSuggestions.length > 0) {
-      filteredSuggestions.forEach((s) => {
+    if (filtered.length > 0) {
+      filtered.forEach((s) => {
         const item = document.createElement("div");
         item.classList.add("suggestion-item");
         item.textContent = s;
-        item.addEventListener("click", () => {
+        // Use 'mousedown' to fire before the input's 'blur' event
+        item.addEventListener("mousedown", () => {
           inputElement.value = s;
           suggestionsList.style.display = "none";
         });
@@ -152,5 +121,21 @@ function initializeAutocomplete(inputElement, suggestions) {
     } else {
       suggestionsList.style.display = "none";
     }
+  };
+
+  inputElement.addEventListener("input", () => {
+    showSuggestions(inputElement.value);
+  });
+
+  inputElement.addEventListener("click", () => {
+    showSuggestions(inputElement.value);
+  });
+
+  // Hide suggestions when the input field loses focus
+  inputElement.addEventListener("blur", () => {
+    // We use a small delay to allow the 'mousedown' event on a suggestion to fire
+    setTimeout(() => {
+      suggestionsList.style.display = "none";
+    }, 150);
   });
 }
