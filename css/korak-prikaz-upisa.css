@@ -53,15 +53,15 @@
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 15px;
+  padding: 11px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .ucionica-card .naziv {
   font-weight: bold;
   font-size: 1.2em;
-  margin-bottom: 8px;
+  margin-bottom: 4px; /* Reduced margin to make items less spread out */
 }
 
 .ucionica-card .tip {

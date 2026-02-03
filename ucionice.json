@@ -1,23 +1,25 @@
 [
     {
         "id": 1,
-        "naziv": "test",
-        "tip": [
-            "test"
+        "naziv": "123",
+        "tipovi_id": [
+            1
         ],
         "prioritet": 0
     },
     {
         "id": 2,
-        "naziv": "test1",
-        "tip": [],
+        "naziv": "321",
+        "tipovi_id": [
+            1
+        ],
         "prioritet": 0
     },
     {
         "id": 3,
-        "naziv": "testdf",
-        "tip": [
-            "12323"
+        "naziv": "432423",
+        "tipovi_id": [
+            2
         ],
         "prioritet": 0
     }

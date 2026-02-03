@@ -32,7 +32,8 @@ $allowedFiles = [
     'razredi.json',
     'program.json',
     'kurikulum.json',
-    'raspored.json'
+    'raspored.json',
+    'tipoviUcionica.json'
 ];
 
 if (!in_array($fileName, $allowedFiles)) {

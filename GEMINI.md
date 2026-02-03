@@ -12,16 +12,19 @@ The goal is to build an automatic high-school timetable generator using a web-ba
 
 ## 2. Architecture & Data Structures
 
-The system relies on 6 core JSON files.
+The system relies on 7 core JSON files.
 
 ### A. Data Models (JSON Structure)
 
 They are empty when program is first started, whey users enters information they will be filled.
 
-1.  **`ucionice.json`** (Classrooms):
+1.  **`tipoviUcionica.json`** (Classroom Types) - NEW!
+    - `id`: unique int
+    - `naziv`: name of the classroom type (e.g., "opca", "kemija")
+2.  **`ucionice.json`** (Classrooms):
     - `id`: unique int
     - `naziv`: name that the user gave for the classroom
-    - `tip`: array of strings (e.g., `["opca", "kemija"]`) - determines capability.
+    - `tipovi_id`: array of ints (IDs from `tipoviUcionica.json`) - determines capability.
     - `prioritet`: int (0 or 1) - 0 = not a priority, 1 = priority / fill first.
 2.  **`predmeti.json`** (Subjects):
     - `id`: unique int
@@ -42,7 +45,7 @@ They are empty when program is first started, whey users enters information they
 5.  **`program.json`** (weekly workload of a school program):
     - `id`: unique int
     - `naziv`: name of the program
-    - `predmet_id`: key should be a ID of a SUBJECT and the value should a number that represents the amount of times that subject need to be scheduled weekly
+    - `popis_predmeta`: array of subjects and their weekly requirement. Format for items inside list: { `predmet_id`: id of a subject, `weekly_requirement`: number representing how many times a week it needs to be scheduled}
 6.  **`kurikulum.json`** (Assignments/Workload) - _The Key Input_ NOT COMPLETELY DEFINED YET:
     - `razredi_id`: array of class IDs (handles merged classes).
     - `profesor_id`: int.
