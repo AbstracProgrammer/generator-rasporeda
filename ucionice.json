@@ -12,5 +12,13 @@
         "naziv": "test1",
         "tip": [],
         "prioritet": 0
+    },
+    {
+        "id": 3,
+        "naziv": "testdf",
+        "tip": [
+            "12323"
+        ],
+        "prioritet": 0
     }
 ]

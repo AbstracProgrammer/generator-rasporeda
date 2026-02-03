@@ -1,35 +1,62 @@
 // This file will orchestrate the building of each step's modal content.
 
-// Array for autocomplete suggestions
-let prijedloziTipovaUcionica = [];
+/**
+ * Creates the HTML string for a single classroom card.
+ * @param {object} ucionica - The classroom object.
+ * @returns {string} HTML string for the card.
+ */
+function renderUcionicaCard(ucionica) {
+  const tipoviText =
+    ucionica.tip && ucionica.tip.length > 0
+      ? ucionica.tip.join(", ")
+      : "Nije specificiran";
+
+  return `
+    <div class="existing-item-card ucionica-card">
+      <div class="naziv">${ucionica.naziv}</div>
+      <div class="tip">Tip: ${tipoviText}</div>
+    </div>
+  `;
+}
 
 /**
  * Builds and displays the form for the "Učionice" (Classrooms) step.
- * It dynamically populates autocomplete suggestions from existing data.
- * @param {HTMLElement} modalContent - The container element within the modal to fill.
+ * It dynamically populates autocomplete suggestions and displays existing items.
+ * @param {HTMLElement} modalBody - The main body container of the modal.
  */
-async function prikaziKorakUcionice(modalContent) {
-  // Fetch existing data to create suggestions using the generic manager
-  let prijedloziTipovaUcionica = await dohvatiPrijedloge('ucionice.json', (item) => item.tip);
-  
-  // 2. Clear previous content
-  modalContent.innerHTML = "";
+async function prikaziKorakUcionice(modalBody) {
+  // Define containers for left and right columns
+  const formContainer = modalBody.querySelector(
+    ".modal-form-container .modal-content",
+  );
+  const existingItemsContainer = modalBody.querySelector(
+    ".existing-items-container",
+  );
 
-  // 3. Build the HTML for the step using components
+  // --- Left Column: Form ---
+  let prijedloziTipovaUcionica = await dohvatiPrijedloge(
+    "ucionice.json",
+    (item) => item.tip,
+  );
+
+  formContainer.innerHTML = ""; // Clear previous form content
+
   const nazivInputHtml = createSimpleInput("Naziv učionice:", "Npr. U-15");
   const tipInputHtml = createAutocompleteInput(
     "Tip učionice:",
     "Npr. Opća, Informatička...",
   );
 
-  modalContent.innerHTML = nazivInputHtml + tipInputHtml;
+  formContainer.innerHTML = nazivInputHtml + tipInputHtml;
 
-  // 4. Initialize functionality for the created components
-  const autocompleteInput = modalContent.querySelector(".autocomplete-input");
+  const autocompleteInput = formContainer.querySelector(".autocomplete-input");
+  formContainer.suggestionsReference = prijedloziTipovaUcionica;
+  initializeAutocomplete(autocompleteInput, formContainer.suggestionsReference);
 
-  // Attach the suggestions array to the modal content so it can be accessed by other functions
-  modalContent.suggestionsReference = prijedloziTipovaUcionica;
-
-  // Initialize the autocomplete suggestions
-  initializeAutocomplete(autocompleteInput, modalContent.suggestionsReference);
+  // --- Right Column: Existing Items ---
+  prikaziPostojeceStavke(
+    existingItemsContainer,
+    "ucionice.json",
+    renderUcionicaCard,
+  );
 }

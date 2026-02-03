@@ -23,6 +23,7 @@
     <script defer src="js/spremiJSON.js"></script>
     <script defer src="js/koraciUpravitelj.js"></script>
     <script defer src="js/upraviteljPrijedloga.js"></script>
+    <script defer src="js/korakPrikaziDodano.js"></script>
   </head>
   <body>
     <header class="title">Generator rasporeda</header>
@@ -58,8 +59,13 @@
       <button class="exit">X</button>
       <h3></h3>
       <p class="error"></p>
-      <div class="modal-content"></div>
-      <div class="new-items-display"></div>
+      <div class="modal-body">
+        <div class="modal-form-container">
+          <div class="modal-content"></div>
+          <div class="new-items-display"></div>
+        </div>
+        <div class="existing-items-container"></div>
+      </div>
       <div class="modal-actions">
         <button class="save-and-add-new-button button">Dodaj novi</button>
         <button class="save-step completed button">Spremi i zatvori</button>

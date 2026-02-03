@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.querySelector(".korak-prozor");
   const modalBackdrop = document.querySelector(".modal-backdrop");
   const modalTitle = modal.querySelector("h3");
-  const modalContent = modal.querySelector(".modal-content");
+  const modalBody = modal.querySelector(".modal-body"); // The main container for both columns
   const exitButton = modal.querySelector(".exit");
   const saveAndAddNewButton = modal.querySelector(".save-and-add-new-button");
   const saveStepButton = modal.querySelector(".save-step");
@@ -16,12 +16,12 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.dataset.step = step; // Set current step on the modal
     switch (step) {
       case "ucionice":
-        prikaziKorakUcionice(modalContent);
+        prikaziKorakUcionice(modalBody); // Pass the main body
         break;
       // Add cases for other steps here in the future
       default:
         console.error("Nepoznat korak:", step);
-        modalContent.innerHTML = "<p>Došlo je do greške pri učitavanju koraka.</p>";
+        modalBody.innerHTML = "<p>Došlo je do greške pri učitavanju koraka.</p>";
     }
   };
 
@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalBackdrop.classList.add("show");
   };
 
+  // Function to close the modal
   const closeModal = () => {
     const currentStep = modal.dataset.step;
     if (currentStep && privremeniUnosi[currentStep]) {
@@ -41,7 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("show");
     modalBackdrop.classList.remove("show");
     modalTitle.textContent = "";
-    modalContent.innerHTML = "";
+    if (modalBody) {
+        modalBody.querySelector('.modal-form-container .modal-content').innerHTML = "";
+        modalBody.querySelector('.existing-items-container').innerHTML = "";
+    }
     document.querySelector(".new-items-display").innerHTML = ""; // Clear display
     delete modal.dataset.step;
   };
@@ -61,19 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /**
-   * Router for the "Spremi i dodaj novi" button.
-   */
-  const handleSaveAndAddNew = async (step, content) => {
-    switch (step) {
-      case "ucionice":
-        await dodajNovuUcionicu(content);
-        break;
-      default:
-        console.error("Nema definirane logike za dodavanje za korak:", step);
-    }
-  };
-
-  /**
    * Router for the "Spremi i zatvori" button.
    */
   const handleSave = async (step) => {
@@ -85,14 +76,21 @@ document.addEventListener("DOMContentLoaded", () => {
         return { success: false, message: "Logika spremanja nije implementirana." };
     }
   };
-  
-  // "Spremi i dodaj novi" button event listener
-  saveAndAddNewButton.addEventListener("click", async () => {
-    const currentStep = modal.dataset.step;
-    if (!currentStep) return;
-    await handleSaveAndAddNew(currentStep, modalContent);
-  });
 
+  /**
+   * Router for the "Spremi i dodaj novi" button.
+   */
+  const handleSaveAndAddNew = async (step, body) => {
+    const formContainer = body.querySelector('.modal-form-container .modal-content');
+    switch (step) {
+      case "ucionice":
+        await dodajNovuUcionicu(formContainer);
+        break;
+      default:
+        console.error("Nema definirane logike za dodavanje za korak:", step);
+    }
+  };
+  
   // "Spremi i zatvori" button event listener
   saveStepButton.addEventListener("click", async () => {
     const currentStep = modal.dataset.step;
@@ -106,6 +104,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // "Spremi i dodaj novi" button event listener
+  saveAndAddNewButton.addEventListener("click", async () => {
+    const currentStep = modal.dataset.step;
+    if (!currentStep) return;
+    await handleSaveAndAddNew(currentStep, modalBody); // Pass the main body
+  });
+  
   // Set initial state for koraci
   koraci.forEach((korak) => {
     korak.addEventListener("click", () => {
