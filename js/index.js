@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {string} step - The 'data-step' attribute value.
    */
   const prikaziKorak = (step) => {
+    modal.dataset.step = step; // Set current step on the modal
     switch (step) {
       case "ucionice":
         prikaziKorakUcionice(modalContent);
@@ -40,7 +41,66 @@ document.addEventListener("DOMContentLoaded", () => {
     modalBackdrop.classList.remove("show");
     modalTitle.textContent = ""; // Clear title
     modalContent.innerHTML = ""; // Clear content
+    delete modal.dataset.step; // Remove step data attribute
   };
+
+  // Main save logic
+  saveStepButton.addEventListener("click", async () => {
+    const currentStep = modal.dataset.step;
+    if (!currentStep) return;
+
+    switch (currentStep) {
+      case "ucionice":
+        try {
+          // 1. Fetch current data
+          const response = await fetch('ucionice.json');
+          const ucionice = await response.json();
+
+          // 2. Get data from form
+          const nazivInput = modalContent.querySelector(".input-field input");
+          const tipInput = modalContent.querySelector(".autocomplete-input");
+          
+          const naziv = nazivInput.value.trim();
+          const tip = tipInput.value.trim();
+
+          if (!naziv) {
+            displayError("Naziv učionice ne može biti prazan.");
+            return;
+          }
+
+          // 3. Create new object (as per GEMINI.md)
+          const noviId = ucionice.length > 0 ? Math.max(...ucionice.map(u => u.id)) + 1 : 1;
+          
+          const novaUcionica = {
+            id: noviId,
+            naziv: naziv,
+            tip: tip ? [tip] : [], // Save tip as an array, even if single
+            prioritet: 0 // Default value as it's not in the form
+          };
+
+          // 4. Append to array
+          ucionice.push(novaUcionica);
+
+          // 5. Save the whole array back
+          const result = await spremiJSON('ucionice.json', ucionice);
+
+          if (result.success) {
+            // On success, close the modal
+            closeModal();
+            // Optional: Visually mark step as 'completed'
+            document.querySelector('.korak[data-step="ucionice"]').classList.add('completed');
+          } else {
+            // Use the error display function for server/fetch errors
+            displayError(result.message || "Došlo je do greške na serveru.");
+          }
+
+        } catch (error) {
+          displayError("Greška pri čitanju ili obradi podataka: " + error.message);
+        }
+        break;
+    }
+  });
+
 
   // Set initial state for koraci
   koraci.forEach((korak) => {
@@ -64,6 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Event listeners for closing the modal
   exitButton.addEventListener("click", closeModal);
-  saveStepButton.addEventListener("click", closeModal); // For now, done also closes
+  // saveStepButton event is now handled separately above
   modalBackdrop.addEventListener("click", closeModal);
 });
