@@ -9,22 +9,9 @@ let prijedloziTipovaUcionica = [];
  * @param {HTMLElement} modalContent - The container element within the modal to fill.
  */
 async function prikaziKorakUcionice(modalContent) {
-  // 1. Fetch existing data to create suggestions
-  let prijedloziTipovaUcionica = [];
-  try {
-    const response = await fetch("ucionice.json");
-    const text = await response.text();
-    const ucionice = text ? JSON.parse(text) : [];
-
-    // Use a Set to get unique tip values from all classroom objects
-    const sviTipovi = ucionice.flatMap((u) => u.tip);
-    prijedloziTipovaUcionica = [...new Set(sviTipovi)];
-    console.log(prijedloziTipovaUcionica);
-  } catch (error) {
-    console.error("Greška pri dohvatu postojećih tipova učionica:", error);
-    // Continue with an empty suggestions array
-  }
-
+  // Fetch existing data to create suggestions using the generic manager
+  let prijedloziTipovaUcionica = await dohvatiPrijedloge('ucionice.json', (item) => item.tip);
+  
   // 2. Clear previous content
   modalContent.innerHTML = "";
 
