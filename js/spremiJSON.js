@@ -5,13 +5,13 @@
  * @returns {Promise<object>} A promise that resolves with the server's response.
  */
 async function spremiJSON(fileName, jsonData) {
-  const url = 'server/SaveJSON.php';
-  
+  const url = "server/SaveJSON.php";
+
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         fileName: fileName,
@@ -23,13 +23,14 @@ async function spremiJSON(fileName, jsonData) {
     if (!response.ok) {
       // Try to parse the error response body
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! Status: ${response.status}`,
+      );
     }
 
     return await response.json();
-
   } catch (error) {
-    console.error('Greška pri spremanju JSON-a:', error);
+    console.error("Greška pri spremanju JSON-a:", error);
     // Re-throw the error to be handled by the caller, or return a standard error format
     // This allows the calling function to display a specific error message
     return { success: false, message: error.message };

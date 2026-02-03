@@ -79,6 +79,7 @@ The generator must solve the **Timetabling Problem (NP-Hard)** using a backtrack
 
 - If I changed the code you written, don't reverse it. Keep it the way it is.
 - Write modular, clean ES6+ JavaScript.
+- When writing JavaScript use double quotation instead of single.
 - when adding JavaScript tag put it in head tag and use defer keyword.
 - Don't comment every line of code, comment only something that is hard to understand like an algorithm or something that has a specific implementation. Don't commend something obvious, especially when the function name is self-explanitory.
 - Use English language when writing code, classes, etc. However use Croatian when writing to JSON and writing comments.

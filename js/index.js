@@ -18,12 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
         prikaziKorakUcionice(modalContent);
         break;
       // Add cases for other steps here in the future
-      // case "predmeti":
-      //   prikaziKorakPredmeti(modalContent);
-      //   break;
       default:
         console.error("Nepoznat korak:", step);
-        modalContent.innerHTML = "<p>Došlo je do greške pri učitavanju koraka.</p>";
+        modalContent.innerHTML =
+          "<p>Došlo je do greške pri učitavanju koraka.</p>";
     }
   };
 
@@ -44,63 +42,42 @@ document.addEventListener("DOMContentLoaded", () => {
     delete modal.dataset.step; // Remove step data attribute
   };
 
-  // Main save logic
+  /**
+   * Acts as a router to call the correct save function from koraciUpravitelj.js
+   * @param {string} step The current step from the modal's dataset.
+   * @param {HTMLElement} content The modal's content element.
+   * @returns {Promise<object>} A promise that resolves to a result object, e.g., { success: true }.
+   */
+  const handleSave = async (step, content) => {
+    switch (step) {
+      case "ucionice":
+        return await spremiKorakUcionice(content);
+      // Add cases for other steps here
+      default:
+        console.error("Nema definirane logike spremanja za korak:", step);
+        return {
+          success: false,
+          message: "Logika spremanja nije implementirana.",
+        };
+    }
+  };
+
+  // Main save button event listener
   saveStepButton.addEventListener("click", async () => {
     const currentStep = modal.dataset.step;
     if (!currentStep) return;
 
-    switch (currentStep) {
-      case "ucionice":
-        try {
-          // 1. Fetch current data
-          const response = await fetch('ucionice.json');
-          const ucionice = await response.json();
+    const result = await handleSave(currentStep, modalContent);
 
-          // 2. Get data from form
-          const nazivInput = modalContent.querySelector(".input-field input");
-          const tipInput = modalContent.querySelector(".autocomplete-input");
-          
-          const naziv = nazivInput.value.trim();
-          const tip = tipInput.value.trim();
-
-          if (!naziv) {
-            displayError("Naziv učionice ne može biti prazan.");
-            return;
-          }
-
-          // 3. Create new object (as per GEMINI.md)
-          const noviId = ucionice.length > 0 ? Math.max(...ucionice.map(u => u.id)) + 1 : 1;
-          
-          const novaUcionica = {
-            id: noviId,
-            naziv: naziv,
-            tip: tip ? [tip] : [], // Save tip as an array, even if single
-            prioritet: 0 // Default value as it's not in the form
-          };
-
-          // 4. Append to array
-          ucionice.push(novaUcionica);
-
-          // 5. Save the whole array back
-          const result = await spremiJSON('ucionice.json', ucionice);
-
-          if (result.success) {
-            // On success, close the modal
-            closeModal();
-            // Optional: Visually mark step as 'completed'
-            document.querySelector('.korak[data-step="ucionice"]').classList.add('completed');
-          } else {
-            // Use the error display function for server/fetch errors
-            displayError(result.message || "Došlo je do greške na serveru.");
-          }
-
-        } catch (error) {
-          displayError("Greška pri čitanju ili obradi podataka: " + error.message);
-        }
-        break;
+    if (result.success) {
+      closeModal();
+      // Visually mark step as 'completed'
+      document
+        .querySelector(`.korak[data-step="${currentStep}"]`)
+        .classList.add("completed");
     }
+    // If not successful, the specific error is already displayed by the function in koraciUpravitelj.js
   });
-
 
   // Set initial state for koraci
   koraci.forEach((korak) => {
@@ -108,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     korak.addEventListener("click", () => {
       if (!korak.classList.contains("locked")) {
         const title = korak.querySelector("h3").textContent;
-        const step = korak.dataset.step; // Get the step name from data attribute
+        const step = korak.dataset.step;
         openModal(title, step);
       }
     });
@@ -121,9 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-
   // Event listeners for closing the modal
   exitButton.addEventListener("click", closeModal);
-  // saveStepButton event is now handled separately above
   modalBackdrop.addEventListener("click", closeModal);
 });
