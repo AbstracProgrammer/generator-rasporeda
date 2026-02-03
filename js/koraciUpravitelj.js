@@ -139,10 +139,16 @@ async function dodajNovuUcionicu(modalContent) {
 
 /**
  * Handles the final "Spremi i zatvori" action.
+ * Merges temporary items with existing data and saves everything.
  * @returns {Promise<object>} A result object { success: true/false }.
  */
 async function spremiKorakUcionice() {
   try {
+    if (privremeniUnosi.ucionice.length === 0) {
+      displayError("Nema novih učionica za spremanje.");
+      return { success: false, message: "Nema novih učionica za spremanje." };
+    }
+
     const response = await fetch('ucionice.json');
     const text = await response.text();
     let ucionice = text ? JSON.parse(text) : [];
@@ -167,6 +173,76 @@ async function spremiKorakUcionice() {
     displayError("Greška pri spremanju: " + error.message);
     return { success: false, message: error.message };
   }
+}
+
+/**
+ * Edits an existing classroom.
+ * @param {number} ucionicaId - The ID of the classroom to edit.
+ * @param {object} noviPodaci - An object with {naziv, nazivTipa}.
+ * @returns {Promise<object>} A result object.
+ */
+async function urediUcionicu(ucionicaId, noviPodaci) {
+    try {
+        const ucioniceRes = await fetch('ucionice.json');
+        const ucioniceText = await ucioniceRes.text();
+        let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+
+        const index = ucionice.findIndex(u => u.id === ucionicaId);
+        if (index === -1) throw new Error("Učionica nije pronađena.");
+        
+        // Check for duplicate name, excluding the current item
+        if (provjeriDupliNaziv(noviPodaci.naziv, ucionice.filter(u => u.id !== ucionicaId), [])) {
+             throw new Error("Učionica s tim nazivom već postoji.");
+        }
+
+        const tipId = await pronadjiIliStvoriId('tipoviUcionica.json', noviPodaci.nazivTipa);
+
+        ucionice[index].naziv = noviPodaci.naziv;
+        ucionice[index].tipovi_id = tipId ? [tipId] : [];
+
+        const result = await spremiJSON('ucionice.json', ucionice);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError("Greška pri uređivanju: " + error.message);
+        return { success: false, message: error.message };
+    }
+}
+
+/**
+ * Deletes a classroom after checking for dependencies.
+ * @param {number} ucionicaId - The ID of the classroom to delete.
+ * @returns {Promise<object>} A result object.
+ */
+async function obrisiUcionicu(ucionicaId) {
+    try {
+        // 1. Dependency Check
+        const profesoriRes = await fetch('profesori.json');
+        const profesoriText = await profesoriRes.text();
+        const profesori = profesoriText ? JSON.parse(profesoriText) : [];
+
+        const ovisnost = profesori.find(p => p.fiksna_ucionica_id === ucionicaId);
+        if (ovisnost) {
+            throw new Error(`Nije moguće obrisati. Učionica je dodijeljena profesoru ${ovisnost.ime} ${ovisnost.prezime}.`);
+        }
+
+        // 2. Deletion
+        const ucioniceRes = await fetch('ucionice.json');
+        const ucioniceText = await ucioniceRes.text();
+        let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+
+        const filtriraneUcionice = ucionice.filter(u => u.id !== ucionicaId);
+
+        // 3. Save
+        const result = await spremiJSON('ucionice.json', filtriraneUcionice);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError(error.message);
+        return { success: false };
+    }
 }
 
 /**

@@ -26,14 +26,14 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 28px; /* Increased to match images */
+  height: 28px; /* Increased to match images */
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 0.8em;
+  font-size: 1em; /* Adjusted font size */
   padding: 0;
   line-height: 1;
 }
@@ -71,6 +71,72 @@
 
 .existing-item-card {
   position: relative; /* Needed for positioning actions */
+  min-height: 100px; /* Ensure consistent height */
+}
+
+.card-actions {
+  position: absolute;
+  top: 15px; /* Adjusted position */
+  right: 15px; /* Adjusted position */
+  display: flex;
+  flex-direction: column; /* Stack icons vertically */
+  gap: 8px; /* Adjusted gap for vertical stacking */
+}
+
+.card-actions img {
+  width: 32px; /* Increased size */
+  height: 32px; /* Increased size */
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.card-actions img:hover {
+  opacity: 1;
+}
+
+.card-actions .delete-temp-item-btn {
+    background: #a0a0a0;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px; /* Match image size */
+    height: 32px; /* Match image size */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2em; /* Adjusted font size */
+    padding: 0;
+    line-height: 1;
+}
+.card-actions .delete-temp-item-btn:hover {
+    background: #8b0000;
+}
+
+
+/* Styles for when the card is in edit mode */
+.existing-item-card.edit-mode {
+  background-color: #fffbe6; /* A light yellow to indicate editing */
+  padding-right: 70px; /* Make space for action icons */
+}
+
+.card-edit-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.existing-item-card .card-edit-form input {
+  width: auto; /* Allow input to respect padding */
+  padding: 6px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.existing-item-card {
+  position: relative; /* Needed for positioning actions */
 }
 
 .card-actions {
@@ -87,6 +153,11 @@
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
+}
+
+img.save-edit-btn {
+  width: 32px;
+  height: 32px;
 }
 
 .card-actions img:hover {
