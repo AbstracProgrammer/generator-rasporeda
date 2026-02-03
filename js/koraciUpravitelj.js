@@ -73,6 +73,13 @@ async function dodajNovuUcionicu(modalContent) {
     if (novaPrivremenaUcionica) {
       privremeniUnosi.ucionice.push(novaPrivremenaUcionica);
       prikaziPrivremeneUnose('ucionice');
+
+      // Dynamically update the suggestions list for the current session
+      const noviTip = novaPrivremenaUcionica.tip[0];
+      if (noviTip && !modalContent.suggestionsReference.includes(noviTip)) {
+        modalContent.suggestionsReference.push(noviTip);
+      }
+
       // Clear input fields for the next entry
       modalContent.querySelector(".input-field input").value = "";
       modalContent.querySelector(".autocomplete-input").value = "";

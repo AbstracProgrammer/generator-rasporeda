@@ -46,5 +46,45 @@
             "321"
         ],
         "prioritet": 0
+    },
+    {
+        "id": 8,
+        "naziv": "test5",
+        "tip": [
+            "inf"
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 9,
+        "naziv": "testdf",
+        "tip": [
+            "2inf"
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 10,
+        "naziv": "vbbvc",
+        "tip": [
+            "fds"
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 11,
+        "naziv": "hghfg",
+        "tip": [
+            "kemija"
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 12,
+        "naziv": "sgdfg",
+        "tip": [
+            "kemija"
+        ],
+        "prioritet": 0
     }
 ]

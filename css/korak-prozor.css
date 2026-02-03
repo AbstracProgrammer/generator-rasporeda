@@ -81,21 +81,8 @@
   flex-grow: 1;
   padding: 8px;
   border: 1px solid #ccc;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
+  border-radius: 5px; /* Apply to all corners */
   font-size: 1em;
-  border-right: none;
-}
-
-.autocomplete-wrapper .add-button {
-  flex-shrink: 0;
-  padding: 0 15px;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  font-size: 1.2em;
-  font-weight: bold;
-  cursor: pointer;
-  border: 1px solid #ccc;
 }
 
 .suggestions-list {

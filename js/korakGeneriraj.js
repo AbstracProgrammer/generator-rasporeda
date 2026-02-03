@@ -38,12 +38,11 @@ async function prikaziKorakUcionice(modalContent) {
   modalContent.innerHTML = nazivInputHtml + tipInputHtml;
 
   // 4. Initialize functionality for the created components
-  const addButton = modalContent.querySelector(".add-button");
   const autocompleteInput = modalContent.querySelector(".autocomplete-input");
 
-  // Initialize the add button to modify the suggestions array
-  initializeAddButton(addButton, prijedloziTipovaUcionica);
+  // Attach the suggestions array to the modal content so it can be accessed by other functions
+  modalContent.suggestionsReference = prijedloziTipovaUcionica;
 
   // Initialize the autocomplete suggestions
-  initializeAutocomplete(autocompleteInput, prijedloziTipovaUcionica);
+  initializeAutocomplete(autocompleteInput, modalContent.suggestionsReference);
 }

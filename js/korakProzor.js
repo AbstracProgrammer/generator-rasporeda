@@ -49,45 +49,10 @@ function createAutocompleteInput(labelText, placeholder) {
       <span class="field-label">${labelText}</span>
       <div class="autocomplete-wrapper">
         <input type="text" class="autocomplete-input" placeholder="${placeholder || ""}" autocomplete="off">
-        <button class="add-button button">+</button>
         <div class="suggestions-list" style="display: none;"></div>
       </div>
     </div>
   `;
-}
-
-/**
- * Initializes the functionality for the 'add' button in an autocomplete component.
- * The button adds the input's value to the suggestions array.
- * @param {HTMLButtonElement} addButton - The button element to attach the listener to.
- * @param {string[]} suggestionsArray - The array that stores the autocomplete suggestions.
- */
-function initializeAddButton(addButton, suggestionsArray) {
-  addButton.addEventListener("click", () => {
-    const wrapper = addButton.closest(".autocomplete-wrapper");
-    const input = wrapper.querySelector(".autocomplete-input");
-    const value = input.value.trim();
-
-    if (!value) {
-      displayError("Unos ne može biti prazan.");
-      return;
-    }
-
-    // Case-insensitive check for duplicates
-    if (
-      suggestionsArray.some(
-        (item) => item.toLowerCase() === value.toLowerCase(),
-      )
-    ) {
-      displayError("Prijedlog već postoji na popisu.");
-      input.value = ""; // Clear on duplicate as well
-      return;
-    }
-
-    suggestionsArray.push(value);
-    input.value = ""; // Clear input after adding
-    displayError(""); // Clear any previous errors
-  });
 }
 
 /**
@@ -96,14 +61,11 @@ function initializeAddButton(addButton, suggestionsArray) {
  * @param {string[]} suggestionsArray - An array of suggestion strings.
  */
 function initializeAutocomplete(inputElement, suggestionsArray) {
-  const suggestionsList =
-    inputElement.parentElement.querySelector(".suggestions-list");
+  const suggestionsList = inputElement.parentElement.querySelector(".suggestions-list");
 
   const showSuggestions = (filter = "") => {
     suggestionsList.innerHTML = "";
-    const filtered = suggestionsArray.filter((s) =>
-      s.toLowerCase().includes(filter.toLowerCase()),
-    );
+    const filtered = suggestionsArray.filter(s => s.toLowerCase().includes(filter.toLowerCase()));
 
     if (filtered.length > 0) {
       filtered.forEach((s) => {
@@ -126,7 +88,7 @@ function initializeAutocomplete(inputElement, suggestionsArray) {
   inputElement.addEventListener("input", () => {
     showSuggestions(inputElement.value);
   });
-
+  
   inputElement.addEventListener("click", () => {
     showSuggestions(inputElement.value);
   });
