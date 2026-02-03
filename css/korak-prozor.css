@@ -157,3 +157,34 @@
   padding: 10px 20px;
   font-size: 1.2em;
 }
+
+/* New styles for modal actions and new items display */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.new-items-display {
+  margin-top: 15px;
+  padding: 10px;
+  min-height: 50px;
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.new-item-tag {
+  background-color: #bde0fe;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

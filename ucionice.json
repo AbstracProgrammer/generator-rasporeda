@@ -1,1 +1,26 @@
-[]
+[
+    {
+        "id": 1,
+        "naziv": "test",
+        "tip": [],
+        "prioritet": 0
+    },
+    {
+        "id": 2,
+        "naziv": "test1",
+        "tip": [],
+        "prioritet": 0
+    },
+    {
+        "id": 3,
+        "naziv": "test123",
+        "tip": [],
+        "prioritet": 0
+    },
+    {
+        "id": 4,
+        "naziv": "asfd",
+        "tip": [],
+        "prioritet": 0
+    }
+]

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalTitle = modal.querySelector("h3");
   const modalContent = modal.querySelector(".modal-content");
   const exitButton = modal.querySelector(".exit");
+  const saveAndAddNewButton = modal.querySelector(".save-and-add-new-button");
   const saveStepButton = modal.querySelector(".save-step");
 
   /**
@@ -20,8 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Add cases for other steps here in the future
       default:
         console.error("Nepoznat korak:", step);
-        modalContent.innerHTML =
-          "<p>Došlo je do greške pri učitavanju koraka.</p>";
+        modalContent.innerHTML = "<p>Došlo je do greške pri učitavanju koraka.</p>";
     }
   };
 
@@ -35,53 +35,66 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function to close the modal
   const closeModal = () => {
+    const currentStep = modal.dataset.step;
+    if (currentStep && privremeniUnosi[currentStep]) {
+      privremeniUnosi[currentStep] = []; // Clear temporary entries for the step
+    }
     modal.classList.remove("show");
     modalBackdrop.classList.remove("show");
-    modalTitle.textContent = ""; // Clear title
-    modalContent.innerHTML = ""; // Clear content
-    delete modal.dataset.step; // Remove step data attribute
+    modalTitle.textContent = "";
+    modalContent.innerHTML = "";
+    document.querySelector(".new-items-display").innerHTML = ""; // Clear display
+    delete modal.dataset.step;
   };
-
+  
   /**
-   * Acts as a router to call the correct save function from koraciUpravitelj.js
-   * @param {string} step The current step from the modal's dataset.
-   * @param {HTMLElement} content The modal's content element.
-   * @returns {Promise<object>} A promise that resolves to a result object, e.g., { success: true }.
+   * Router for the "Spremi i dodaj novi" button.
    */
-  const handleSave = async (step, content) => {
+  const handleSaveAndAddNew = async (step, content) => {
     switch (step) {
       case "ucionice":
-        return await spremiKorakUcionice(content);
-      // Add cases for other steps here
+        await dodajNovuUcionicu(content);
+        break;
       default:
-        console.error("Nema definirane logike spremanja za korak:", step);
-        return {
-          success: false,
-          message: "Logika spremanja nije implementirana.",
-        };
+        console.error("Nema definirane logike za dodavanje za korak:", step);
     }
   };
 
-  // Main save button event listener
+  /**
+   * Router for the "Spremi i zatvori" button.
+   */
+  const handleSave = async (step) => {
+    switch (step) {
+      case "ucionice":
+        return await spremiKorakUcionice();
+      default:
+        console.error("Nema definirane logike spremanja za korak:", step);
+        return { success: false, message: "Logika spremanja nije implementirana." };
+    }
+  };
+
+  // "Spremi i dodaj novi" button event listener
+  saveAndAddNewButton.addEventListener("click", async () => {
+    const currentStep = modal.dataset.step;
+    if (!currentStep) return;
+    await handleSaveAndAddNew(currentStep, modalContent);
+  });
+  
+  // "Spremi i zatvori" button event listener
   saveStepButton.addEventListener("click", async () => {
     const currentStep = modal.dataset.step;
     if (!currentStep) return;
 
-    const result = await handleSave(currentStep, modalContent);
+    const result = await handleSave(currentStep);
 
     if (result.success) {
       closeModal();
-      // Visually mark step as 'completed'
-      document
-        .querySelector(`.korak[data-step="${currentStep}"]`)
-        .classList.add("completed");
+      document.querySelector(`.korak[data-step="${currentStep}"]`).classList.add('completed');
     }
-    // If not successful, the specific error is already displayed by the function in koraciUpravitelj.js
   });
 
   // Set initial state for koraci
   koraci.forEach((korak) => {
-    // Add click listener to each korak
     korak.addEventListener("click", () => {
       if (!korak.classList.contains("locked")) {
         const title = korak.querySelector("h3").textContent;
