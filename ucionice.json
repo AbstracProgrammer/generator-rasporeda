@@ -1,15 +1,15 @@
 [
     {
         "id": 1,
-        "naziv": "321test",
+        "naziv": "123",
         "tipovi_id": [
-            3
+            1
         ],
         "prioritet": 0
     },
     {
         "id": 2,
-        "naziv": "321",
+        "naziv": "123fd",
         "tipovi_id": [
             1
         ],

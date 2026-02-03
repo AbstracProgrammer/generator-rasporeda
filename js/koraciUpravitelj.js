@@ -144,15 +144,22 @@ async function dodajNovuUcionicu(modalContent) {
  */
 async function spremiKorakUcionice() {
   try {
-    if (privremeniUnosi.ucionice.length === 0) {
-      displayError("Nema novih učionica za spremanje.");
-      return { success: false, message: "Nema novih učionica za spremanje." };
-    }
-
     const response = await fetch('ucionice.json');
     const text = await response.text();
     let ucionice = text ? JSON.parse(text) : [];
 
+    // Block only if both temporary and permanent lists are empty
+    if (privremeniUnosi.ucionice.length === 0 && ucionice.length === 0) {
+      displayError("Nema unesenih učionica.");
+      return { success: false, message: "Nema unesenih učionica." };
+    }
+
+    // If there's nothing new to save, just allow the modal to close
+    if (privremeniUnosi.ucionice.length === 0) {
+      return { success: true };
+    }
+
+    // Proceed with saving new items
     let kombiniraniPodaci = [...ucionice, ...privremeniUnosi.ucionice];
 
     kombiniraniPodaci.forEach((ucionica, index) => {

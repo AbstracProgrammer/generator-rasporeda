@@ -69,11 +69,6 @@
   color: #6c757d;
 }
 
-.existing-item-card {
-  position: relative; /* Needed for positioning actions */
-  min-height: 100px; /* Ensure consistent height */
-}
-
 .card-actions {
   position: absolute;
   top: 15px; /* Adjusted position */
@@ -96,25 +91,24 @@
 }
 
 .card-actions .delete-temp-item-btn {
-    background: #a0a0a0;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 32px; /* Match image size */
-    height: 32px; /* Match image size */
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.2em; /* Adjusted font size */
-    padding: 0;
-    line-height: 1;
+  background: #a0a0a0;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px; /* Match image size */
+  height: 32px; /* Match image size */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2em; /* Adjusted font size */
+  padding: 0;
+  line-height: 1;
 }
 .card-actions .delete-temp-item-btn:hover {
-    background: #8b0000;
+  background: #8b0000;
 }
-
 
 /* Styles for when the card is in edit mode */
 .existing-item-card.edit-mode {
