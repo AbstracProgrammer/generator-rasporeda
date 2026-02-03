@@ -135,26 +135,3 @@
   position: absolute;
   right: 0; /* Align to the far right of the .modal-actions container */
 }
-
-.new-items-display {
-  margin-top: 15px;
-  padding: 10px;
-  min-height: 100px; /* Increased height */
-  background-color: #f0f8ff;
-  border-radius: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.new-item-tag {
-  background-color: #bde0fe;
-  padding: 8px 15px; /* Increased padding */
-  border-radius: 15px;
-  font-size: 1em; /* Increased font size */
-  display: flex;
-  align-items: center;
-  align-self: flex-start; /* Prevent stretching vertically */
-  line-height: 1; /* Minimal line height for text */
-  gap: 8px;
-}

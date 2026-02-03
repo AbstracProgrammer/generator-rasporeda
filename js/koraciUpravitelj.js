@@ -13,14 +13,24 @@ let privremeniUnosi = {
 function prikaziPrivremeneUnose(step) {
   const display = document.querySelector(".new-items-display");
   display.innerHTML = "";
-  privremeniUnosi[step].forEach(item => {
+  privremeniUnosi[step].forEach((item, index) => {
     const tag = document.createElement("div");
     tag.classList.add("new-item-tag");
     
-    // Display both name and type if type exists
+    const textSpan = document.createElement("span");
     const tipText = item.tip && item.tip.length > 0 ? ` (${item.tip.join(', ')})` : "";
-    tag.textContent = item.naziv + tipText;
+    textSpan.textContent = item.naziv + tipText;
+    
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "X";
+    deleteBtn.classList.add("delete-temp-item-btn");
+    deleteBtn.onclick = () => {
+      privremeniUnosi[step].splice(index, 1); // Remove the item from the array
+      prikaziPrivremeneUnose(step); // Re-render the list
+    };
 
+    tag.appendChild(textSpan);
+    tag.appendChild(deleteBtn);
     display.appendChild(tag);
   });
 }

@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modalBackdrop.classList.add("show");
   };
 
-  // Function to close the modal
   const closeModal = () => {
     const currentStep = modal.dataset.step;
     if (currentStep && privremeniUnosi[currentStep]) {
@@ -47,6 +46,20 @@ document.addEventListener("DOMContentLoaded", () => {
     delete modal.dataset.step;
   };
   
+  /**
+   * Checks for unsaved items before closing the modal.
+   */
+  const handleCloseAttempt = () => {
+    const currentStep = modal.dataset.step;
+    if (currentStep && privremeniUnosi[currentStep] && privremeniUnosi[currentStep].length > 0) {
+      if (confirm('Imate nespremljene unose. Jeste li sigurni da želite izaći? Promjene neće biti spremljene.')) {
+        closeModal();
+      }
+    } else {
+      closeModal();
+    }
+  };
+
   /**
    * Router for the "Spremi i dodaj novi" button.
    */
@@ -72,14 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return { success: false, message: "Logika spremanja nije implementirana." };
     }
   };
-
+  
   // "Spremi i dodaj novi" button event listener
   saveAndAddNewButton.addEventListener("click", async () => {
     const currentStep = modal.dataset.step;
     if (!currentStep) return;
     await handleSaveAndAddNew(currentStep, modalContent);
   });
-  
+
   // "Spremi i zatvori" button event listener
   saveStepButton.addEventListener("click", async () => {
     const currentStep = modal.dataset.step;
@@ -112,6 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Event listeners for closing the modal
-  exitButton.addEventListener("click", closeModal);
-  modalBackdrop.addEventListener("click", closeModal);
+  exitButton.addEventListener("click", handleCloseAttempt);
+  modalBackdrop.addEventListener("click", handleCloseAttempt);
 });
