@@ -22,5 +22,29 @@
         "naziv": "asfd",
         "tip": [],
         "prioritet": 0
+    },
+    {
+        "id": 5,
+        "naziv": "test321",
+        "tip": [
+            "123"
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 6,
+        "naziv": "tes",
+        "tip": [
+            "123s"
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 7,
+        "naziv": "sdfs",
+        "tip": [
+            "321"
+        ],
+        "prioritet": 0
     }
 ]

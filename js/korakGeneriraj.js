@@ -12,14 +12,14 @@ async function prikaziKorakUcionice(modalContent) {
   // 1. Fetch existing data to create suggestions
   let prijedloziTipovaUcionica = [];
   try {
-    const response = await fetch('ucionice.json');
+    const response = await fetch("ucionice.json");
     const text = await response.text();
     const ucionice = text ? JSON.parse(text) : [];
-    
-    // Use a Set to get unique tip values from all classroom objects
-    const sviTipovi = ucionice.flatMap(u => u.tip);
-    prijedloziTipovaUcionica = [...new Set(sviTipovi)];
 
+    // Use a Set to get unique tip values from all classroom objects
+    const sviTipovi = ucionice.flatMap((u) => u.tip);
+    prijedloziTipovaUcionica = [...new Set(sviTipovi)];
+    console.log(prijedloziTipovaUcionica);
   } catch (error) {
     console.error("Greška pri dohvatu postojećih tipova učionica:", error);
     // Continue with an empty suggestions array
