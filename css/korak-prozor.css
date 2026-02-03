@@ -1,38 +1,8 @@
-/* Backdrop for the modal */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  display: none; /* Initially hidden */
-}
-
-/* The modal window itself */
-.korak-prozor {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%; /* Increased width */
-  max-width: 1000px; /* Increased max-width */
-  background-color: white;
-  border-radius: 15px;
-  padding: 20px;
-  z-index: 1000;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
 .modal-content {
   flex-grow: 1; /* Allows this area to expand */
   padding: 20px 0;
   overflow-y: auto; /* Add scroll if content overflows */
 }
-
 /* Base styles for input fields */
 .input-field {
   display: flex;
@@ -179,10 +149,12 @@
 
 .new-item-tag {
   background-color: #bde0fe;
-  padding: 5px 12px;
+  padding: 8px 15px; /* Increased padding */
   border-radius: 15px;
-  font-size: 0.9em;
+  font-size: 1em; /* Increased font size */
   display: flex;
   align-items: center;
+  align-self: flex-start; /* Prevent stretching vertically */
+  line-height: 1; /* Minimal line height for text */
   gap: 8px;
 }

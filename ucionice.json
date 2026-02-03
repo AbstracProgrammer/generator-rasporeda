@@ -2,97 +2,15 @@
     {
         "id": 1,
         "naziv": "test",
-        "tip": [],
+        "tip": [
+            "test"
+        ],
         "prioritet": 0
     },
     {
         "id": 2,
         "naziv": "test1",
         "tip": [],
-        "prioritet": 0
-    },
-    {
-        "id": 3,
-        "naziv": "test123",
-        "tip": [],
-        "prioritet": 0
-    },
-    {
-        "id": 4,
-        "naziv": "asfd",
-        "tip": [],
-        "prioritet": 0
-    },
-    {
-        "id": 5,
-        "naziv": "test321",
-        "tip": [
-            "123"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 6,
-        "naziv": "tes",
-        "tip": [
-            "123s"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 7,
-        "naziv": "sdfs",
-        "tip": [
-            "321"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 8,
-        "naziv": "test5",
-        "tip": [
-            "inf"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 9,
-        "naziv": "testdf",
-        "tip": [
-            "2inf"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 10,
-        "naziv": "vbbvc",
-        "tip": [
-            "fds"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 11,
-        "naziv": "hghfg",
-        "tip": [
-            "kemija"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 12,
-        "naziv": "sgdfg",
-        "tip": [
-            "kemija"
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 13,
-        "naziv": "123",
-        "tip": [
-            "adf"
-        ],
         "prioritet": 0
     }
 ]

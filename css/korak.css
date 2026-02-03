@@ -19,3 +19,32 @@
 .korak > h3 {
   font-size: 2em;
 }
+
+/* Backdrop for the modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none; /* Initially hidden */
+}
+
+/* The modal window itself */
+.korak-prozor {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%; /* Increased width */
+  max-width: 1000px; /* Increased max-width */
+  background-color: white;
+  border-radius: 15px;
+  padding: 20px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}

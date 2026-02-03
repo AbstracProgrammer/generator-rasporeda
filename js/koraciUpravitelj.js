@@ -16,7 +16,11 @@ function prikaziPrivremeneUnose(step) {
   privremeniUnosi[step].forEach(item => {
     const tag = document.createElement("div");
     tag.classList.add("new-item-tag");
-    tag.textContent = item.naziv; // Display the name of the item
+    
+    // Display both name and type if type exists
+    const tipText = item.tip && item.tip.length > 0 ? ` (${item.tip.join(', ')})` : "";
+    tag.textContent = item.naziv + tipText;
+
     display.appendChild(tag);
   });
 }
