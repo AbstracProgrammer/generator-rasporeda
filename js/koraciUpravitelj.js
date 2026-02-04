@@ -787,6 +787,11 @@ async function urediProfesora(teacherId, newTeacherData, allSubjects) {
     const index = profesori.findIndex(p => p.id === teacherId);
     if (index === -1) throw new Error("Profesor nije pronađen.");
 
+    // Ensure there is at least one subject
+    if (newTeacherData.selectedSubjectNames.length === 0) {
+        throw new Error("Profesor mora imati barem jedan predmet.");
+    }
+
     const subjectMap = new Map(allSubjects.map(s => [s.naziv.toLowerCase(), s.id]));
     const strukaPredmetiId = newTeacherData.selectedSubjectNames
       .map(name => subjectMap.get(name.toLowerCase()))
@@ -795,7 +800,8 @@ async function urediProfesora(teacherId, newTeacherData, allSubjects) {
     profesori[index].ime = newTeacherData.ime;
     profesori[index].prezime = newTeacherData.prezime;
     profesori[index].struka_predmeti_id = strukaPredmetiId;
-    profesori[index].nedostupan = newTeacherData.nedostupan || {}; // Update nedostupan object
+    profesori[index].nedostupan = newTeacherData.nedostupan || {};
+    profesori[index].fiksna_ucionica_id = newTeacherData.fiksna_ucionica_id; // Save the fixed classroom ID
 
     const result = await spremiJSON('profesori.json', profesori);
     if (!result.success) throw new Error(result.message);

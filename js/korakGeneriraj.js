@@ -263,5 +263,5 @@ async function prikaziKorakProfesori(modalBody) {
     });
 
     // --- Right Column: Existing Items ---
-    // prikaziPostojeceProfesore(existingItemsContainer); // Will be implemented later
+    prikaziPostojeceProfesore(existingItemsContainer);
 }
