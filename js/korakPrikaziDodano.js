@@ -441,8 +441,8 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
             </div>
 
             <div class="input-field checkbox-field">
-                <input type="checkbox" id="teacher-unavailable-toggle-edit" class="custom-checkbox" ${Object.keys(profesor.nedostupan).length > 0 ? 'checked' : ''}>
                 <label for="teacher-unavailable-toggle-edit" class="field-label">Profesor ima definirane nedostupnosti</label>
+                <input type="checkbox" id="teacher-unavailable-toggle-edit" class="custom-checkbox" ${Object.keys(profesor.nedostupan).length > 0 ? 'checked' : ''}>
             </div>
             <div class="unavailable-times-section" style="display: ${Object.keys(profesor.nedostupan).length > 0 ? 'block' : 'none'};">
                 <div class="unavailable-input-row">
@@ -457,22 +457,24 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
                         </select>
                     </div>
                     <div class="input-field checkbox-field">
-                        <input type="checkbox" id="full-day-unavailable-edit" class="custom-checkbox">
                         <label for="full-day-unavailable-edit" class="field-label">Cijeli dan nedostupan</label>
+                        <input type="checkbox" id="full-day-unavailable-edit" class="custom-checkbox">
                     </div>
-                    <div class="select-wrapper">
-                        <label for="unavailable-start-hour-edit" class="field-label">Početni sat:</label>
-                        <select id="unavailable-start-hour-edit">
-                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
-                        </select>
+                    <div class="unavailable-hour-controls">
+                        <div class="select-wrapper">
+                            <label for="unavailable-start-hour-edit" class="field-label">Početni sat:</label>
+                            <select id="unavailable-start-hour-edit">
+                                ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="select-wrapper">
+                            <label for="unavailable-end-hour-edit" class="field-label">Krajnji sat:</label>
+                            <select id="unavailable-end-hour-edit">
+                                ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                            </select>
+                        </div>
+                        <button class="button add-unavailable-time-btn">+</button>
                     </div>
-                    <div class="select-wrapper">
-                        <label for="unavailable-end-hour-edit" class="field-label">Krajnji sat:</label>
-                        <select id="unavailable-end-hour-edit">
-                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
-                        </select>
-                    </div>
-                    <button class="button add-unavailable-time-btn">+</button>
                 </div>
                 <div class="added-unavailable-times-display"></div>
             </div>

@@ -135,3 +135,69 @@
   position: absolute;
   right: 0; /* Align to the far right of the .modal-actions container */
 }
+
+/* Styles for Teacher Unavailability Section */
+.checkbox-field {
+  gap: 10px;
+}
+.checkbox-field .field-label {
+  flex-basis: auto; /* Override the 200px basis */
+  padding-right: 0;
+}
+.checkbox-field input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.unavailable-times-section {
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.unavailable-input-row {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    align-items: center;
+    gap: 15px; /* Space between elements */
+}
+
+.unavailable-input-row .select-wrapper,
+.unavailable-input-row .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 0; /* Remove margin from parent .input-field style */
+    padding: 0;
+    background-color: transparent;
+}
+
+.unavailable-input-row .field-label {
+    flex-basis: auto; /* Key change */
+    padding-right: 5px;
+}
+
+.unavailable-input-row .button.add-unavailable-time-btn {
+    padding: 5px 10px;
+    font-size: 1.2em;
+    min-width: 40px; /* Ensure button has a decent size */
+}
+
+.unavailable-hour-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    flex-basis: 100%; /* Force it to a new line */
+    margin-top: 10px; /* Space from the elements above */
+}
+
+.added-unavailable-times-display {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
