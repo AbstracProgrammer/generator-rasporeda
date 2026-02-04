@@ -585,13 +585,38 @@ async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects)
     });
   }
 
+  // Process fixed classroom
+  const teacherFixedClassroomToggle = modalContent.querySelector('#teacher-fixed-classroom-toggle');
+  let fiksnaUcionicaId = null;
+  if (teacherFixedClassroomToggle && teacherFixedClassroomToggle.checked) {
+      const fixedClassroomAutocompleteInput = modalContent.querySelector('.fixed-classroom-section .autocomplete-input');
+      const fiksnaUcionicaNaziv = fixedClassroomAutocompleteInput.value.trim();
+
+      if (fiksnaUcionicaNaziv) {
+          const ucioniceResponse = await fetch('ucionice.json');
+          const ucioniceText = await ucioniceResponse.text();
+          let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+          const postojecaUcionica = ucionice.find(u => u.naziv.toLowerCase() === fiksnaUcionicaNaziv.toLowerCase());
+
+          if (postojecaUcionica) {
+              fiksnaUcionicaId = postojecaUcionica.id;
+          } else {
+              displayError("Odabrana fiksna učionica ne postoji. Odaberite s popisa.");
+              return null;
+          }
+      } else {
+          displayError("Ako je označeno, naziv fiksne učionice ne može biti prazan.");
+          return null;
+      }
+  }
+
   return {
     id: -1,
     ime: ime,
     prezime: prezime,
     struka_predmeti_id: strukaPredmetiId,
     nedostupan: nedostupanObjekt,
-    fiksna_ucionica_id: null, // Default no fixed classroom
+    fiksna_ucionica_id: fiksnaUcionicaId,
   };
 }
 
@@ -630,6 +655,15 @@ async function dodajNovogProfesora(modalContent) {
       if (unavailableTimesSection) unavailableTimesSection.style.display = 'none';
       if (addedUnavailableTimesDisplay) addedUnavailableTimesDisplay.innerHTML = '';
       modalContent.currentUnavailableTimes = []; // Clear internal array
+
+      // Reset fixed classroom UI
+      const teacherFixedClassroomToggle = modalContent.querySelector('#teacher-fixed-classroom-toggle');
+      const fixedClassroomSection = modalContent.querySelector('.fixed-classroom-section');
+      const fixedClassroomAutocompleteInput = modalContent.querySelector('.fixed-classroom-section .autocomplete-input');
+
+      if (teacherFixedClassroomToggle) teacherFixedClassroomToggle.checked = false;
+      if (fixedClassroomSection) fixedClassroomSection.style.display = 'none';
+      if (fixedClassroomAutocompleteInput) fixedClassroomAutocompleteInput.value = '';
 
       modalContent.querySelector("div:nth-of-type(1) input").focus();
     }

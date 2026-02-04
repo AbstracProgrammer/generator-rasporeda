@@ -123,8 +123,18 @@ async function prikaziKorakProfesori(modalBody) {
         </div>
     `;
 
+    const fixedClassroomHtml = `
+        <div class="input-field checkbox-field">
+            <label for="teacher-fixed-classroom-toggle" class="field-label">Profesor ima fiksnu učionicu</label>
+            <input type="checkbox" id="teacher-fixed-classroom-toggle" class="custom-checkbox">
+        </div>
+        <div class="fixed-classroom-section" style="display: none;">
+            ${createStrictAutocompleteInput("Fiksna učionica:", "Npr. U-15, Laboratorij za kemiju...")}
+        </div>
+    `;
+
     // Set innerHTML only once with all generated HTML
-    formContainer.innerHTML = imeInputHtml + prezimeInputHtml + strukaInputHtml + unavailableHtml;
+    formContainer.innerHTML = imeInputHtml + prezimeInputHtml + strukaInputHtml + unavailableHtml + fixedClassroomHtml;
 
     // --- Query elements AFTER innerHTML is set ---
     const strukaAutocompleteInput = formContainer.querySelector(".multi-select-autocomplete .autocomplete-input");
@@ -139,6 +149,14 @@ async function prikaziKorakProfesori(modalBody) {
     const addUnavailableTimeBtn = formContainer.querySelector('.add-unavailable-time-btn');
     const addedUnavailableTimesDisplay = formContainer.querySelector('.added-unavailable-times-display');
     const unavailableDaySelect = formContainer.querySelector('#unavailable-day');
+
+    const teacherFixedClassroomToggle = formContainer.querySelector('#teacher-fixed-classroom-toggle');
+    const fixedClassroomSection = formContainer.querySelector('.fixed-classroom-section');
+    const fixedClassroomAutocompleteInput = fixedClassroomSection.querySelector('.autocomplete-input');
+
+    // Fetch classroom suggestions for strict autocomplete
+    let prijedloziUcionica = await dohvatiPrijedloge('ucionice.json', (item) => item.naziv);
+    initializeAutocomplete(fixedClassroomAutocompleteInput, prijedloziUcionica, true); // Strict mode!
 
     const dayNames = {
         1: "Ponedjeljak", 2: "Utorak", 3: "Srijeda", 4: "Četvrtak", 5: "Petak"
@@ -198,6 +216,10 @@ async function prikaziKorakProfesori(modalBody) {
     // Event listeners
     teacherUnavailableToggle.addEventListener('change', () => {
         unavailableTimesSection.style.display = teacherUnavailableToggle.checked ? 'block' : 'none';
+    });
+
+    teacherFixedClassroomToggle.addEventListener('change', () => {
+        fixedClassroomSection.style.display = teacherFixedClassroomToggle.checked ? 'block' : 'none';
     });
 
     fullDayUnavailableCheckbox.addEventListener('change', () => {
