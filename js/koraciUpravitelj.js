@@ -520,13 +520,71 @@ async function prikaziPrivremeneUnoseProfesori(step, allSubjects) {
 
   const subjectMap = new Map(allSubjects.map(s => [s.id, s.naziv]));
 
+  // Fetch classrooms to get names for fixed_classroom_id
+  const ucioniceResponse = await fetch('ucionice.json');
+  const ucioniceText = await ucioniceResponse.text();
+  const allUcionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+  const ucioniceMap = new Map(allUcionice.map(u => [u.id, u.naziv]));
+
+  // Helper to format unavailable times
+  const formatirajNedostupnost = (nedostupanObjekt) => {
+      if (Object.keys(nedostupanObjekt).length === 0) {
+          return "";
+      }
+
+      const dayNamesShort = {
+          1: "Pon", 2: "Uto", 3: "Sri", 4: "Čet", 5: "Pet"
+      };
+
+      let parts = [];
+      for (const dayKey in nedostupanObjekt) {
+          const day = parseInt(dayKey);
+          const hours = nedostupanObjekt[dayKey];
+          if (hours.length === 7) { // Assuming 7 hours for a full day
+              parts.push(`${dayNamesShort[day]} (cijeli dan)`);
+          } else if (hours.length > 0) {
+              hours.sort((a, b) => a - b);
+              let ranges = [];
+              let start = hours[0];
+              let end = hours[0];
+
+              for (let i = 1; i < hours.length; i++) {
+                  if (hours[i] === end + 1) {
+                      end = hours[i];
+                  } else {
+                      ranges.push(start === end ? `${start}.` : `${start}.-${end}.`);
+                      start = hours[i];
+                      end = hours[i];
+                  }
+              }
+              ranges.push(start === end ? `${start}.` : `${start}.-${end}.`);
+
+              parts.push(`${dayNamesShort[day]}: ${ranges.join(", ")} sat`);
+          }
+      }
+      return `Nedostupan: ${parts.join("; ")}`;
+  };
+
   privremeniUnosi[step].forEach((item, index) => {
     const tag = document.createElement("div");
     tag.classList.add("new-item-tag");
     
     const textSpan = document.createElement("span");
     const subjectNames = item.struka_predmeti_id.map(id => subjectMap.get(id)).filter(Boolean).join(", ");
-    textSpan.textContent = `${item.ime} ${item.prezime} (${subjectNames || 'Nema predmeta'})`;
+    
+    let teacherInfo = `${item.ime} ${item.prezime} (${subjectNames || 'Nema predmeta'})`;
+
+    if (item.fiksna_ucionica_id) {
+        const ucionicaNaziv = ucioniceMap.get(item.fiksna_ucionica_id) || `ID:${item.fiksna_ucionica_id}`;
+        teacherInfo += `, Učionica: ${ucionicaNaziv}`;
+    }
+
+    const nedostupanString = formatirajNedostupnost(item.nedostupan);
+    if (nedostupanString) {
+        teacherInfo += `, ${nedostupanString}`;
+    }
+
+    textSpan.textContent = teacherInfo;
     
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "X";
@@ -640,8 +698,8 @@ async function dodajNovogProfesora(modalContent) {
       privremeniUnosi.profesori.push(noviPrivremeniProfesor);
       prikaziPrivremeneUnoseProfesori('profesori', allSubjects);
 
-      modalContent.querySelector("div:nth-of-type(1) input").value = ""; // Clear ime
-      modalContent.querySelector("div:nth-of-type(2) input").value = ""; // Clear prezime
+      modalContent.querySelector("#teacher-ime").value = ""; // Clear ime
+      modalContent.querySelector("#teacher-prezime").value = ""; // Clear prezime
       modalContent.querySelector(".multi-select-autocomplete .autocomplete-input").value = ""; // Clear subject input
       modalContent.selectedSubjectNames = []; // Clear selected subjects
       modalContent.querySelector(".selected-tags-container").innerHTML = ""; // Clear tags display

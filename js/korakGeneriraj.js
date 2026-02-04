@@ -74,8 +74,8 @@ async function prikaziKorakProfesori(modalBody) {
     // --- Left Column: Form ---
     let prijedloziPredmeta = await dohvatiPrijedloge('predmeti.json', (item) => item.naziv);
 
-    const imeInputHtml = createSimpleInput("Ime profesora:", "Npr. Ivan");
-    const prezimeInputHtml = createSimpleInput("Prezime profesora:", "Npr. Horvat");
+    const imeInputHtml = createSimpleInput("Ime profesora:", "Npr. Ivan", "teacher-ime");
+    const prezimeInputHtml = createSimpleInput("Prezime profesora:", "Npr. Horvat", "teacher-prezime");
     const strukaInputHtml = createMultiSelectAutocompleteInput(
         "Predaje predmete:",
         "Npr. Matematika, Fizika..."

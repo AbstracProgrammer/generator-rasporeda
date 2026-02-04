@@ -59,7 +59,8 @@
   overflow: hidden; /* Prevent body from overflowing, children will scroll */
 }
 
-.modal-form-container, .existing-items-container {
+.modal-form-container,
+.existing-items-container {
   overflow-y: auto; /* Allow individual columns to scroll */
   padding: 10px;
 }

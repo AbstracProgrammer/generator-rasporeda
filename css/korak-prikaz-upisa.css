@@ -2,6 +2,8 @@
   margin-top: 15px;
   padding: 10px;
   min-height: 100px; /* Increased height */
+  max-height: 200px; /* Limit height for scrollability */
+  overflow-y: auto; /* Enable vertical scrolling */
   background-color: #f0f8ff;
   border-radius: 8px;
   display: flex;

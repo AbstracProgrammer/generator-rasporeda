@@ -28,5 +28,15 @@
         ],
         "nedostupan": [],
         "fiksna_ucionica_id": null
+    },
+    {
+        "id": 3,
+        "ime": "test",
+        "prezime": "test",
+        "struka_predmeti_id": [
+            2
+        ],
+        "nedostupan": [],
+        "fiksna_ucionica_id": null
     }
 ]

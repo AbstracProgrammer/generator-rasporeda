@@ -26,13 +26,14 @@ function displayError(message) {
  * Creates the HTML for a simple labeled input field.
  * @param {string} labelText - The text for the field's label.
  * @param {string} placeholder - The placeholder text for the input.
+ * @param {string} [id=""] - Optional: An ID for the input element.
  * @returns {string} - The HTML string for the input field.
  */
-function createSimpleInput(labelText, placeholder) {
+function createSimpleInput(labelText, placeholder, id = "") {
   return `
     <div class="input-field">
       <span class="field-label">${labelText}</span>
-      <input type="text" placeholder="${placeholder || ""}">
+      <input type="text" ${id ? `id="${id}"` : ''} placeholder="${placeholder || ""}">
     </div>
   `;
 }
