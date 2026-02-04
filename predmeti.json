@@ -1,1 +1,12 @@
-[]
+[
+    {
+        "id": 1,
+        "naziv": "Dva1",
+        "potreban_tip_ucionice_id": null
+    },
+    {
+        "id": 2,
+        "naziv": "Dva",
+        "potreban_tip_ucionice_id": null
+    }
+]

@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
       case "ucionice":
         prikaziKorakUcionice(modalBody); // Pass the main body
         break;
+      case "predmeti":
+        prikaziKorakPredmeti(modalBody);
+        break;
       // Add cases for other steps here in the future
       default:
         console.error("Nepoznat korak:", step);
@@ -78,6 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
     switch (step) {
       case "ucionice":
         return await spremiKorakUcionice();
+      case "predmeti":
+        return await spremiKorakPredmeti();
       default:
         console.error("Nema definirane logike spremanja za korak:", step);
         return { success: false, message: "Logika spremanja nije implementirana." };
@@ -93,6 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
     switch (step) {
       case "ucionice":
         await dodajNovuUcionicu(formContainer);
+        break;
+      case "predmeti":
+        await dodajNoviPredmet(formContainer);
         break;
       default:
         console.error("Nema definirane logike za dodavanje za korak:", step);

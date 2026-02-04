@@ -59,8 +59,9 @@ function createAutocompleteInput(labelText, placeholder) {
  * Initializes the autocomplete functionality for a given input.
  * @param {HTMLInputElement} inputElement - The input element to attach listeners to.
  * @param {string[]} suggestionsArray - An array of suggestion strings.
+ * @param {boolean} [strictMode=false] - If true, only values from suggestionsArray are allowed.
  */
-function initializeAutocomplete(inputElement, suggestionsArray) {
+function initializeAutocomplete(inputElement, suggestionsArray, strictMode = false) {
   const suggestionsList = inputElement.parentElement.querySelector(".suggestions-list");
 
   const showSuggestions = (filter = "") => {
@@ -72,7 +73,6 @@ function initializeAutocomplete(inputElement, suggestionsArray) {
         const item = document.createElement("div");
         item.classList.add("suggestion-item");
         item.textContent = s;
-        // Use 'mousedown' to fire before the input's 'blur' event
         item.addEventListener("mousedown", () => {
           inputElement.value = s;
           suggestionsList.style.display = "none";
@@ -93,11 +93,41 @@ function initializeAutocomplete(inputElement, suggestionsArray) {
     showSuggestions(inputElement.value);
   });
 
-  // Hide suggestions when the input field loses focus
-  inputElement.addEventListener("blur", () => {
-    // We use a small delay to allow the 'mousedown' event on a suggestion to fire
-    setTimeout(() => {
-      suggestionsList.style.display = "none";
-    }, 150);
-  });
+  if (strictMode) {
+    inputElement.addEventListener("blur", () => {
+      // Small delay to allow click on suggestion to register
+      setTimeout(() => {
+        if (!suggestionsArray.some(s => s.toLowerCase() === inputElement.value.toLowerCase()) && inputElement.value.trim() !== '') {
+          displayError("Odabrana vrijednost mora biti s popisa. ");
+          inputElement.value = ""; // Clear invalid input
+        }
+        suggestionsList.style.display = "none";
+      }, 150);
+    });
+  } else {
+    // Original blur behavior for non-strict mode
+    inputElement.addEventListener("blur", () => {
+      setTimeout(() => {
+        suggestionsList.style.display = "none";
+      }, 150);
+    });
+  }
+}
+
+/**
+ * Creates the HTML for a labeled input field with strict autocomplete functionality (no adding new).
+ * @param {string} labelText - The text for the field's label.
+ * @param {string} placeholder - The placeholder text for the input.
+ * @returns {string} - The HTML string for the strict autocomplete field.
+ */
+function createStrictAutocompleteInput(labelText, placeholder) {
+  return `
+    <div class="autocomplete-field strict-autocomplete">
+      <span class="field-label">${labelText}</span>
+      <div class="autocomplete-wrapper">
+        <input type="text" class="autocomplete-input" placeholder="${placeholder || ""}" autocomplete="off">
+        <div class="suggestions-list" style="display: none;"></div>
+      </div>
+    </div>
+  `;
 }

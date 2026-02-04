@@ -69,6 +69,11 @@
   color: #6c757d;
 }
 
+.predmet-card .potreban-tip {
+  font-style: italic;
+  color: #6c757d;
+}
+
 .card-actions {
   position: absolute;
   top: 15px; /* Adjusted position */

@@ -3,7 +3,8 @@
 // A temporary local storage for new items added during a single modal session
 let privremeniUnosi = {
   ucionice: [],
-  // predmeti: [], etc. for other steps
+  predmeti: [], // Added for 'Predmeti' step
+  // profesori: [], etc. for other steps
 };
 
 // --- GENERIC HELPER FUNCTIONS ---
@@ -52,13 +53,14 @@ async function pronadjiIliStvoriId(fileName, nazivStavke, poljeZaNaziv = 'naziv'
     }
 }
 
+
 // --- UČIONICE SPECIFIC FUNCTIONS ---
 
 /**
  * Renders the items from the temporary list into the display area in the modal.
  * @param {string} step The key for the privremeniUnosi object (e.g., 'ucionice').
  */
-async function prikaziPrivremeneUnose(step) {
+async function prikaziPrivremeneUnose(step) { // This function should be made generic or moved to korakPrikaziDodano.js
   const display = document.querySelector(".new-items-display");
   display.innerHTML = "";
 
@@ -268,4 +270,238 @@ async function obrisiUcionicu(ucionicaId) {
         displayError(error.message);
         return { success: false };
     }
+}
+
+
+// --- PREDMETI SPECIFIC FUNCTIONS ---
+
+/**
+ * Validates form data and creates a new subject object.
+ * @param {HTMLElement} modalContent - The content container of the modal's form.
+ * @param {Array} postojeciPodaci - Array of existing subjects from the JSON file.
+ * @returns {Promise<object|null>} A new subject object or null if validation fails.
+ */
+async function validirajIStvoriPredmet(modalContent, postojeciPodaci) {
+  const nazivInput = modalContent.querySelector(".input-field input");
+  const tipUcioniceInput = modalContent.querySelector(".autocomplete-input");
+  const naziv = nazivInput.value.trim();
+  const tipUcioniceNaziv = tipUcioniceInput.value.trim();
+
+  if (!naziv) {
+    displayError("Naziv predmeta ne može biti prazan.");
+    return null;
+  }
+
+  if (provjeriDupliNaziv(naziv, postojeciPodaci, privremeniUnosi.predmeti)) {
+    displayError("Predmet s tim nazivom već postoji.");
+    return null;
+  }
+  
+  let potrebanTipUcioniceId = null;
+  if (tipUcioniceNaziv) {
+      // For Predmeti, type MUST exist, so we only find, not create.
+      // We need a specific helper to find existing ID without creation.
+      const response = await fetch('tipoviUcionica.json');
+      const text = await response.text();
+      let tipovi = text ? JSON.parse(text) : [];
+      const postojeciTip = tipovi.find(t => t.naziv.toLowerCase() === tipUcioniceNaziv.toLowerCase());
+
+      if (postojeciTip) {
+          potrebanTipUcioniceId = postojeciTip.id;
+      } else {
+          displayError("Odabrani tip učionice ne postoji. Odaberite s popisa.");
+          return null;
+      }
+  }
+
+  return {
+    id: -1,
+    naziv: naziv,
+    potreban_tip_ucionice_id: potrebanTipUcioniceId,
+  };
+}
+
+/**
+ * Handles "Spremi i dodaj novi" button click for subjects.
+ * @param {HTMLElement} modalContent - The modal's form content element.
+ */
+async function dodajNoviPredmet(modalContent) {
+  try {
+    const response = await fetch('predmeti.json');
+    const text = await response.text();
+    const predmeti = text ? JSON.parse(text) : [];
+
+    const noviPrivremeniPredmet = await validirajIStvoriPredmet(modalContent, predmeti);
+
+    if (noviPrivremeniPredmet) {
+      privremeniUnosi.predmeti.push(noviPrivremeniPredmet);
+      prikaziPrivremeneUnosePredmeti('predmeti'); // New function to display temp subjects
+
+      modalContent.querySelector(".input-field input").value = ""; // Clear subject name
+      modalContent.querySelector(".autocomplete-input").value = ""; // Clear type input
+      modalContent.querySelector(".input-field input").focus();
+    }
+  } catch (error) {
+    displayError("Greška pri provjeri podataka: " + error.message);
+  }
+}
+
+/**
+ * Handles the final "Spremi i zatvori" action for subjects.
+ * Merges temporary items with existing data and saves everything.
+ * @returns {Promise<object>} A result object { success: true/false }.
+ */
+async function spremiKorakPredmeti() {
+  try {
+    const response = await fetch('predmeti.json');
+    const text = await response.text();
+    let predmeti = text ? JSON.parse(text) : [];
+
+    if (privremeniUnosi.predmeti.length === 0 && predmeti.length === 0) {
+      displayError("Nema unesenih predmeta.");
+      return { success: false, message: "Nema unesenih predmeta." };
+    }
+
+    if (privremeniUnosi.predmeti.length === 0) {
+      return { success: true };
+    }
+
+    let kombiniraniPodaci = [...predmeti, ...privremeniUnosi.predmeti];
+
+    kombiniraniPodaci.forEach((predmet, index) => {
+      predmet.id = index + 1;
+    });
+
+    const result = await spremiJSON('predmeti.json', kombiniraniPodaci);
+
+    if (result.success) {
+      privremeniUnosi.predmeti = [];
+      return { success: true };
+    } else {
+      displayError(result.message || "Došlo je do greške na serveru.");
+      return { success: false, message: result.message };
+    }
+
+  } catch (error) {
+    displayError("Greška pri spremanju: " + error.message);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Edits an existing subject.
+ * @param {number} predmetId - The ID of the subject to edit.
+ * @param {object} noviPodaci - An object with {naziv, nazivTipaUcionice}.
+ * @returns {Promise<object>} A result object.
+ */
+async function urediPredmet(predmetId, noviPodaci) {
+    try {
+        const predmetiRes = await fetch('predmeti.json');
+        const predmetiText = await predmetiRes.text();
+        let predmeti = predmetiText ? JSON.parse(predmetiText) : [];
+
+        const index = predmeti.findIndex(p => p.id === predmetId);
+        if (index === -1) throw new Error("Predmet nije pronađen.");
+        
+        if (provjeriDupliNaziv(noviPodaci.naziv, predmeti.filter(p => p.id !== predmetId), [])) {
+             throw new Error("Predmet s tim nazivom već postoji.");
+        }
+
+        let potrebanTipUcioniceId = null;
+        if (noviPodaci.nazivTipaUcionice) {
+            const response = await fetch('tipoviUcionica.json');
+            const text = await response.text();
+            let tipovi = text ? JSON.parse(text) : [];
+            const postojeciTip = tipovi.find(t => t.naziv.toLowerCase() === noviPodaci.nazivTipaUcionice.toLowerCase());
+
+            if (postojeciTip) {
+                potrebanTipUcioniceId = postojeciTip.id;
+            } else {
+                throw new Error("Odabrani tip učionice ne postoji. Odaberite s popisa.");
+            }
+        }
+        
+        predmeti[index].naziv = noviPodaci.naziv;
+        predmeti[index].potreban_tip_ucionice_id = potrebanTipUcioniceId;
+
+        const result = await spremiJSON('predmeti.json', predmeti);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError("Greška pri uređivanju: " + error.message);
+        return { success: false, message: error.message };
+    }
+}
+
+/**
+ * Deletes a subject after checking for dependencies.
+ * @param {number} predmetId - The ID of the subject to delete.
+ * @returns {Promise<object>} A result object.
+ */
+async function obrisiPredmet(predmetId) {
+    try {
+        // Dependency Check: Check program.json and kurikulum.json
+        // For now, a placeholder check for program.json
+        const programRes = await fetch('program.json');
+        const programText = await programRes.text();
+        const programi = programText ? JSON.parse(programText) : [];
+
+        const ovisnostProgram = programi.find(p => p.popis_predmeta.some(item => item.predmet_id === predmetId));
+        if (ovisnostProgram) {
+            throw new Error(`Nije moguće obrisati. Predmet je spomenut u programu "${ovisnostProgram.naziv}".`);
+        }
+
+        // Add more dependency checks here (e.g., kurikulum.json)
+
+        const predmetiRes = await fetch('predmeti.json');
+        const predmetiText = await predmetiRes.text();
+        let predmeti = predmetiText ? JSON.parse(predmetiText) : [];
+
+        const filtriraniPredmeti = predmeti.filter(p => p.id !== predmetId);
+
+        const result = await spremiJSON('predmeti.json', filtriraniPredmeti);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError(error.message);
+        return { success: false };
+    }
+}
+
+/**
+ * Renders the items from the temporary list into the display area in the modal.
+ * @param {string} step The key for the privremeniUnosi object (e.g., 'predmeti').
+ */
+async function prikaziPrivremeneUnosePredmeti(step) {
+    const display = document.querySelector(".new-items-display");
+    display.innerHTML = "";
+
+    const response = await fetch('tipoviUcionica.json');
+    const text = await response.text();
+    const tipovi = text ? JSON.parse(text) : [];
+    const tipoviMapa = new Map(tipovi.map(t => [t.id, t.naziv]));
+
+    privremeniUnosi[step].forEach((item, index) => {
+        const tag = document.createElement("div");
+        tag.classList.add("new-item-tag");
+        
+        const textSpan = document.createElement("span");
+        const nazivTipa = item.potreban_tip_ucionice_id ? tipoviMapa.get(item.potreban_tip_ucionice_id) : 'Nije specificiran';
+        const tipText = nazivTipa !== 'Nije specificiran' ? ` (Tip učionice: ${nazivTipa})` : "";
+        textSpan.textContent = item.naziv + tipText;
+        
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "X";
+        deleteBtn.classList.add("delete-temp-item-btn");
+        deleteBtn.onclick = () => {
+            privremeniUnosi[step].splice(index, 1);
+            prikaziPrivremeneUnosePredmeti(step);
+        };
+
+        tag.appendChild(textSpan);
+        tag.appendChild(deleteBtn);
+        display.appendChild(tag);
+    });
 }
