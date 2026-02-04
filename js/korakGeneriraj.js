@@ -62,3 +62,51 @@ async function prikaziKorakPredmeti(modalBody) {
   // --- Right Column: Existing Items ---
   prikaziPostojecePredmete(existingItemsContainer); // New function for Predmeti
 }
+
+/**
+ * Builds and displays the form for the "Profesori" (Teachers) step.
+ * @param {HTMLElement} modalBody - The main body container of the modal.
+ */
+async function prikaziKorakProfesori(modalBody) {
+    const formContainer = modalBody.querySelector('.modal-form-container .modal-content');
+    const existingItemsContainer = modalBody.querySelector('.existing-items-container');
+
+    // --- Left Column: Form ---
+    let prijedloziPredmeta = await dohvatiPrijedloge('predmeti.json', (item) => item.naziv);
+
+    formContainer.innerHTML = ""; // Clear previous form content
+
+    const imeInputHtml = createSimpleInput("Ime profesora:", "Npr. Ivan");
+    const prezimeInputHtml = createSimpleInput("Prezime profesora:", "Npr. Horvat");
+    const strukaInputHtml = createMultiSelectAutocompleteInput(
+        "Predaje predmete:",
+        "Npr. Matematika, Fizika..."
+    );
+
+    formContainer.innerHTML = imeInputHtml + prezimeInputHtml + strukaInputHtml;
+
+    const strukaAutocompleteInput = formContainer.querySelector(".multi-select-autocomplete .autocomplete-input");
+    const selectedTagsContainer = formContainer.querySelector(".selected-tags-container");
+
+    // Initialize an array to hold selected subject names for the current form instance
+    formContainer.selectedSubjectNames = [];
+
+    const multiSelectFunctions = initializeMultiSelectAutocomplete(
+        strukaAutocompleteInput,
+        prijedloziPredmeta,
+        selectedTagsContainer,
+        (itemText) => {
+            if (!formContainer.selectedSubjectNames.includes(itemText)) {
+                formContainer.selectedSubjectNames.push(itemText);
+                multiSelectFunctions.renderSelectedTags(formContainer.selectedSubjectNames);
+            }
+        },
+        (itemText) => {
+            formContainer.selectedSubjectNames = formContainer.selectedSubjectNames.filter(name => name !== itemText);
+            multiSelectFunctions.renderSelectedTags(formContainer.selectedSubjectNames);
+        }
+    );
+
+    // --- Right Column: Existing Items ---
+    // prikaziPostojeceProfesore(existingItemsContainer); // Will be implemented later
+}

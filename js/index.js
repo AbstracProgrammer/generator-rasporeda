@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
       case "predmeti":
         prikaziKorakPredmeti(modalBody);
         break;
+      case "profesori":
+        prikaziKorakProfesori(modalBody);
+        break;
       // Add cases for other steps here in the future
       default:
         console.error("Nepoznat korak:", step);
@@ -83,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return await spremiKorakUcionice();
       case "predmeti":
         return await spremiKorakPredmeti();
+      case "profesori":
+        return await spremiKorakProfesori();
       default:
         console.error("Nema definirane logike spremanja za korak:", step);
         return { success: false, message: "Logika spremanja nije implementirana." };
@@ -101,6 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "predmeti":
         await dodajNoviPredmet(formContainer);
+        break;
+      case "profesori":
+        await dodajNovogProfesora(formContainer);
         break;
       default:
         console.error("Nema definirane logike za dodavanje za korak:", step);

@@ -59,7 +59,77 @@ They are empty when program is first started, whey users enters information they
     - `sati_tjedno`: int
     - `paralelna_grupa_id`: id of a parallel or null (CRITICAL: If multiple assignments share the same id here, they MUST be scheduled at the exact same time).
 
-## 3. Algorithm Requirements (Backtracking)
+---
+
+### **3. Project File Structure and Functionalities**
+
+This section of the documentation describes the purpose of each file within the project and how they are interconnected to form a functional application.
+
+#### **1. HTML Files**
+
+- **`index.html`:** The main entry point of the application. It contains the basic HTML structure, links all CSS and JavaScript files, and defines the initial UI for navigating through the steps (`.korak` elements) and the main modal window.
+
+#### **2. CSS Files (`css/` directory)**
+
+- **`template.css`:** Contains global application styles, basic resets, font definitions, common components like buttons (`.button`), and the grid layout for the main `main` section.
+- **`korak.css`:** Defines styles for individual step elements (`.korak`) on the main page (grid items), including their states (`.active`, `.completed`, `.locked`) and hover effects. It also contains styles for the general structure of the modal window (`.modal-backdrop`, `.korak-prozor`, `.modal-body`).
+- **`korak-prozor.css`:** Contains styles specific to the interior of the modal window. These include styles for input fields (`.input-field`, `.autocomplete-field`), labels (`.field-label`), autocomplete suggestions (`.suggestions-list`, `.suggestion-item`), action buttons within the modal (`.modal-actions`, `.save-step`, `.save-and-add-new-button`), and error messages (`.error`).
+- **`korak-prikaz-upisa.css`:** Unifies styles for dynamically generated UI elements within the modal window: displaying temporary entries (`.new-items-display`, `.new-item-tag`, `.delete-temp-item-btn`) and displaying existing (already saved) items (`.existing-items-container`, `.existing-item-card`, `.card-actions`, `edit-mode` appearance, specific styles for classroom and subject cards).
+
+#### **3. JavaScript Files (`js/` directory)**
+
+- **`index.js`:** The core of the application. It acts as the main orchestrator:
+  - Manages opening and closing the modal window.
+  - Dispatches calls to step-specific functions (`displayClassroomStep`, `saveClassroomStep`, etc.).
+  - Handles the global state of steps (which is `.active`, `.completed`, `.locked`) based on saved JSON files.
+  - Contains logic for checking unsaved data when closing the modal.
+- **`korakProzor.js`:** A library of generic UI components and helper functions:
+  - `createSimpleInput(labelText, placeholder)`: Generates HTML for a simple text input field.
+  - `createAutocompleteInput(labelText, placeholder)`: Generates HTML for an autocomplete field with the ability to dynamically add new suggestions (no "+" button, but new input is added to the suggestions list).
+  - `createStrictAutocompleteInput(labelText, placeholder)`: Generates HTML for an autocomplete field that allows **only selection** of existing suggestions, without creating new ones.
+  - `createMultiSelectAutocompleteInput(labelText, placeholder)`: Generates HTML for a multi-select autocomplete field, allowing selection of multiple tags from suggestions.
+  - `initializeAutocomplete(inputElement, suggestionsArray, strictMode, suggestionsListElement)`: Initializes autocomplete functionality for a given input element.
+  - `initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selectedTagsContainer, onItemSelected, onItemRemoved)`: Initializes multi-select autocomplete functionality, managing selected tags and their display.
+  - `displayError(message)`: Displays a temporary error message within the modal window.
+- **`spremiJSON.js`:** Encapsulates the logic for communicating with the PHP backend to save JSON files to the server (`saveJSON(fileName, jsonData)` function).
+- **`upraviteljPrijedloga.js`:** A generic module for fetching and processing data:
+  - `fetchSuggestions(fileName, propertyExtractor)`: Fetches a JSON file and extracts unique values of a specific property for use as suggestions.
+- **`koraciUpravitelj.js`:** Contains specific data management logic (validation, saving, editing, deleting) for each step, along with some generic helper functions:
+  - `temporaryEntries`: A global object for storing temporarily added items before final saving (now includes `profesori`).
+  - `checkDuplicateName(...)`: A generic function for checking duplicate names.
+  - `findOrCreateId(fileName, itemName, nameField)`: A generic function that finds an item's ID by name in any JSON file, or creates a new item and returns its ID if it doesn't exist.
+  - **Classroom-specific functions:** `displayTemporaryClassroomEntries`, `validateAndCreateClassroom`, `addClassroomTemporarily`, `saveClassroomStep`, `editClassroom`, `deleteClassroom`.
+  - **Subject-specific functions:** `validateAndCreateSubject`, `addSubjectTemporarily`, `saveSubjectStep`, `editSubject`, `deleteSubject`, `displayTemporarySubjectEntries`.
+  - **Teacher-specific functions:** `displayTemporaryTeacherEntries`, `validateAndCreateTeacher`, `addTeacherTemporarily`, `saveTeacherStep`, `editTeacher`, `deleteTeacher`.
+- **`korakGeneriraj.js`:** Responsible for building the dynamic UI (forms) for each step within the modal window.
+  - `displayClassroomStep(modalBody)`: Builds the form for entering classrooms.
+  - `displaySubjectStep(modalBody)`: Builds the form for entering subjects.
+  - `displayTeacherStep(modalBody)`: Builds the form for entering teachers (including multi-select subjects).
+- **`korakPrikaziDodano.js`:** Responsible for rendering and managing interactions (editing/deleting) with existing data in the right-hand column of the modal window.
+  - **Classrooms:** `displayExistingClassrooms`, `renderClassroomDisplayMode`, `renderClassroomEditMode`.
+  - **Subjects:** `displayExistingSubjects`, `renderSubjectDisplayMode`, `renderSubjectEditMode`.
+  - **Teachers:** `displayExistingTeachers`, `renderTeacherDisplayMode`, `renderTeacherEditMode`.
+
+#### **4. PHP Files (`server/` directory)**
+
+- **`SaveJSON.php`:** A backend script that receives `POST` requests with a filename and JSON data. It ensures that data is securely written only to a predefined (`$allowedFiles`) list of JSON files.
+
+#### **5. JSON Files (Data Models)**
+
+- **`ucionice.json`:** Stores classroom data (`id`, `naziv`, `tipovi_id`, `prioritet`).
+- **`predmeti.json`:** Stores subject data (`id`, `naziv`, `potreban_tip_ucionice_id`).
+- **`tipoviUcionica.json`:** A centralized list of all defined classroom types (`id`, `naziv`).
+- **`profesori.json`:** Stores teacher data:
+  - `id`: unique int
+  - `ime`: name of the teacher
+  - `prezime`: surname of the teacher
+  - `struka_predmeti_id`: array of subject IDs they can teach.
+  - `nedostupan`: object defining unavailable times (e.g., `{"1": [1, 2]}` means Monday 1st and 2nd hour unavailable).
+  - `fiksna_ucionica_id`: ID or null (if teacher is bound to a specific room).
+
+---
+
+## 4. Algorithm Requirements (Backtracking)
 
 The generator must solve the **Timetabling Problem (NP-Hard)** using a backtracking approach or heuristic search inside the browser (JS).
 
@@ -78,13 +148,13 @@ The generator must solve the **Timetabling Problem (NP-Hard)** using a backtrack
 3.  **Distribution:** Lessons should be spread evenly across the week.
 4.  **Room Stability:** Prefer keeping the same room for the same subject if possible.
 
-## 4. Scope & Limitations
+## 5 Scope & Limitations
 
 - Student count and room capacity are explicitly **excluded** to simplify logic (assumed valid by user).
 - No database (MySQL), strictly JSON manipulation.
 - Logic runs client-side (JS).
 
-## 5. Development Guidelines
+## 6. Development Guidelines
 
 - If I changed the code you written, don't reverse it. Keep it the way it is.
 - Write modular, clean ES6+ JavaScript.

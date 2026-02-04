@@ -295,3 +295,158 @@ function renderPredmetEditMode(card, predmet, tipoviMapa) {
     });
 
 }
+
+
+// --- PROFESORI SPECIFIC FUNCTIONS ---
+
+/**
+ * Fetches teachers and subjects, then renders them into the container.
+ * @param {HTMLElement} container - The HTML element to populate.
+ */
+async function prikaziPostojeceProfesore(container) {
+    container.innerHTML = 'Učitavanje...';
+
+    try {
+        const [profesoriRes, predmetiRes] = await Promise.all([
+            fetch('profesori.json'),
+            fetch('predmeti.json')
+        ]);
+
+        const profesori = await (profesoriRes.text().then(text => text ? JSON.parse(text) : []));
+        const predmeti = await (predmetiRes.text().then(text => text ? JSON.parse(text) : []));
+        
+        if (profesori.length === 0) {
+            container.innerHTML = 'Nema unesenih profesora.';
+            return;
+        }
+
+        const predmetiMapa = new Map(predmeti.map(p => [p.id, p.naziv]));
+        
+        container.innerHTML = ""; // Clear loading message
+
+        profesori.forEach(profesor => {
+            const card = document.createElement('div');
+            card.className = 'existing-item-card profesor-card';
+            card.dataset.id = profesor.id;
+
+            renderProfessorDisplayMode(card, profesor, predmetiMapa);
+            container.appendChild(card);
+        });
+        
+    } catch (error) {
+        console.error(`Greška pri prikazivanju postojećih profesora:`, error);
+        container.innerHTML = `<p style="color: red;">Nije moguće učitati podatke.</p>`;
+    }
+}
+
+/** Renders the default display view of a teacher card */
+function renderProfessorDisplayMode(card, profesor, predmetiMapa) {
+    const subjectNames = profesor.struka_predmeti_id
+        .map(id => predmetiMapa.get(id))
+        .filter(Boolean)
+        .join(', ') || 'Nema predmeta';
+
+    card.innerHTML = `
+        <div class="card-content">
+            <div class="naziv">${profesor.ime} ${profesor.prezime}</div>
+            <div class="tip">Predaje: ${subjectNames}</div>
+        </div>
+        <div class="card-actions">
+            <img src="assets/edit.png" alt="Uredi" class="edit-btn">
+            <img src="assets/delete.png" alt="Obriši" class="delete-btn">
+        </div>
+    `;
+
+    card.querySelector('.edit-btn').addEventListener('click', () => renderProfessorEditMode(card, profesor, predmetiMapa));
+    card.querySelector('.delete-btn').addEventListener('click', async () => {
+        if (confirm(`Jeste li sigurni da želite obrisati profesora "${profesor.ime} ${profesor.prezime}"?`)) {
+            const result = await obrisiProfesora(profesor.id);
+            if (result.success) {
+                prikaziPostojeceProfesore(card.parentElement); // Re-render the whole list
+            }
+        }
+    });
+}
+
+/** Renders the editing view of a teacher card */
+async function renderProfessorEditMode(card, profesor, predmetiMapa) {
+    card.classList.add('edit-mode');
+
+    // Fetch all subjects for the autocomplete suggestions
+    const predmetiRes = await fetch('predmeti.json');
+    const predmetiData = await predmetiRes.text().then(text => text ? JSON.parse(text) : []);
+    const prijedloziPredmeta = predmetiData.map(p => p.naziv);
+
+    // Get current subject names for the teacher
+    const currentSubjectNames = profesor.struka_predmeti_id
+        .map(id => predmetiMapa.get(id))
+        .filter(Boolean);
+
+    card.innerHTML = `
+        <div class="card-edit-form">
+            <input type="text" class="edit-ime" value="${profesor.ime}">
+            <input type="text" class="edit-prezime" value="${profesor.prezime}">
+            <div class="autocomplete-field multi-select-autocomplete">
+                <span class="field-label">Predaje predmete:</span>
+                <div class="autocomplete-wrapper">
+                    <input type="text" class="autocomplete-input edit-struka" placeholder="Npr. Matematika, Fizika..." autocomplete="off">
+                    <div class="suggestions-list" style="display: none;"></div>
+                </div>
+                <div class="selected-tags-container"></div>
+            </div>
+        </div>
+        <div class="card-actions">
+            <img src="assets/save.svg" alt="Spremi" class="save-edit-btn">
+            <button class="cancel-edit-btn delete-temp-item-btn">X</button>
+        </div>
+    `;
+
+    const strukaAutocompleteInput = card.querySelector('.edit-struka');
+    const selectedTagsContainer = card.querySelector('.selected-tags-container');
+
+    // Store selected subject names locally for this edit instance
+    const selectedSubjectNames = [...currentSubjectNames];
+    
+    const multiSelectFunctions = initializeMultiSelectAutocomplete(
+        strukaAutocompleteInput,
+        prijedloziPredmeta,
+        selectedTagsContainer,
+        (itemText) => {
+            if (!selectedSubjectNames.includes(itemText)) {
+                selectedSubjectNames.push(itemText);
+                multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+            }
+        },
+        (itemText) => {
+            selectedSubjectNames.splice(selectedSubjectNames.indexOf(itemText), 1);
+            multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+        }
+    );
+    // Render initial selected tags
+    multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+
+
+    card.querySelector('.save-edit-btn').addEventListener('click', async () => {
+        const novoIme = card.querySelector('.edit-ime').value.trim();
+        const novoPrezime = card.querySelector('.edit-prezime').value.trim();
+
+        if (!novoIme || !novoPrezime) {
+            return displayError("Ime i prezime ne mogu biti prazni.");
+        }
+
+        const result = await urediProfesora(profesor.id, {
+            ime: novoIme,
+            prezime: novoPrezime,
+            selectedSubjectNames: selectedSubjectNames // Pass the array of selected subject names
+        }, predmetiData); // Pass all subjects for ID mapping
+
+        if (result.success) {
+            prikaziPostojeceProfesore(card.parentElement);
+        }
+    });
+
+    card.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+        card.classList.remove('edit-mode');
+        renderProfessorDisplayMode(card, profesor, predmetiMapa);
+    });
+}

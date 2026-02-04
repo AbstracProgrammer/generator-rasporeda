@@ -3,8 +3,8 @@
 // A temporary local storage for new items added during a single modal session
 let privremeniUnosi = {
   ucionice: [],
-  predmeti: [], // Added for 'Predmeti' step
-  // profesori: [], etc. for other steps
+  predmeti: [],
+  profesori: [], // Added for 'Profesori' step
 };
 
 // --- GENERIC HELPER FUNCTIONS ---
@@ -504,4 +504,220 @@ async function prikaziPrivremeneUnosePredmeti(step) {
         tag.appendChild(deleteBtn);
         display.appendChild(tag);
     });
+}
+
+
+// --- PROFESORI SPECIFIC FUNCTIONS ---
+
+/**
+ * Renders the items from the temporary list into the display area in the modal.
+ * @param {string} step The key for the privremeniUnosi object (e.g., 'profesori').
+ * @param {Array} allSubjects - Array of all subjects to map subject IDs to names.
+ */
+async function prikaziPrivremeneUnoseProfesori(step, allSubjects) {
+  const display = document.querySelector(".new-items-display");
+  display.innerHTML = "";
+
+  const subjectMap = new Map(allSubjects.map(s => [s.id, s.naziv]));
+
+  privremeniUnosi[step].forEach((item, index) => {
+    const tag = document.createElement("div");
+    tag.classList.add("new-item-tag");
+    
+    const textSpan = document.createElement("span");
+    const subjectNames = item.struka_predmeti_id.map(id => subjectMap.get(id)).filter(Boolean).join(", ");
+    textSpan.textContent = `${item.ime} ${item.prezime} (${subjectNames || 'Nema predmeta'})`;
+    
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "X";
+    deleteBtn.classList.add("delete-temp-item-btn");
+    deleteBtn.onclick = () => {
+      privremeniUnosi[step].splice(index, 1);
+      prikaziPrivremeneUnoseProfesori(step, allSubjects);
+    };
+
+    tag.appendChild(textSpan);
+    tag.appendChild(deleteBtn);
+    display.appendChild(tag);
+  });
+}
+
+/**
+ * Validates form data and creates a new teacher object.
+ * @param {HTMLElement} modalContent - The content container of the modal's form.
+ * @param {Array} allTeachers - Array of existing teachers from the JSON file.
+ * @param {Array} allSubjects - Array of all subjects to get subject IDs.
+ * @returns {Promise<object|null>} A new teacher object or null if validation fails.
+ */
+async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects) {
+  const imeInput = modalContent.querySelector("div:nth-of-type(1) input"); // First simple input
+  const prezimeInput = modalContent.querySelector("div:nth-of-type(2) input"); // Second simple input
+  const ime = imeInput.value.trim();
+  const prezime = prezimeInput.value.trim();
+  const selectedSubjects = modalContent.selectedSubjectNames || []; // From multi-select autocomplete
+
+  if (!ime || !prezime) {
+    displayError("Ime i prezime profesora ne mogu biti prazni.");
+    return null;
+  }
+
+  // No duplicate name check for teachers as per requirements
+
+  const subjectMap = new Map(allSubjects.map(s => [s.naziv.toLowerCase(), s.id]));
+  const strukaPredmetiId = selectedSubjects
+    .map(name => subjectMap.get(name.toLowerCase()))
+    .filter(Boolean); // Filter out any subjects not found
+
+  return {
+    id: -1,
+    ime: ime,
+    prezime: prezime,
+    struka_predmeti_id: strukaPredmetiId,
+    nedostupan: {}, // Default empty unavailable times
+    fiksna_ucionica_id: null, // Default no fixed classroom
+  };
+}
+
+/**
+ * Handles "Spremi i dodaj novi" button click for teachers.
+ * @param {HTMLElement} modalContent - The modal's form content element.
+ */
+async function dodajNovogProfesora(modalContent) {
+  try {
+    const response = await fetch('profesori.json');
+    const text = await response.text();
+    const allTeachers = text ? JSON.parse(text) : [];
+
+    const subjectsResponse = await fetch('predmeti.json');
+    const subjectsText = await subjectsResponse.text();
+    const allSubjects = subjectsText ? JSON.parse(subjectsText) : [];
+
+    const noviPrivremeniProfesor = await validirajIStvoriProfesora(modalContent, allTeachers, allSubjects);
+
+    if (noviPrivremeniProfesor) {
+      privremeniUnosi.profesori.push(noviPrivremeniProfesor);
+      prikaziPrivremeneUnoseProfesori('profesori', allSubjects);
+
+      modalContent.querySelector("div:nth-of-type(1) input").value = ""; // Clear ime
+      modalContent.querySelector("div:nth-of-type(2) input").value = ""; // Clear prezime
+      modalContent.querySelector(".multi-select-autocomplete .autocomplete-input").value = ""; // Clear subject input
+      modalContent.selectedSubjectNames = []; // Clear selected subjects
+      modalContent.querySelector(".selected-tags-container").innerHTML = ""; // Clear tags display
+      modalContent.querySelector("div:nth-of-type(1) input").focus();
+    }
+  } catch (error) {
+    displayError("Greška pri provjeri podataka: " + error.message);
+  }
+}
+
+/**
+ * Handles the final "Spremi i zatvori" action for teachers.
+ * @returns {Promise<object>} A result object { success: true/false }.
+ */
+async function spremiKorakProfesori() {
+  try {
+    const response = await fetch('profesori.json');
+    const text = await response.text();
+    let allTeachers = text ? JSON.parse(text) : [];
+
+    if (privremeniUnosi.profesori.length === 0 && allTeachers.length === 0) {
+      displayError("Nema unesenih profesora.");
+      return { success: false, message: "Nema unesenih profesora." };
+    }
+
+    if (privremeniUnosi.profesori.length === 0) {
+      return { success: true };
+    }
+
+    let kombiniraniPodaci = [...allTeachers, ...privremeniUnosi.profesori];
+
+    kombiniraniPodaci.forEach((profesor, index) => {
+      profesor.id = index + 1;
+    });
+
+    const result = await spremiJSON('profesori.json', kombiniraniPodaci);
+
+    if (result.success) {
+      privremeniUnosi.profesori = [];
+      return { success: true };
+    } else {
+      displayError(result.message || "Došlo je do greške na serveru.");
+      return { success: false, message: result.message };
+    }
+
+  } catch (error) {
+    displayError("Greška pri spremanju: " + error.message);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Edits an existing teacher.
+ * @param {number} teacherId - The ID of the teacher to edit.
+ * @param {object} newTeacherData - An object with {ime, prezime, selectedSubjectNames}.
+ * @param {Array} allSubjects - Array of all subjects to map subject names to IDs.
+ * @returns {Promise<object>} A result object.
+ */
+async function urediProfesora(teacherId, newTeacherData, allSubjects) {
+  try {
+    const profesoriRes = await fetch('profesori.json');
+    const profesoriText = await profesoriRes.text();
+    let profesori = profesoriText ? JSON.parse(profesoriText) : [];
+
+    const index = profesori.findIndex(p => p.id === teacherId);
+    if (index === -1) throw new Error("Profesor nije pronađen.");
+
+    const subjectMap = new Map(allSubjects.map(s => [s.naziv.toLowerCase(), s.id]));
+    const strukaPredmetiId = newTeacherData.selectedSubjectNames
+      .map(name => subjectMap.get(name.toLowerCase()))
+      .filter(Boolean);
+
+    profesori[index].ime = newTeacherData.ime;
+    profesori[index].prezime = newTeacherData.prezime;
+    profesori[index].struka_predmeti_id = strukaPredmetiId;
+
+    const result = await spremiJSON('profesori.json', profesori);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError("Greška pri uređivanju: " + error.message);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Deletes a teacher after checking for dependencies.
+ * @param {number} teacherId - The ID of the teacher to delete.
+ * @returns {Promise<object>} A result object.
+ */
+async function obrisiProfesora(teacherId) {
+  try {
+    // Dependency Check: kurikulum.json (for assigned lessons)
+    const kurikulumRes = await fetch('kurikulum.json');
+    const kurikulumText = await kurikulumRes.text();
+    const kurikulum = kurikulumText ? JSON.parse(kurikulumText) : [];
+
+    const ovisnostKurikulum = kurikulum.find(a => a.profesor_id === teacherId);
+    if (ovisnostKurikulum) {
+      throw new Error(`Nije moguće obrisati. Profesor je dodijeljen u kurikulumu.`);
+    }
+
+    // Dependency Check: profesori.json (for fiksna_ucionica_id - though this is a self-reference,
+    // it's checked when deleting a classroom, not a teacher) - No direct check needed here.
+
+    const profesoriRes = await fetch('profesori.json');
+    const profesoriText = await profesoriRes.text();
+    let profesori = profesoriText ? JSON.parse(profesoriText) : [];
+
+    const filtriraniProfesori = profesori.filter(p => p.id !== teacherId);
+
+    const result = await spremiJSON('profesori.json', filtriraniProfesori);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError(error.message);
+    return { success: false };
+  }
 }

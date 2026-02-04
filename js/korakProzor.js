@@ -137,3 +137,104 @@ function createStrictAutocompleteInput(labelText, placeholder) {
     </div>
   `;
 }
+
+/**
+ * Creates the HTML for a labeled input field with multi-select autocomplete functionality.
+ * @param {string} labelText - The text for the field's label.
+ * @param {string} placeholder - The placeholder text for the input.
+ * @returns {string} - The HTML string for the multi-select autocomplete field.
+ */
+function createMultiSelectAutocompleteInput(labelText, placeholder) {
+  return `
+    <div class="autocomplete-field multi-select-autocomplete">
+      <span class="field-label">${labelText}</span>
+      <div class="autocomplete-wrapper">
+        <input type="text" class="autocomplete-input" placeholder="${placeholder || ""}" autocomplete="off">
+        <div class="suggestions-list" style="display: none;"></div>
+      </div>
+      <div class="selected-tags-container"></div>
+    </div>
+  `;
+}
+
+/**
+ * Initializes the multi-select autocomplete functionality for a given input.
+ * @param {HTMLInputElement} inputElement - The input element to attach listeners to.
+ * @param {string[]} suggestionsArray - An array of suggestion strings.
+ * @param {HTMLElement} selectedTagsContainer - The container where selected tags will be displayed.
+ * @param {Function} onItemSelected - Callback function when an item is selected. Receives (itemText).
+ * @param {Function} onItemRemoved - Callback function when an item is removed. Receives (itemText).
+ */
+function initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selectedTagsContainer, onItemSelected, onItemRemoved) {
+  const suggestionsList = inputElement.parentElement.querySelector(".suggestions-list");
+
+  if (!suggestionsList) {
+    console.warn("Nema 'suggestions-list' elementa za multi-select autocomplete input:", inputElement);
+    return;
+  }
+
+  const showSuggestions = (filter = "") => {
+    suggestionsList.innerHTML = "";
+    const filtered = suggestionsArray.filter(s => s.toLowerCase().includes(filter.toLowerCase()));
+
+    if (filtered.length > 0) {
+      filtered.forEach((s) => {
+        const item = document.createElement("div");
+        item.classList.add("suggestion-item");
+        item.textContent = s;
+        item.addEventListener("mousedown", (e) => {
+          e.preventDefault(); // Prevent input blur
+          inputElement.value = "";
+          suggestionsList.style.display = "none";
+          onItemSelected(s);
+        });
+        suggestionsList.appendChild(item);
+      });
+      suggestionsList.style.display = "block";
+    } else {
+      suggestionsList.style.display = "none";
+    }
+  };
+
+  inputElement.addEventListener("input", () => {
+    showSuggestions(inputElement.value);
+  });
+  
+  inputElement.addEventListener("click", () => {
+    showSuggestions(inputElement.value);
+  });
+
+  inputElement.addEventListener("blur", () => {
+    setTimeout(() => {
+      suggestionsList.style.display = "none";
+      // Clear input if an invalid value is left (strict mode)
+      if (inputElement.value.trim() !== '' && !suggestionsArray.some(s => s.toLowerCase() === inputElement.value.toLowerCase())) {
+        displayError("Odabrana vrijednost mora biti s popisa. ");
+        inputElement.value = "";
+      }
+    }, 150);
+  });
+
+  // Function to render selected tags
+  const renderSelectedTags = (selectedItems) => {
+    selectedTagsContainer.innerHTML = "";
+    selectedItems.forEach(itemText => {
+      const tag = document.createElement("div");
+      tag.classList.add("new-item-tag"); // Reusing this class for visual consistency
+      tag.textContent = itemText;
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "X";
+      deleteBtn.classList.add("delete-temp-item-btn"); // Reusing this class
+      deleteBtn.onclick = () => {
+        onItemRemoved(itemText);
+      };
+
+      tag.appendChild(deleteBtn);
+      selectedTagsContainer.appendChild(tag);
+    });
+  };
+
+  // Expose render function for external updates (e.g., loading existing items)
+  return { renderSelectedTags };
+}
