@@ -13,5 +13,10 @@
         "id": 3,
         "naziv": "sdf",
         "potreban_tip_ucionice_id": 2
+    },
+    {
+        "id": 4,
+        "naziv": "test123",
+        "potreban_tip_ucionice_id": null
     }
 ]

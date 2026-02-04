@@ -568,12 +568,29 @@ async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects)
     .map(name => subjectMap.get(name.toLowerCase()))
     .filter(Boolean); // Filter out any subjects not found
 
+  // Process unavailable times
+  const unavailableTimesToggle = modalContent.querySelector('#teacher-unavailable-toggle');
+  let nedostupanObjekt = {};
+  if (unavailableTimesToggle && unavailableTimesToggle.checked && modalContent.currentUnavailableTimes) {
+    modalContent.currentUnavailableTimes.forEach(entry => {
+      let hours = [];
+      if (entry.fullDay) {
+        hours = Array.from({ length: 7 }, (_, i) => i + 1); // Hours 1 to 7
+      } else {
+        for (let i = entry.startHour; i <= entry.endHour; i++) {
+          hours.push(i);
+        }
+      }
+      nedostupanObjekt[entry.day.toString()] = hours;
+    });
+  }
+
   return {
     id: -1,
     ime: ime,
     prezime: prezime,
     struka_predmeti_id: strukaPredmetiId,
-    nedostupan: {}, // Default empty unavailable times
+    nedostupan: nedostupanObjekt,
     fiksna_ucionica_id: null, // Default no fixed classroom
   };
 }
@@ -603,6 +620,17 @@ async function dodajNovogProfesora(modalContent) {
       modalContent.querySelector(".multi-select-autocomplete .autocomplete-input").value = ""; // Clear subject input
       modalContent.selectedSubjectNames = []; // Clear selected subjects
       modalContent.querySelector(".selected-tags-container").innerHTML = ""; // Clear tags display
+
+      // Reset unavailable times UI
+      const teacherUnavailableToggle = modalContent.querySelector('#teacher-unavailable-toggle');
+      const unavailableTimesSection = modalContent.querySelector('.unavailable-times-section');
+      const addedUnavailableTimesDisplay = modalContent.querySelector('.added-unavailable-times-display');
+      
+      if (teacherUnavailableToggle) teacherUnavailableToggle.checked = false;
+      if (unavailableTimesSection) unavailableTimesSection.style.display = 'none';
+      if (addedUnavailableTimesDisplay) addedUnavailableTimesDisplay.innerHTML = '';
+      modalContent.currentUnavailableTimes = []; // Clear internal array
+
       modalContent.querySelector("div:nth-of-type(1) input").focus();
     }
   } catch (error) {
@@ -675,6 +703,7 @@ async function urediProfesora(teacherId, newTeacherData, allSubjects) {
     profesori[index].ime = newTeacherData.ime;
     profesori[index].prezime = newTeacherData.prezime;
     profesori[index].struka_predmeti_id = strukaPredmetiId;
+    profesori[index].nedostupan = newTeacherData.nedostupan || {}; // Update nedostupan object
 
     const result = await spremiJSON('profesori.json', profesori);
     if (!result.success) throw new Error(result.message);

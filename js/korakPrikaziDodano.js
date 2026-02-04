@@ -346,10 +346,32 @@ function renderProfessorDisplayMode(card, profesor, predmetiMapa) {
         .filter(Boolean)
         .join(', ') || 'Nema predmeta';
 
+    const dayNames = {
+        1: "Ponedjeljak", 2: "Utorak", 3: "Srijeda", 4: "Četvrtak", 5: "Petak"
+    };
+
+    let unavailableHtml = '';
+    if (profesor.nedostupan && Object.keys(profesor.nedostupan).length > 0) {
+        unavailableHtml += '<div class="unavailable-display-section"><span class="field-label">Nedostupan:</span><ul>';
+        for (const dayNum in profesor.nedostupan) {
+            const hours = profesor.nedostupan[dayNum];
+            let hoursText;
+            if (hours.length === 7 && hours.every((val, i) => val === i + 1)) { // Check if it's 1-7
+                hoursText = 'Cijeli dan';
+            } else {
+                // Assuming continuous ranges from the MVP decision
+                hoursText = `${Math.min(...hours)}.-${Math.max(...hours)}. sat`;
+            }
+            unavailableHtml += `<li>${dayNames[dayNum]}: ${hoursText}</li>`;
+        }
+        unavailableHtml += '</ul></div>';
+    }
+
     card.innerHTML = `
         <div class="card-content">
             <div class="naziv">${profesor.ime} ${profesor.prezime}</div>
             <div class="tip">Predaje: ${subjectNames}</div>
+            ${unavailableHtml}
         </div>
         <div class="card-actions">
             <img src="assets/edit.png" alt="Uredi" class="edit-btn">
@@ -382,6 +404,29 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
         .map(id => predmetiMapa.get(id))
         .filter(Boolean);
 
+    // Prepare initial currentUnavailableTimes from profesor.nedostupan
+    const initialUnavailableTimes = [];
+    for (const dayNumStr in profesor.nedostupan) {
+        const dayNum = parseInt(dayNumStr);
+        const hours = profesor.nedostupan[dayNumStr];
+        let fullDay = false;
+        let startHour = 1;
+        let endHour = 7;
+
+        if (hours.length === 7 && hours.every((val, i) => val === i + 1)) {
+            fullDay = true;
+        } else if (hours.length > 0) {
+            startHour = Math.min(...hours);
+            endHour = Math.max(...hours);
+        }
+        initialUnavailableTimes.push({ day: dayNum, fullDay, startHour, endHour });
+    }
+    
+    // Day names for display
+    const dayNames = {
+        1: "Ponedjeljak", 2: "Utorak", 3: "Srijeda", 4: "Četvrtak", 5: "Petak"
+    };
+
     card.innerHTML = `
         <div class="card-edit-form">
             <input type="text" class="edit-ime" value="${profesor.ime}">
@@ -394,6 +439,43 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
                 </div>
                 <div class="selected-tags-container"></div>
             </div>
+
+            <div class="input-field checkbox-field">
+                <input type="checkbox" id="teacher-unavailable-toggle-edit" class="custom-checkbox" ${Object.keys(profesor.nedostupan).length > 0 ? 'checked' : ''}>
+                <label for="teacher-unavailable-toggle-edit" class="field-label">Profesor ima definirane nedostupnosti</label>
+            </div>
+            <div class="unavailable-times-section" style="display: ${Object.keys(profesor.nedostupan).length > 0 ? 'block' : 'none'};">
+                <div class="unavailable-input-row">
+                    <div class="select-wrapper">
+                        <label for="unavailable-day-edit" class="field-label">Dan:</label>
+                        <select id="unavailable-day-edit">
+                            <option value="1">Ponedjeljak</option>
+                            <option value="2">Utorak</option>
+                            <option value="3">Srijeda</option>
+                            <option value="4">Četvrtak</option>
+                            <option value="5">Petak</option>
+                        </select>
+                    </div>
+                    <div class="input-field checkbox-field">
+                        <input type="checkbox" id="full-day-unavailable-edit" class="custom-checkbox">
+                        <label for="full-day-unavailable-edit" class="field-label">Cijeli dan nedostupan</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <label for="unavailable-start-hour-edit" class="field-label">Početni sat:</label>
+                        <select id="unavailable-start-hour-edit">
+                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="select-wrapper">
+                        <label for="unavailable-end-hour-edit" class="field-label">Krajnji sat:</label>
+                        <select id="unavailable-end-hour-edit">
+                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                        </select>
+                    </div>
+                    <button class="button add-unavailable-time-btn">+</button>
+                </div>
+                <div class="added-unavailable-times-display"></div>
+            </div>
         </div>
         <div class="card-actions">
             <img src="assets/save.svg" alt="Spremi" class="save-edit-btn">
@@ -403,7 +485,8 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
 
     const strukaAutocompleteInput = card.querySelector('.edit-struka');
     const selectedTagsContainer = card.querySelector('.selected-tags-container');
-
+    const suggestionsListElementEdit = card.querySelector('.multi-select-autocomplete .suggestions-list'); // Explicitly find it
+    
     // Store selected subject names locally for this edit instance
     const selectedSubjectNames = [...currentSubjectNames];
     
@@ -420,10 +503,97 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
         (itemText) => {
             selectedSubjectNames.splice(selectedSubjectNames.indexOf(itemText), 1);
             multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
-        }
+        },
+        suggestionsListElementEdit // Explicitly pass the suggestions list element
     );
     // Render initial selected tags
     multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+
+
+    // Unavailable times logic for EDIT mode
+    const teacherUnavailableToggleEdit = card.querySelector('#teacher-unavailable-toggle-edit');
+    const unavailableTimesSectionEdit = card.querySelector('.unavailable-times-section');
+    const fullDayUnavailableCheckboxEdit = card.querySelector('#full-day-unavailable-edit');
+    const startHourSelectEdit = card.querySelector('#unavailable-start-hour-edit');
+    const endHourSelectEdit = card.querySelector('#unavailable-end-hour-edit');
+    const addUnavailableTimeBtnEdit = card.querySelector('.add-unavailable-time-btn');
+    const addedUnavailableTimesDisplayEdit = card.querySelector('.added-unavailable-times-display');
+    const unavailableDaySelectEdit = card.querySelector('#unavailable-day-edit');
+
+    // Local array to manage unavailability during edit
+    const currentUnavailableTimes = [...initialUnavailableTimes];
+
+    const renderUnavailableTimesEdit = () => {
+        addedUnavailableTimesDisplayEdit.innerHTML = '';
+        currentUnavailableTimes.forEach((entry, index) => {
+            const timeTag = document.createElement('div');
+            timeTag.classList.add('new-item-tag');
+
+            let text = `${dayNames[entry.day]}: `;
+            if (entry.fullDay) {
+                text += 'Cijeli dan';
+            } else {
+                text += `${entry.startHour}.-${entry.endHour}. sat`;
+            }
+            timeTag.textContent = text;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'X';
+            removeBtn.classList.add('delete-temp-item-btn');
+            removeBtn.onclick = () => {
+                currentUnavailableTimes.splice(index, 1);
+                renderUnavailableTimesEdit();
+            };
+
+            timeTag.appendChild(removeBtn);
+            addedUnavailableTimesDisplayEdit.appendChild(timeTag);
+        });
+    };
+    renderUnavailableTimesEdit(); // Render existing unavailability
+
+    teacherUnavailableToggleEdit.addEventListener('change', () => {
+        unavailableTimesSectionEdit.style.display = teacherUnavailableToggleEdit.checked ? 'block' : 'none';
+    });
+
+    fullDayUnavailableCheckboxEdit.addEventListener('change', () => {
+        const isDisabled = fullDayUnavailableCheckboxEdit.checked;
+        startHourSelectEdit.disabled = isDisabled;
+        endHourSelectEdit.disabled = isDisabled;
+    });
+
+    addUnavailableTimeBtnEdit.addEventListener('click', () => {
+        const day = parseInt(unavailableDaySelectEdit.value);
+        const fullDay = fullDayUnavailableCheckboxEdit.checked;
+        let startHour = null;
+        let endHour = null;
+
+        if (!fullDay) {
+            startHour = parseInt(startHourSelectEdit.value);
+            endHour = parseInt(endHourSelectEdit.value);
+
+            if (isNaN(startHour) || isNaN(endHour) || startHour > endHour) {
+                displayError("Početni sat mora biti manji ili jednak krajnjem satu.");
+                return;
+            }
+        }
+        
+        // Check for existing entry for the same day (MVP, one continuous range per day)
+        const existingEntryIndex = currentUnavailableTimes.findIndex(e => e.day === day);
+        if (existingEntryIndex !== -1) {
+             displayError(`Nedostupnost za ${dayNames[day]} već postoji. Prvo je obrišite pa dodajte novu.`);
+             return;
+        }
+
+        currentUnavailableTimes.push({ day, fullDay, startHour, endHour });
+        renderUnavailableTimesEdit();
+        // Reset inputs to default after adding
+        unavailableDaySelectEdit.value = "1";
+        fullDayUnavailableCheckboxEdit.checked = false;
+        startHourSelectEdit.disabled = false;
+        endHourSelectEdit.disabled = false;
+        startHourSelectEdit.value = "1";
+        endHourSelectEdit.value = "7";
+    });
 
 
     card.querySelector('.save-edit-btn').addEventListener('click', async () => {
@@ -434,10 +604,28 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa) {
             return displayError("Ime i prezime ne mogu biti prazni.");
         }
 
+        // Convert currentUnavailableTimes to the profesor.nedostupan format
+        let updatedNedostupan = {};
+        if (teacherUnavailableToggleEdit.checked && currentUnavailableTimes.length > 0) {
+            currentUnavailableTimes.forEach(entry => {
+                let hours = [];
+                if (entry.fullDay) {
+                    hours = Array.from({ length: 7 }, (_, i) => i + 1); // Hours 1 to 7
+                } else {
+                    for (let i = entry.startHour; i <= entry.endHour; i++) {
+                        hours.push(i);
+                    }
+                }
+                updatedNedostupan[entry.day.toString()] = hours;
+            });
+        }
+        
+
         const result = await urediProfesora(profesor.id, {
             ime: novoIme,
             prezime: novoPrezime,
-            selectedSubjectNames: selectedSubjectNames // Pass the array of selected subject names
+            selectedSubjectNames: selectedSubjectNames, // Pass the array of selected subject names
+            nedostupan: updatedNedostupan // Pass the updated unavailable times
         }, predmetiData); // Pass all subjects for ID mapping
 
         if (result.success) {
