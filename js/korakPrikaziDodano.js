@@ -683,3 +683,117 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMap
         renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa);
     });
 }
+
+// --- RAZREDI SPECIFIC FUNCTIONS ---
+
+/**
+ * Fetches and displays existing class sections, grouped by their identifier.
+ * @param {HTMLElement} container - The HTML element to populate.
+ */
+async function prikaziPostojeceRazrede(container) {
+    container.innerHTML = 'Učitavanje...';
+    try {
+        const response = await fetch('razredi.json');
+        const text = await response.text();
+        const razredi = text ? JSON.parse(text) : [];
+
+        if (razredi.length === 0) {
+            container.innerHTML = 'Nema unesenih razreda.';
+            return;
+        }
+
+        // Group classes by 'odjeljenje'
+        const grupiraniRazredi = razredi.reduce((acc, razred) => {
+            const odjeljenje = razred.odjeljenje;
+            if (!acc[odjeljenje]) {
+                acc[odjeljenje] = [];
+            }
+            acc[odjeljenje].push(razred);
+            return acc;
+        }, {});
+
+        container.innerHTML = ""; // Clear loading message
+
+        for (const odjeljenje in grupiraniRazredi) {
+            const card = document.createElement('div');
+            card.className = 'existing-item-card razred-card';
+            card.dataset.odjeljenje = odjeljenje;
+
+            const grupa = grupiraniRazredi[odjeljenje];
+            renderRazredDisplayMode(card, grupa);
+            container.appendChild(card);
+        }
+
+    } catch (error) {
+        console.error(`Greška pri prikazivanju postojećih razreda:`, error);
+        container.innerHTML = `<p style="color: red;">Nije moguće učitati podatke.</p>`;
+    }
+}
+
+/** Renders the display view for a class section card */
+function renderRazredDisplayMode(card, grupa) {
+    const odjeljenje = grupa[0].odjeljenje;
+    const godine = grupa.map(r => r.godina).sort((a, b) => a - b);
+    const godineText = `(${godine.join(', ')}. godina)`;
+
+    card.innerHTML = `
+        <div class="card-content">
+            <div class="naziv">Odjeljenje: ${odjeljenje}</div>
+            <div class="tip">${godineText}</div>
+        </div>
+        <div class="card-actions">
+            <img src="assets/edit.png" alt="Uredi" class="edit-btn">
+            <img src="assets/delete.png" alt="Obriši" class="delete-btn">
+        </div>
+    `;
+
+    card.querySelector('.edit-btn').addEventListener('click', () => renderRazredEditMode(card, grupa));
+    card.querySelector('.delete-btn').addEventListener('click', async () => {
+        if (confirm(`Jeste li sigurni da želite obrisati cijelo odjeljenje "${odjeljenje}"?`)) {
+            const result = await obrisiOdjeljenje(odjeljenje);
+            if (result.success) {
+                prikaziPostojeceRazrede(card.parentElement);
+            }
+        }
+    });
+}
+
+/** Renders the editing view for a class section card */
+function renderRazredEditMode(card, grupa) {
+    const odjeljenje = grupa[0].odjeljenje;
+    const brojGodina = grupa.length;
+    card.classList.add('edit-mode');
+
+    card.innerHTML = `
+        <div class="card-edit-form">
+            <input type="text" class="edit-oznaka" value="${odjeljenje}">
+            <input type="number" class="edit-godine" value="${brojGodina}" min="1" max="8">
+        </div>
+        <div class="card-actions">
+            <img src="assets/save.svg" alt="Spremi" class="save-edit-btn">
+            <button class="cancel-edit-btn delete-temp-item-btn">X</button>
+        </div>
+    `;
+
+    card.querySelector('.save-edit-btn').addEventListener('click', async () => {
+        const novaOznaka = card.querySelector('.edit-oznaka').value.trim();
+        const noveGodine = parseInt(card.querySelector('.edit-godine').value, 10);
+
+        if (!novaOznaka) {
+            return displayError("Oznaka ne može biti prazna.");
+        }
+        if (isNaN(noveGodine) || noveGodine < 1 || noveGodine > 8) {
+            return displayError("Broj godina mora biti između 1 i 8.");
+        }
+
+        const result = await urediOdjeljenje(odjeljenje, novaOznaka, noveGodine);
+        if (result.success) {
+            prikaziPostojeceRazrede(card.parentElement);
+        }
+    });
+
+    card.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+        card.classList.remove('edit-mode');
+        renderRazredDisplayMode(card, grupa);
+    });
+}

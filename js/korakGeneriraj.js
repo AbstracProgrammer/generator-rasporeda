@@ -265,3 +265,29 @@ async function prikaziKorakProfesori(modalBody) {
     // --- Right Column: Existing Items ---
     prikaziPostojeceProfesore(existingItemsContainer);
 }
+
+/**
+ * Builds and displays the form for the "Razredi" (Classes) step.
+ * @param {HTMLElement} modalBody - The main body container of the modal.
+ */
+async function prikaziKorakRazredi(modalBody) {
+    const formContainer = modalBody.querySelector('.modal-form-container .modal-content');
+    const existingItemsContainer = modalBody.querySelector('.existing-items-container');
+
+    formContainer.innerHTML = `
+        <div class="input-field">
+            <span class="field-label">Oznaka odjeljenja:</span>
+            <input type="text" id="class-section-identifier" placeholder="Npr. a, b, g...">
+        </div>
+        <div class="input-field">
+            <span class="field-label">Broj godina:</span>
+            <input type="number" id="class-years-count" min="1" max="8" value="4">
+        </div>
+    `;
+    
+    // The "Dodaj novi" button in .modal-actions will now be used as the "+" button
+    // We will handle its logic specifically in the index.js dispatcher.
+
+    // Display existing and temporary classes
+    prikaziPostojeceRazrede(existingItemsContainer);
+}

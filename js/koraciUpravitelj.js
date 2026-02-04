@@ -5,6 +5,7 @@ let privremeniUnosi = {
   ucionice: [],
   predmeti: [],
   profesori: [], // Added for 'Profesori' step
+  razredi: [], 
 };
 
 // --- GENERIC HELPER FUNCTIONS ---
@@ -883,4 +884,214 @@ async function obrisiProfesora(teacherId) {
     displayError(error.message);
     return { success: false };
   }
+}
+
+// --- RAZREDI SPECIFIC FUNCTIONS ---
+
+/**
+ * Renders the temporary class sections into the display area.
+ * @param {string} step - The key for privremeniUnosi ('razredi').
+ */
+function prikaziPrivremeneUnoseRazredi(step) {
+    const display = document.querySelector(".new-items-display");
+    display.innerHTML = "";
+
+    privremeniUnosi[step].forEach((item, index) => {
+        const tag = document.createElement("div");
+        tag.classList.add("new-item-tag");
+        
+        const textSpan = document.createElement("span");
+        textSpan.textContent = `Odjeljenje: ${item.oznaka} (1-${item.godine}. godina)`;
+        
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "X";
+        deleteBtn.classList.add("delete-temp-item-btn");
+        deleteBtn.onclick = () => {
+            privremeniUnosi[step].splice(index, 1);
+            prikaziPrivremeneUnoseRazredi(step);
+        };
+
+        tag.appendChild(textSpan);
+        tag.appendChild(deleteBtn);
+        display.appendChild(tag);
+    });
+}
+
+/**
+ * Handles adding a new class section group temporarily.
+ * @param {HTMLElement} modalContent - The modal's form content element.
+ */
+async function dodajNovoOdjeljenje(modalContent) {
+    const oznakaInput = modalContent.querySelector("#class-section-identifier");
+    const godineInput = modalContent.querySelector("#class-years-count");
+    const oznaka = oznakaInput.value.trim();
+    const godine = parseInt(godineInput.value, 10);
+
+    if (!oznaka) {
+        return displayError("Oznaka odjeljenja ne može biti prazna.");
+    }
+    if (isNaN(godine) || godine < 1 || godine > 8) {
+        return displayError("Broj godina mora biti između 1 i 8.");
+    }
+
+    try {
+        const response = await fetch('razredi.json');
+        const text = await response.text();
+        const postojeciRazredi = text ? JSON.parse(text) : [];
+
+        // Check for uniqueness in both existing and temporary data
+        const vecPostoji = postojeciRazredi.some(r => r.odjeljenje.toLowerCase() === oznaka.toLowerCase()) ||
+                           privremeniUnosi.razredi.some(r => r.oznaka.toLowerCase() === oznaka.toLowerCase());
+
+        if (vecPostoji) {
+            return displayError(`Odjeljenje s oznakom "${oznaka}" već postoji.`);
+        }
+
+        privremeniUnosi.razredi.push({ oznaka, godine });
+        prikaziPrivremeneUnoseRazredi('razredi');
+
+        // Clear inputs
+        oznakaInput.value = "";
+        godineInput.value = "4";
+        oznakaInput.focus();
+
+    } catch (error) {
+        displayError("Greška pri provjeri postojećih razreda: " + error.message);
+    }
+}
+
+/**
+ * Handles the final save action for the "Razredi" step.
+ * @returns {Promise<object>} A result object { success: true/false }.
+ */
+async function spremiKorakRazredi() {
+    try {
+        const response = await fetch('razredi.json');
+        const text = await response.text();
+        let postojeciRazredi = text ? JSON.parse(text) : [];
+
+        if (privremeniUnosi.razredi.length === 0 && postojeciRazredi.length === 0) {
+            displayError("Nema unesenih razreda.");
+            return { success: false, message: "Nema unesenih razreda." };
+        }
+        if (privremeniUnosi.razredi.length === 0) {
+            return { success: true }; // Nothing new to save
+        }
+
+        const noviRazredi = [];
+        privremeniUnosi.razredi.forEach(odjeljenje => {
+            for (let i = 1; i <= odjeljenje.godine; i++) {
+                noviRazredi.push({
+                    id: -1, // Placeholder ID
+                    godina: i,
+                    odjeljenje: odjeljenje.oznaka,
+                    oznaka: `${i}.${odjeljenje.oznaka}`
+                });
+            }
+        });
+
+        let kombiniraniPodaci = [...postojeciRazredi, ...noviRazredi];
+
+        // Re-assign all IDs to ensure they are unique and sequential
+        kombiniraniPodaci.forEach((razred, index) => {
+            razred.id = index + 1;
+        });
+
+        const result = await spremiJSON('razredi.json', kombiniraniPodaci);
+
+        if (result.success) {
+            privremeniUnosi.razredi = []; // Clear temporary entries on successful save
+            return { success: true };
+        } else {
+            displayError(result.message || "Došlo je do greške na serveru.");
+            return { success: false, message: result.message };
+        }
+
+    } catch (error) {
+        displayError("Greška pri spremanju razreda: " + error.message);
+        return { success: false, message: error.message };
+    }
+}
+
+/**
+ * Deletes a class section and all its associated years.
+ * @param {string} odjeljenjeOznaka - The identifier of the section to delete (e.g., 'a').
+ * @returns {Promise<object>} A result object.
+ */
+async function obrisiOdjeljenje(odjeljenjeOznaka) {
+    try {
+        // TODO: Add dependency checks for kurikulum.json
+        // const kurikulumRes = await fetch('kurikulum.json');
+        // ... find if any razred.id from this odjeljenje is used.
+        
+        const response = await fetch('razredi.json');
+        const text = await response.text();
+        let razredi = text ? JSON.parse(text) : [];
+
+        const filtriraniRazredi = razredi.filter(r => r.odjeljenje.toLowerCase() !== odjeljenjeOznaka.toLowerCase());
+
+        // Re-assign IDs
+        filtriraniRazredi.forEach((razred, index) => {
+            razred.id = index + 1;
+        });
+
+        const result = await spremiJSON('razredi.json', filtriraniRazredi);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError(error.message);
+        return { success: false };
+    }
+}
+
+/**
+ * Edits an entire class section.
+ * @param {string} staraOznaka - The original section identifier.
+ * @param {string} novaOznaka - The new section identifier.
+ * @param {number} noveGodine - The new number of years for the section.
+ * @returns {Promise<object>} A result object.
+ */
+async function urediOdjeljenje(staraOznaka, novaOznaka, noveGodine) {
+    try {
+        const response = await fetch('razredi.json');
+        const text = await response.text();
+        let razredi = text ? JSON.parse(text) : [];
+
+        // Check if the new name already exists (and it's not the same as the old one)
+        if (staraOznaka.toLowerCase() !== novaOznaka.toLowerCase()) {
+            if (razredi.some(r => r.odjeljenje.toLowerCase() === novaOznaka.toLowerCase())) {
+                throw new Error(`Odjeljenje s oznakom "${novaOznaka}" već postoji.`);
+            }
+        }
+        
+        // Remove old entries for the section
+        let ostatakRazreda = razredi.filter(r => r.odjeljenje.toLowerCase() !== staraOznaka.toLowerCase());
+        
+        // Create new entries
+        const noviRazredi = [];
+        for (let i = 1; i <= noveGodine; i++) {
+            noviRazredi.push({
+                id: -1, // Placeholder
+                godina: i,
+                odjeljenje: novaOznaka,
+                oznaka: `${i}.${novaOznaka}`
+            });
+        }
+        
+        let kombiniraniPodaci = [...ostatakRazreda, ...noviRazredi];
+
+        // Re-assign all IDs
+        kombiniraniPodaci.forEach((razred, index) => {
+            razred.id = index + 1;
+        });
+        
+        const result = await spremiJSON('razredi.json', kombiniraniPodaci);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError("Greška pri uređivanju: " + error.message);
+        return { success: false, message: error.message };
+    }
 }
