@@ -2,217 +2,145 @@
     {
         "id": 1,
         "godina": 1,
-        "odjeljenje": "f",
-        "oznaka": "1.f"
-    },
-    {
-        "id": 2,
-        "godina": 2,
-        "odjeljenje": "f",
-        "oznaka": "2.f"
-    },
-    {
-        "id": 3,
-        "godina": 3,
-        "odjeljenje": "f",
-        "oznaka": "3.f"
-    },
-    {
-        "id": 4,
-        "godina": 4,
-        "odjeljenje": "f",
-        "oznaka": "4.f"
-    },
-    {
-        "id": 5,
-        "godina": 1,
-        "odjeljenje": "a",
-        "oznaka": "1.a"
-    },
-    {
-        "id": 6,
-        "godina": 2,
-        "odjeljenje": "a",
-        "oznaka": "2.a"
-    },
-    {
-        "id": 7,
-        "godina": 3,
-        "odjeljenje": "a",
-        "oznaka": "3.a"
-    },
-    {
-        "id": 8,
-        "godina": 4,
-        "odjeljenje": "a",
-        "oznaka": "4.a"
-    },
-    {
-        "id": 9,
-        "godina": 1,
-        "odjeljenje": "b",
-        "oznaka": "1.b"
-    },
-    {
-        "id": 10,
-        "godina": 2,
-        "odjeljenje": "b",
-        "oznaka": "2.b"
-    },
-    {
-        "id": 11,
-        "godina": 3,
-        "odjeljenje": "b",
-        "oznaka": "3.b"
-    },
-    {
-        "id": 12,
-        "godina": 4,
-        "odjeljenje": "b",
-        "oznaka": "4.b"
-    },
-    {
-        "id": 13,
-        "godina": 1,
         "odjeljenje": "g",
         "oznaka": "1.g"
     },
     {
-        "id": 14,
+        "id": 2,
         "godina": 2,
         "odjeljenje": "g",
         "oznaka": "2.g"
     },
     {
-        "id": 15,
+        "id": 3,
         "godina": 3,
         "odjeljenje": "g",
         "oznaka": "3.g"
     },
     {
-        "id": 16,
+        "id": 4,
         "godina": 4,
         "odjeljenje": "g",
         "oznaka": "4.g"
     },
     {
-        "id": 17,
+        "id": 5,
         "godina": 1,
         "odjeljenje": "m",
         "oznaka": "1.m"
     },
     {
-        "id": 18,
+        "id": 6,
         "godina": 2,
         "odjeljenje": "m",
         "oznaka": "2.m"
     },
     {
-        "id": 19,
+        "id": 7,
         "godina": 3,
         "odjeljenje": "m",
         "oznaka": "3.m"
     },
     {
-        "id": 20,
+        "id": 8,
         "godina": 4,
         "odjeljenje": "m",
         "oznaka": "4.m"
     },
     {
+        "id": 9,
+        "godina": 1,
+        "odjeljenje": "fAS",
+        "oznaka": "1.fAS"
+    },
+    {
+        "id": 10,
+        "godina": 2,
+        "odjeljenje": "fAS",
+        "oznaka": "2.fAS"
+    },
+    {
+        "id": 11,
+        "godina": 3,
+        "odjeljenje": "fAS",
+        "oznaka": "3.fAS"
+    },
+    {
+        "id": 12,
+        "godina": 4,
+        "odjeljenje": "fAS",
+        "oznaka": "4.fAS"
+    },
+    {
+        "id": 13,
+        "godina": 1,
+        "odjeljenje": "e",
+        "oznaka": "1.e"
+    },
+    {
+        "id": 14,
+        "godina": 2,
+        "odjeljenje": "e",
+        "oznaka": "2.e"
+    },
+    {
+        "id": 15,
+        "godina": 3,
+        "odjeljenje": "e",
+        "oznaka": "3.e"
+    },
+    {
+        "id": 16,
+        "godina": 4,
+        "odjeljenje": "e",
+        "oznaka": "4.e"
+    },
+    {
+        "id": 17,
+        "godina": 1,
+        "odjeljenje": "easdasdfsdf",
+        "oznaka": "1.easdasdfsdf"
+    },
+    {
+        "id": 18,
+        "godina": 2,
+        "odjeljenje": "easdasdfsdf",
+        "oznaka": "2.easdasdfsdf"
+    },
+    {
+        "id": 19,
+        "godina": 3,
+        "odjeljenje": "easdasdfsdf",
+        "oznaka": "3.easdasdfsdf"
+    },
+    {
+        "id": 20,
+        "godina": 4,
+        "odjeljenje": "easdasdfsdf",
+        "oznaka": "4.easdasdfsdf"
+    },
+    {
         "id": 21,
         "godina": 1,
-        "odjeljenje": "gds",
-        "oznaka": "1.gds"
+        "odjeljenje": "gdsfdsfd",
+        "oznaka": "1.gdsfdsfd"
     },
     {
         "id": 22,
         "godina": 2,
-        "odjeljenje": "gds",
-        "oznaka": "2.gds"
+        "odjeljenje": "gdsfdsfd",
+        "oznaka": "2.gdsfdsfd"
     },
     {
         "id": 23,
         "godina": 3,
-        "odjeljenje": "gds",
-        "oznaka": "3.gds"
+        "odjeljenje": "gdsfdsfd",
+        "oznaka": "3.gdsfdsfd"
     },
     {
         "id": 24,
         "godina": 4,
-        "odjeljenje": "gds",
-        "oznaka": "4.gds"
-    },
-    {
-        "id": 25,
-        "godina": 1,
-        "odjeljenje": "sd",
-        "oznaka": "1.sd"
-    },
-    {
-        "id": 26,
-        "godina": 2,
-        "odjeljenje": "sd",
-        "oznaka": "2.sd"
-    },
-    {
-        "id": 27,
-        "godina": 3,
-        "odjeljenje": "sd",
-        "oznaka": "3.sd"
-    },
-    {
-        "id": 28,
-        "godina": 4,
-        "odjeljenje": "sd",
-        "oznaka": "4.sd"
-    },
-    {
-        "id": 29,
-        "godina": 1,
-        "odjeljenje": "fs",
-        "oznaka": "1.fs"
-    },
-    {
-        "id": 30,
-        "godina": 2,
-        "odjeljenje": "fs",
-        "oznaka": "2.fs"
-    },
-    {
-        "id": 31,
-        "godina": 3,
-        "odjeljenje": "fs",
-        "oznaka": "3.fs"
-    },
-    {
-        "id": 32,
-        "godina": 4,
-        "odjeljenje": "fs",
-        "oznaka": "4.fs"
-    },
-    {
-        "id": 33,
-        "godina": 1,
-        "odjeljenje": "asf",
-        "oznaka": "1.asf"
-    },
-    {
-        "id": 34,
-        "godina": 2,
-        "odjeljenje": "asf",
-        "oznaka": "2.asf"
-    },
-    {
-        "id": 35,
-        "godina": 3,
-        "odjeljenje": "asf",
-        "oznaka": "3.asf"
-    },
-    {
-        "id": 36,
-        "godina": 4,
-        "odjeljenje": "asf",
-        "oznaka": "4.asf"
+        "odjeljenje": "gdsfdsfd",
+        "oznaka": "4.gdsfdsfd"
     }
 ]

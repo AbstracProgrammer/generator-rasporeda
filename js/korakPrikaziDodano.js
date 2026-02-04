@@ -788,7 +788,21 @@ function renderRazredEditMode(card, grupa) {
 
         const result = await urediOdjeljenje(odjeljenje, novaOznaka, noveGodine);
         if (result.success) {
-            prikaziPostojeceRazrede(card.parentElement);
+            // Fetch the latest razredi data to update just this card
+            const response = await fetch('razredi.json');
+            const text = await response.text();
+            const allRazredi = text ? JSON.parse(text) : [];
+
+            // Find the updated group for the edited section
+            const updatedGrupa = allRazredi.filter(r => r.odjeljenje.toLowerCase() === novaOznaka.toLowerCase());
+            
+            if (updatedGrupa.length > 0) {
+                card.classList.remove('edit-mode');
+                renderRazredDisplayMode(card, updatedGrupa);
+            } else {
+                // If the group was effectively deleted or changed so much it no longer exists, re-render parent
+                prikaziPostojeceRazrede(card.parentElement);
+            }
         }
     });
 

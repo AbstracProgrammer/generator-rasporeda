@@ -5,7 +5,7 @@ let privremeniUnosi = {
   ucionice: [],
   predmeti: [],
   profesori: [], // Added for 'Profesori' step
-  razredi: [], 
+  razredi: [],
 };
 
 // --- GENERIC HELPER FUNCTIONS ---
@@ -18,12 +18,17 @@ let privremeniUnosi = {
  * @param {string} [poljeZaNaziv='naziv'] - The name of the property that holds the name.
  * @returns {boolean} True if a duplicate is found, false otherwise.
  */
-function provjeriDupliNaziv(noviNaziv, postojeciPodaci, privremeniPodaci, poljeZaNaziv = 'naziv') {
-    const sviNazivi = [
-        ...postojeciPodaci.map(p => p[poljeZaNaziv].toLowerCase()),
-        ...privremeniPodaci.map(p => p[poljeZaNaziv].toLowerCase())
-    ];
-    return sviNazivi.includes(noviNaziv.toLowerCase());
+function provjeriDupliNaziv(
+  noviNaziv,
+  postojeciPodaci,
+  privremeniPodaci,
+  poljeZaNaziv = "naziv",
+) {
+  const sviNazivi = [
+    ...postojeciPodaci.map((p) => p[poljeZaNaziv].toLowerCase()),
+    ...privremeniPodaci.map((p) => p[poljeZaNaziv].toLowerCase()),
+  ];
+  return sviNazivi.includes(noviNaziv.toLowerCase());
 }
 
 /**
@@ -33,27 +38,33 @@ function provjeriDupliNaziv(noviNaziv, postojeciPodaci, privremeniPodaci, poljeZ
  * @param {string} [poljeZaNaziv='naziv'] - The name of the property that holds the name.
  * @returns {Promise<number|null>} The ID of the item.
  */
-async function pronadjiIliStvoriId(fileName, nazivStavke, poljeZaNaziv = 'naziv') {
-    if (!nazivStavke) return null;
+async function pronadjiIliStvoriId(
+  fileName,
+  nazivStavke,
+  poljeZaNaziv = "naziv",
+) {
+  if (!nazivStavke) return null;
 
-    const response = await fetch(fileName);
-    const text = await response.text();
-    let stavke = text ? JSON.parse(text) : [];
+  const response = await fetch(fileName);
+  const text = await response.text();
+  let stavke = text ? JSON.parse(text) : [];
 
-    const postojecaStavka = stavke.find(s => s[poljeZaNaziv].toLowerCase() === nazivStavke.toLowerCase());
+  const postojecaStavka = stavke.find(
+    (s) => s[poljeZaNaziv].toLowerCase() === nazivStavke.toLowerCase(),
+  );
 
-    if (postojecaStavka) {
-        return postojecaStavka.id;
-    } else {
-        const noviId = stavke.length > 0 ? Math.max(...stavke.map(s => s.id)) + 1 : 1;
-        const novaStavka = { id: noviId, [poljeZaNaziv]: nazivStavke };
-        stavke.push(novaStavka);
-        
-        await spremiJSON(fileName, stavke);
-        return noviId;
-    }
+  if (postojecaStavka) {
+    return postojecaStavka.id;
+  } else {
+    const noviId =
+      stavke.length > 0 ? Math.max(...stavke.map((s) => s.id)) + 1 : 1;
+    const novaStavka = { id: noviId, [poljeZaNaziv]: nazivStavke };
+    stavke.push(novaStavka);
+
+    await spremiJSON(fileName, stavke);
+    return noviId;
+  }
 }
-
 
 // --- UČIONICE SPECIFIC FUNCTIONS ---
 
@@ -61,24 +72,26 @@ async function pronadjiIliStvoriId(fileName, nazivStavke, poljeZaNaziv = 'naziv'
  * Renders the items from the temporary list into the display area in the modal.
  * @param {string} step The key for the privremeniUnosi object (e.g., 'ucionice').
  */
-async function prikaziPrivremeneUnose(step) { // This function should be made generic or moved to korakPrikaziDodano.js
+async function prikaziPrivremeneUnose(step) {
+  // This function should be made generic or moved to korakPrikaziDodano.js
   const display = document.querySelector(".new-items-display");
   display.innerHTML = "";
 
-  const response = await fetch('tipoviUcionica.json');
+  const response = await fetch("tipoviUcionica.json");
   const text = await response.text();
   const tipovi = text ? JSON.parse(text) : [];
-  const tipoviMapa = new Map(tipovi.map(t => [t.id, t.naziv]));
+  const tipoviMapa = new Map(tipovi.map((t) => [t.id, t.naziv]));
 
   privremeniUnosi[step].forEach((item, index) => {
     const tag = document.createElement("div");
     tag.classList.add("new-item-tag");
-    
+
     const textSpan = document.createElement("span");
-    const nazivTipa = item.tipovi_id.length > 0 ? tipoviMapa.get(item.tipovi_id[0]) : '';
+    const nazivTipa =
+      item.tipovi_id.length > 0 ? tipoviMapa.get(item.tipovi_id[0]) : "";
     const tipText = nazivTipa ? ` (${nazivTipa})` : "";
     textSpan.textContent = item.naziv + tipText;
-    
+
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "X";
     deleteBtn.classList.add("delete-temp-item-btn");
@@ -92,7 +105,6 @@ async function prikaziPrivremeneUnose(step) { // This function should be made ge
     display.appendChild(tag);
   });
 }
-
 
 /**
  * Validates form data and creates a new classroom object using generic helpers.
@@ -115,8 +127,8 @@ async function validirajIStvoriUcionicu(modalContent, postojeciPodaci) {
     displayError("Učionica s tim nazivom već postoji.");
     return null;
   }
-  
-  const tipId = await pronadjiIliStvoriId('tipoviUcionica.json', nazivTipa);
+
+  const tipId = await pronadjiIliStvoriId("tipoviUcionica.json", nazivTipa);
 
   return {
     id: -1,
@@ -132,20 +144,28 @@ async function validirajIStvoriUcionicu(modalContent, postojeciPodaci) {
  */
 async function dodajNovuUcionicu(modalContent) {
   try {
-    const response = await fetch('ucionice.json');
+    const response = await fetch("ucionice.json");
     const text = await response.text();
     const ucionice = text ? JSON.parse(text) : [];
 
-    const novaPrivremenaUcionica = await validirajIStvoriUcionicu(modalContent, ucionice);
+    const novaPrivremenaUcionica = await validirajIStvoriUcionicu(
+      modalContent,
+      ucionice,
+    );
 
     if (novaPrivremenaUcionica) {
       privremeniUnosi.ucionice.push(novaPrivremenaUcionica);
-      prikaziPrivremeneUnose('ucionice');
+      prikaziPrivremeneUnose("ucionice");
 
-      const noviTipNaziv = modalContent.querySelector(".autocomplete-input").value.trim();
+      const noviTipNaziv = modalContent
+        .querySelector(".autocomplete-input")
+        .value.trim();
       const suggestions = modalContent.suggestionsReference;
-      if (noviTipNaziv && !suggestions.some(s => s.toLowerCase() === noviTipNaziv.toLowerCase())) {
-          suggestions.push(noviTipNaziv);
+      if (
+        noviTipNaziv &&
+        !suggestions.some((s) => s.toLowerCase() === noviTipNaziv.toLowerCase())
+      ) {
+        suggestions.push(noviTipNaziv);
       }
 
       modalContent.querySelector(".input-field input").value = "";
@@ -163,7 +183,7 @@ async function dodajNovuUcionicu(modalContent) {
  */
 async function spremiKorakUcionice() {
   try {
-    const response = await fetch('ucionice.json');
+    const response = await fetch("ucionice.json");
     const text = await response.text();
     let ucionice = text ? JSON.parse(text) : [];
 
@@ -185,7 +205,7 @@ async function spremiKorakUcionice() {
       ucionica.id = index + 1;
     });
 
-    const result = await spremiJSON('ucionice.json', kombiniraniPodaci);
+    const result = await spremiJSON("ucionice.json", kombiniraniPodaci);
 
     if (result.success) {
       privremeniUnosi.ucionice = [];
@@ -194,13 +214,11 @@ async function spremiKorakUcionice() {
       displayError(result.message || "Došlo je do greške na serveru.");
       return { success: false, message: result.message };
     }
-
   } catch (error) {
     displayError("Greška pri spremanju: " + error.message);
     return { success: false, message: error.message };
   }
 }
-
 
 // --- LOGIC FOR EDITING AND DELETING ---
 /**
@@ -210,32 +228,41 @@ async function spremiKorakUcionice() {
  * @returns {Promise<object>} A result object.
  */
 async function urediUcionicu(ucionicaId, noviPodaci) {
-    try {
-        const ucioniceRes = await fetch('ucionice.json');
-        const ucioniceText = await ucioniceRes.text();
-        let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+  try {
+    const ucioniceRes = await fetch("ucionice.json");
+    const ucioniceText = await ucioniceRes.text();
+    let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
 
-        const index = ucionice.findIndex(u => u.id === ucionicaId);
-        if (index === -1) throw new Error("Učionica nije pronađena.");
-        
-        // Check for duplicate name, excluding the current item
-        if (provjeriDupliNaziv(noviPodaci.naziv, ucionice.filter(u => u.id !== ucionicaId), [])) {
-             throw new Error("Učionica s tim nazivom već postoji.");
-        }
+    const index = ucionice.findIndex((u) => u.id === ucionicaId);
+    if (index === -1) throw new Error("Učionica nije pronađena.");
 
-        const tipId = await pronadjiIliStvoriId('tipoviUcionica.json', noviPodaci.nazivTipa);
-
-        ucionice[index].naziv = noviPodaci.naziv;
-        ucionice[index].tipovi_id = tipId ? [tipId] : [];
-
-        const result = await spremiJSON('ucionice.json', ucionice);
-        if (!result.success) throw new Error(result.message);
-
-        return { success: true };
-    } catch (error) {
-        displayError("Greška pri uređivanju: " + error.message);
-        return { success: false, message: error.message };
+    // Check for duplicate name, excluding the current item
+    if (
+      provjeriDupliNaziv(
+        noviPodaci.naziv,
+        ucionice.filter((u) => u.id !== ucionicaId),
+        [],
+      )
+    ) {
+      throw new Error("Učionica s tim nazivom već postoji.");
     }
+
+    const tipId = await pronadjiIliStvoriId(
+      "tipoviUcionica.json",
+      noviPodaci.nazivTipa,
+    );
+
+    ucionice[index].naziv = noviPodaci.naziv;
+    ucionice[index].tipovi_id = tipId ? [tipId] : [];
+
+    const result = await spremiJSON("ucionice.json", ucionice);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError("Greška pri uređivanju: " + error.message);
+    return { success: false, message: error.message };
+  }
 }
 
 /**
@@ -244,62 +271,82 @@ async function urediUcionicu(ucionicaId, noviPodaci) {
  * @returns {Promise<object>} A result object.
  */
 async function obrisiUcionicu(ucionicaId) {
-    try {
-        // Fetch all necessary data in parallel
-        const [profesoriRes, ucioniceRes, predmetiRes, tipoviRes] = await Promise.all([
-            fetch('profesori.json'),
-            fetch('ucionice.json'),
-            fetch('predmeti.json'),
-            fetch('tipoviUcionica.json')
-        ]);
+  try {
+    // Fetch all necessary data in parallel
+    const [profesoriRes, ucioniceRes, predmetiRes, tipoviRes] =
+      await Promise.all([
+        fetch("profesori.json"),
+        fetch("ucionice.json"),
+        fetch("predmeti.json"),
+        fetch("tipoviUcionica.json"),
+      ]);
 
-        const profesori = await profesoriRes.text().then(text => text ? JSON.parse(text) : []);
-        const ucionice = await ucioniceRes.text().then(text => text ? JSON.parse(text) : []);
-        const predmeti = await predmetiRes.text().then(text => text ? JSON.parse(text) : []);
-        const tipovi = await tipoviRes.text().then(text => text ? JSON.parse(text) : []);
-        const tipoviMapa = new Map(tipovi.map(t => [t.id, t.naziv]));
+    const profesori = await profesoriRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const ucionice = await ucioniceRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const predmeti = await predmetiRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const tipovi = await tipoviRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const tipoviMapa = new Map(tipovi.map((t) => [t.id, t.naziv]));
 
-        // 1. Dependency Check: Is it a fixed classroom for a teacher?
-        const ovisnostProfesor = profesori.find(p => p.fiksna_ucionica_id === ucionicaId);
-        if (ovisnostProfesor) {
-            throw new Error(`Nije moguće obrisati. Učionica je dodijeljena profesoru ${ovisnostProfesor.ime} ${ovisnostProfesor.prezime}.`);
-        }
-
-        // 2. Dependency Check: Is it the last room of a required type?
-        const ucionicaZaBrisanje = ucionice.find(u => u.id === ucionicaId);
-        if (ucionicaZaBrisanje && ucionicaZaBrisanje.tipovi_id.length > 0) {
-            for (const tipId of ucionicaZaBrisanje.tipovi_id) {
-                // Find all subjects that require this specific type
-                const predmetiKojiTrebajuTip = predmeti.filter(p => p.potreban_tip_ucionice_id === tipId);
-
-                if (predmetiKojiTrebajuTip.length > 0) {
-                    // Check if any other classroom has this type
-                    const drugeUcioniceSTimTipom = ucionice.filter(u => u.id !== ucionicaId && u.tipovi_id.includes(tipId));
-                    
-                    if (drugeUcioniceSTimTipom.length === 0) {
-                        const nazivTipa = tipoviMapa.get(tipId) || `ID: ${tipId}`;
-                        const nazivPredmeta = predmetiKojiTrebajuTip.map(p => p.naziv).join(', ');
-                        throw new Error(`Nije moguće obrisati. Ovo je zadnja učionica tipa "${nazivTipa}" koji je potreban za predmet(e): ${nazivPredmeta}.`);
-                    }
-                }
-            }
-        }
-        
-        // --- TODO: Future Dependency Check for kurikulum.json ---
-
-        // Proceed with deletion
-        const filtriraneUcionice = ucionice.filter(u => u.id !== ucionicaId);
-
-        const result = await spremiJSON('ucionice.json', filtriraneUcionice);
-        if (!result.success) throw new Error(result.message);
-
-        return { success: true };
-    } catch (error) {
-        displayError(error.message);
-        return { success: false, message: error.message };
+    // 1. Dependency Check: Is it a fixed classroom for a teacher?
+    const ovisnostProfesor = profesori.find(
+      (p) => p.fiksna_ucionica_id === ucionicaId,
+    );
+    if (ovisnostProfesor) {
+      throw new Error(
+        `Nije moguće obrisati. Učionica je dodijeljena profesoru ${ovisnostProfesor.ime} ${ovisnostProfesor.prezime}.`,
+      );
     }
-}
 
+    // 2. Dependency Check: Is it the last room of a required type?
+    const ucionicaZaBrisanje = ucionice.find((u) => u.id === ucionicaId);
+    if (ucionicaZaBrisanje && ucionicaZaBrisanje.tipovi_id.length > 0) {
+      for (const tipId of ucionicaZaBrisanje.tipovi_id) {
+        // Find all subjects that require this specific type
+        const predmetiKojiTrebajuTip = predmeti.filter(
+          (p) => p.potreban_tip_ucionice_id === tipId,
+        );
+
+        if (predmetiKojiTrebajuTip.length > 0) {
+          // Check if any other classroom has this type
+          const drugeUcioniceSTimTipom = ucionice.filter(
+            (u) => u.id !== ucionicaId && u.tipovi_id.includes(tipId),
+          );
+
+          if (drugeUcioniceSTimTipom.length === 0) {
+            const nazivTipa = tipoviMapa.get(tipId) || `ID: ${tipId}`;
+            const nazivPredmeta = predmetiKojiTrebajuTip
+              .map((p) => p.naziv)
+              .join(", ");
+            throw new Error(
+              `Nije moguće obrisati. Ovo je zadnja učionica tipa "${nazivTipa}" koji je potreban za predmet(e): ${nazivPredmeta}.`,
+            );
+          }
+        }
+      }
+    }
+
+    // --- TODO: Future Dependency Check for kurikulum.json ---
+
+    // Proceed with deletion
+    const filtriraneUcionice = ucionice.filter((u) => u.id !== ucionicaId);
+
+    const result = await spremiJSON("ucionice.json", filtriraneUcionice);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError(error.message);
+    return { success: false, message: error.message };
+  }
+}
 
 // --- PREDMETI SPECIFIC FUNCTIONS ---
 
@@ -324,22 +371,24 @@ async function validirajIStvoriPredmet(modalContent, postojeciPodaci) {
     displayError("Predmet s tim nazivom već postoji.");
     return null;
   }
-  
+
   let potrebanTipUcioniceId = null;
   if (tipUcioniceNaziv) {
-      // For Predmeti, type MUST exist, so we only find, not create.
-      // We need a specific helper to find existing ID without creation.
-      const response = await fetch('tipoviUcionica.json');
-      const text = await response.text();
-      let tipovi = text ? JSON.parse(text) : [];
-      const postojeciTip = tipovi.find(t => t.naziv.toLowerCase() === tipUcioniceNaziv.toLowerCase());
+    // For Predmeti, type MUST exist, so we only find, not create.
+    // We need a specific helper to find existing ID without creation.
+    const response = await fetch("tipoviUcionica.json");
+    const text = await response.text();
+    let tipovi = text ? JSON.parse(text) : [];
+    const postojeciTip = tipovi.find(
+      (t) => t.naziv.toLowerCase() === tipUcioniceNaziv.toLowerCase(),
+    );
 
-      if (postojeciTip) {
-          potrebanTipUcioniceId = postojeciTip.id;
-      } else {
-          displayError("Odabrani tip učionice ne postoji. Odaberite s popisa.");
-          return null;
-      }
+    if (postojeciTip) {
+      potrebanTipUcioniceId = postojeciTip.id;
+    } else {
+      displayError("Odabrani tip učionice ne postoji. Odaberite s popisa.");
+      return null;
+    }
   }
 
   return {
@@ -355,15 +404,18 @@ async function validirajIStvoriPredmet(modalContent, postojeciPodaci) {
  */
 async function dodajNoviPredmet(modalContent) {
   try {
-    const response = await fetch('predmeti.json');
+    const response = await fetch("predmeti.json");
     const text = await response.text();
     const predmeti = text ? JSON.parse(text) : [];
 
-    const noviPrivremeniPredmet = await validirajIStvoriPredmet(modalContent, predmeti);
+    const noviPrivremeniPredmet = await validirajIStvoriPredmet(
+      modalContent,
+      predmeti,
+    );
 
     if (noviPrivremeniPredmet) {
       privremeniUnosi.predmeti.push(noviPrivremeniPredmet);
-      prikaziPrivremeneUnosePredmeti('predmeti'); // New function to display temp subjects
+      prikaziPrivremeneUnosePredmeti("predmeti"); // New function to display temp subjects
 
       modalContent.querySelector(".input-field input").value = ""; // Clear subject name
       modalContent.querySelector(".autocomplete-input").value = ""; // Clear type input
@@ -381,7 +433,7 @@ async function dodajNoviPredmet(modalContent) {
  */
 async function spremiKorakPredmeti() {
   try {
-    const response = await fetch('predmeti.json');
+    const response = await fetch("predmeti.json");
     const text = await response.text();
     let predmeti = text ? JSON.parse(text) : [];
 
@@ -400,7 +452,7 @@ async function spremiKorakPredmeti() {
       predmet.id = index + 1;
     });
 
-    const result = await spremiJSON('predmeti.json', kombiniraniPodaci);
+    const result = await spremiJSON("predmeti.json", kombiniraniPodaci);
 
     if (result.success) {
       privremeniUnosi.predmeti = [];
@@ -409,7 +461,6 @@ async function spremiKorakPredmeti() {
       displayError(result.message || "Došlo je do greške na serveru.");
       return { success: false, message: result.message };
     }
-
   } catch (error) {
     displayError("Greška pri spremanju: " + error.message);
     return { success: false, message: error.message };
@@ -423,43 +474,54 @@ async function spremiKorakPredmeti() {
  * @returns {Promise<object>} A result object.
  */
 async function urediPredmet(predmetId, noviPodaci) {
-    try {
-        const predmetiRes = await fetch('predmeti.json');
-        const predmetiText = await predmetiRes.text();
-        let predmeti = predmetiText ? JSON.parse(predmetiText) : [];
+  try {
+    const predmetiRes = await fetch("predmeti.json");
+    const predmetiText = await predmetiRes.text();
+    let predmeti = predmetiText ? JSON.parse(predmetiText) : [];
 
-        const index = predmeti.findIndex(p => p.id === predmetId);
-        if (index === -1) throw new Error("Predmet nije pronađen.");
-        
-        if (provjeriDupliNaziv(noviPodaci.naziv, predmeti.filter(p => p.id !== predmetId), [])) {
-             throw new Error("Predmet s tim nazivom već postoji.");
-        }
+    const index = predmeti.findIndex((p) => p.id === predmetId);
+    if (index === -1) throw new Error("Predmet nije pronađen.");
 
-        let potrebanTipUcioniceId = null;
-        if (noviPodaci.nazivTipaUcionice) {
-            const response = await fetch('tipoviUcionica.json');
-            const text = await response.text();
-            let tipovi = text ? JSON.parse(text) : [];
-            const postojeciTip = tipovi.find(t => t.naziv.toLowerCase() === noviPodaci.nazivTipaUcionice.toLowerCase());
-
-            if (postojeciTip) {
-                potrebanTipUcioniceId = postojeciTip.id;
-            } else {
-                throw new Error("Odabrani tip učionice ne postoji. Odaberite s popisa.");
-            }
-        }
-        
-        predmeti[index].naziv = noviPodaci.naziv;
-        predmeti[index].potreban_tip_ucionice_id = potrebanTipUcioniceId;
-
-        const result = await spremiJSON('predmeti.json', predmeti);
-        if (!result.success) throw new Error(result.message);
-
-        return { success: true };
-    } catch (error) {
-        displayError("Greška pri uređivanju: " + error.message);
-        return { success: false, message: error.message };
+    if (
+      provjeriDupliNaziv(
+        noviPodaci.naziv,
+        predmeti.filter((p) => p.id !== predmetId),
+        [],
+      )
+    ) {
+      throw new Error("Predmet s tim nazivom već postoji.");
     }
+
+    let potrebanTipUcioniceId = null;
+    if (noviPodaci.nazivTipaUcionice) {
+      const response = await fetch("tipoviUcionica.json");
+      const text = await response.text();
+      let tipovi = text ? JSON.parse(text) : [];
+      const postojeciTip = tipovi.find(
+        (t) =>
+          t.naziv.toLowerCase() === noviPodaci.nazivTipaUcionice.toLowerCase(),
+      );
+
+      if (postojeciTip) {
+        potrebanTipUcioniceId = postojeciTip.id;
+      } else {
+        throw new Error(
+          "Odabrani tip učionice ne postoji. Odaberite s popisa.",
+        );
+      }
+    }
+
+    predmeti[index].naziv = noviPodaci.naziv;
+    predmeti[index].potreban_tip_ucionice_id = potrebanTipUcioniceId;
+
+    const result = await spremiJSON("predmeti.json", predmeti);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError("Greška pri uređivanju: " + error.message);
+    return { success: false, message: error.message };
+  }
 }
 
 /**
@@ -468,43 +530,57 @@ async function urediPredmet(predmetId, noviPodaci) {
  * @returns {Promise<object>} A result object.
  */
 async function obrisiPredmet(predmetId) {
-    try {
-        // Fetch all necessary data in parallel
-        const [programRes, profesoriRes, predmetiRes] = await Promise.all([
-            fetch('program.json'),
-            fetch('profesori.json'),
-            fetch('predmeti.json')
-        ]);
-        
-        const programi = await programRes.text().then(text => text ? JSON.parse(text) : []);
-        const profesori = await profesoriRes.text().then(text => text ? JSON.parse(text) : []);
-        const predmeti = await predmetiRes.text().then(text => text ? JSON.parse(text) : []);
+  try {
+    // Fetch all necessary data in parallel
+    const [programRes, profesoriRes, predmetiRes] = await Promise.all([
+      fetch("program.json"),
+      fetch("profesori.json"),
+      fetch("predmeti.json"),
+    ]);
 
-        // 1. Dependency Check: Is it part of a program?
-        const ovisnostProgram = programi.find(p => p.popis_predmeta.some(item => item.predmet_id === predmetId));
-        if (ovisnostProgram) {
-            throw new Error(`Nije moguće obrisati. Predmet se koristi u programu "${ovisnostProgram.naziv}".`);
-        }
+    const programi = await programRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const profesori = await profesoriRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const predmeti = await predmetiRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
 
-        // 2. Dependency Check: Is it taught by a teacher?
-        const ovisnostProfesor = profesori.find(p => p.struka_predmeti_id.includes(predmetId));
-        if (ovisnostProfesor) {
-            throw new Error(`Nije moguće obrisati. Predmet je dodijeljen profesoru ${ovisnostProfesor.ime} ${ovisnostProfesor.prezime}.`);
-        }
-
-        // --- TODO: Future Dependency Check for kurikulum.json ---
-
-        // Proceed with deletion
-        const filtriraniPredmeti = predmeti.filter(p => p.id !== predmetId);
-
-        const result = await spremiJSON('predmeti.json', filtriraniPredmeti);
-        if (!result.success) throw new Error(result.message);
-
-        return { success: true };
-    } catch (error) {
-        displayError(error.message);
-        return { success: false, message: error.message };
+    // 1. Dependency Check: Is it part of a program?
+    const ovisnostProgram = programi.find((p) =>
+      p.popis_predmeta.some((item) => item.predmet_id === predmetId),
+    );
+    if (ovisnostProgram) {
+      throw new Error(
+        `Nije moguće obrisati. Predmet se koristi u programu "${ovisnostProgram.naziv}".`,
+      );
     }
+
+    // 2. Dependency Check: Is it taught by a teacher?
+    const ovisnostProfesor = profesori.find((p) =>
+      p.struka_predmeti_id.includes(predmetId),
+    );
+    if (ovisnostProfesor) {
+      throw new Error(
+        `Nije moguće obrisati. Predmet je dodijeljen profesoru ${ovisnostProfesor.ime} ${ovisnostProfesor.prezime}.`,
+      );
+    }
+
+    // --- TODO: Future Dependency Check for kurikulum.json ---
+
+    // Proceed with deletion
+    const filtriraniPredmeti = predmeti.filter((p) => p.id !== predmetId);
+
+    const result = await spremiJSON("predmeti.json", filtriraniPredmeti);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError(error.message);
+    return { success: false, message: error.message };
+  }
 }
 
 /**
@@ -512,37 +588,39 @@ async function obrisiPredmet(predmetId) {
  * @param {string} step The key for the privremeniUnosi object (e.g., 'predmeti').
  */
 async function prikaziPrivremeneUnosePredmeti(step) {
-    const display = document.querySelector(".new-items-display");
-    display.innerHTML = "";
+  const display = document.querySelector(".new-items-display");
+  display.innerHTML = "";
 
-    const response = await fetch('tipoviUcionica.json');
-    const text = await response.text();
-    const tipovi = text ? JSON.parse(text) : [];
-    const tipoviMapa = new Map(tipovi.map(t => [t.id, t.naziv]));
+  const response = await fetch("tipoviUcionica.json");
+  const text = await response.text();
+  const tipovi = text ? JSON.parse(text) : [];
+  const tipoviMapa = new Map(tipovi.map((t) => [t.id, t.naziv]));
 
-    privremeniUnosi[step].forEach((item, index) => {
-        const tag = document.createElement("div");
-        tag.classList.add("new-item-tag");
-        
-        const textSpan = document.createElement("span");
-        const nazivTipa = item.potreban_tip_ucionice_id ? tipoviMapa.get(item.potreban_tip_ucionice_id) : 'Nije specificiran';
-        const tipText = nazivTipa !== 'Nije specificiran' ? ` (Tip učionice: ${nazivTipa})` : "";
-        textSpan.textContent = item.naziv + tipText;
-        
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "X";
-        deleteBtn.classList.add("delete-temp-item-btn");
-        deleteBtn.onclick = () => {
-            privremeniUnosi[step].splice(index, 1);
-            prikaziPrivremeneUnosePredmeti(step);
-        };
+  privremeniUnosi[step].forEach((item, index) => {
+    const tag = document.createElement("div");
+    tag.classList.add("new-item-tag");
 
-        tag.appendChild(textSpan);
-        tag.appendChild(deleteBtn);
-        display.appendChild(tag);
-    });
+    const textSpan = document.createElement("span");
+    const nazivTipa = item.potreban_tip_ucionice_id
+      ? tipoviMapa.get(item.potreban_tip_ucionice_id)
+      : "Nije specificiran";
+    const tipText =
+      nazivTipa !== "Nije specificiran" ? ` (Tip učionice: ${nazivTipa})` : "";
+    textSpan.textContent = item.naziv + tipText;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "X";
+    deleteBtn.classList.add("delete-temp-item-btn");
+    deleteBtn.onclick = () => {
+      privremeniUnosi[step].splice(index, 1);
+      prikaziPrivremeneUnosePredmeti(step);
+    };
+
+    tag.appendChild(textSpan);
+    tag.appendChild(deleteBtn);
+    display.appendChild(tag);
+  });
 }
-
 
 // --- PROFESORI SPECIFIC FUNCTIONS ---
 
@@ -555,74 +633,84 @@ async function prikaziPrivremeneUnoseProfesori(step, allSubjects) {
   const display = document.querySelector(".new-items-display");
   display.innerHTML = "";
 
-  const subjectMap = new Map(allSubjects.map(s => [s.id, s.naziv]));
+  const subjectMap = new Map(allSubjects.map((s) => [s.id, s.naziv]));
 
   // Fetch classrooms to get names for fixed_classroom_id
-  const ucioniceResponse = await fetch('ucionice.json');
+  const ucioniceResponse = await fetch("ucionice.json");
   const ucioniceText = await ucioniceResponse.text();
   const allUcionice = ucioniceText ? JSON.parse(ucioniceText) : [];
-  const ucioniceMap = new Map(allUcionice.map(u => [u.id, u.naziv]));
+  const ucioniceMap = new Map(allUcionice.map((u) => [u.id, u.naziv]));
 
   // Helper to format unavailable times
   const formatirajNedostupnost = (nedostupanObjekt) => {
-      if (Object.keys(nedostupanObjekt).length === 0) {
-          return "";
-      }
+    if (Object.keys(nedostupanObjekt).length === 0) {
+      return "";
+    }
 
-      const dayNamesShort = {
-          1: "Pon", 2: "Uto", 3: "Sri", 4: "Čet", 5: "Pet"
-      };
+    const dayNamesShort = {
+      1: "Pon",
+      2: "Uto",
+      3: "Sri",
+      4: "Čet",
+      5: "Pet",
+    };
 
-      let parts = [];
-      for (const dayKey in nedostupanObjekt) {
-          const day = parseInt(dayKey);
-          const hours = nedostupanObjekt[dayKey];
-          if (hours.length === 7) { // Assuming 7 hours for a full day
-              parts.push(`${dayNamesShort[day]} (cijeli dan)`);
-          } else if (hours.length > 0) {
-              hours.sort((a, b) => a - b);
-              let ranges = [];
-              let start = hours[0];
-              let end = hours[0];
+    let parts = [];
+    for (const dayKey in nedostupanObjekt) {
+      const day = parseInt(dayKey);
+      const hours = nedostupanObjekt[dayKey];
+      if (hours.length === 7) {
+        // Assuming 7 hours for a full day
+        parts.push(`${dayNamesShort[day]} (cijeli dan)`);
+      } else if (hours.length > 0) {
+        hours.sort((a, b) => a - b);
+        let ranges = [];
+        let start = hours[0];
+        let end = hours[0];
 
-              for (let i = 1; i < hours.length; i++) {
-                  if (hours[i] === end + 1) {
-                      end = hours[i];
-                  } else {
-                      ranges.push(start === end ? `${start}.` : `${start}.-${end}.`);
-                      start = hours[i];
-                      end = hours[i];
-                  }
-              }
-              ranges.push(start === end ? `${start}.` : `${start}.-${end}.`);
-
-              parts.push(`${dayNamesShort[day]}: ${ranges.join(", ")} sat`);
+        for (let i = 1; i < hours.length; i++) {
+          if (hours[i] === end + 1) {
+            end = hours[i];
+          } else {
+            ranges.push(start === end ? `${start}.` : `${start}.-${end}.`);
+            start = hours[i];
+            end = hours[i];
           }
+        }
+        ranges.push(start === end ? `${start}.` : `${start}.-${end}.`);
+
+        parts.push(`${dayNamesShort[day]}: ${ranges.join(", ")} sat`);
       }
-      return `Nedostupan: ${parts.join("; ")}`;
+    }
+    return `Nedostupan: ${parts.join("; ")}`;
   };
 
   privremeniUnosi[step].forEach((item, index) => {
     const tag = document.createElement("div");
     tag.classList.add("new-item-tag");
-    
+
     const textSpan = document.createElement("span");
-    const subjectNames = item.struka_predmeti_id.map(id => subjectMap.get(id)).filter(Boolean).join(", ");
-    
-    let teacherInfo = `${item.ime} ${item.prezime} (${subjectNames || 'Nema predmeta'})`;
+    const subjectNames = item.struka_predmeti_id
+      .map((id) => subjectMap.get(id))
+      .filter(Boolean)
+      .join(", ");
+
+    let teacherInfo = `${item.ime} ${item.prezime} (${subjectNames || "Nema predmeta"})`;
 
     if (item.fiksna_ucionica_id) {
-        const ucionicaNaziv = ucioniceMap.get(item.fiksna_ucionica_id) || `ID:${item.fiksna_ucionica_id}`;
-        teacherInfo += `, Učionica: ${ucionicaNaziv}`;
+      const ucionicaNaziv =
+        ucioniceMap.get(item.fiksna_ucionica_id) ||
+        `ID:${item.fiksna_ucionica_id}`;
+      teacherInfo += `, Učionica: ${ucionicaNaziv}`;
     }
 
     const nedostupanString = formatirajNedostupnost(item.nedostupan);
     if (nedostupanString) {
-        teacherInfo += `, ${nedostupanString}`;
+      teacherInfo += `, ${nedostupanString}`;
     }
 
     textSpan.textContent = teacherInfo;
-    
+
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "X";
     deleteBtn.classList.add("delete-temp-item-btn");
@@ -644,7 +732,11 @@ async function prikaziPrivremeneUnoseProfesori(step, allSubjects) {
  * @param {Array} allSubjects - Array of all subjects to get subject IDs.
  * @returns {Promise<object|null>} A new teacher object or null if validation fails.
  */
-async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects) {
+async function validirajIStvoriProfesora(
+  modalContent,
+  allTeachers,
+  allSubjects,
+) {
   const imeInput = modalContent.querySelector("div:nth-of-type(1) input"); // First simple input
   const prezimeInput = modalContent.querySelector("div:nth-of-type(2) input"); // Second simple input
   const ime = imeInput.value.trim();
@@ -658,16 +750,24 @@ async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects)
 
   // No duplicate name check for teachers as per requirements
 
-  const subjectMap = new Map(allSubjects.map(s => [s.naziv.toLowerCase(), s.id]));
+  const subjectMap = new Map(
+    allSubjects.map((s) => [s.naziv.toLowerCase(), s.id]),
+  );
   const strukaPredmetiId = selectedSubjects
-    .map(name => subjectMap.get(name.toLowerCase()))
+    .map((name) => subjectMap.get(name.toLowerCase()))
     .filter(Boolean); // Filter out any subjects not found
 
   // Process unavailable times
-  const unavailableTimesToggle = modalContent.querySelector('#teacher-unavailable-toggle');
+  const unavailableTimesToggle = modalContent.querySelector(
+    "#teacher-unavailable-toggle",
+  );
   let nedostupanObjekt = {};
-  if (unavailableTimesToggle && unavailableTimesToggle.checked && modalContent.currentUnavailableTimes) {
-    modalContent.currentUnavailableTimes.forEach(entry => {
+  if (
+    unavailableTimesToggle &&
+    unavailableTimesToggle.checked &&
+    modalContent.currentUnavailableTimes
+  ) {
+    modalContent.currentUnavailableTimes.forEach((entry) => {
       let hours = [];
       if (entry.fullDay) {
         hours = Array.from({ length: 7 }, (_, i) => i + 1); // Hours 1 to 7
@@ -681,28 +781,38 @@ async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects)
   }
 
   // Process fixed classroom
-  const teacherFixedClassroomToggle = modalContent.querySelector('#teacher-fixed-classroom-toggle');
+  const teacherFixedClassroomToggle = modalContent.querySelector(
+    "#teacher-fixed-classroom-toggle",
+  );
   let fiksnaUcionicaId = null;
   if (teacherFixedClassroomToggle && teacherFixedClassroomToggle.checked) {
-      const fixedClassroomAutocompleteInput = modalContent.querySelector('.fixed-classroom-section .autocomplete-input');
-      const fiksnaUcionicaNaziv = fixedClassroomAutocompleteInput.value.trim();
+    const fixedClassroomAutocompleteInput = modalContent.querySelector(
+      ".fixed-classroom-section .autocomplete-input",
+    );
+    const fiksnaUcionicaNaziv = fixedClassroomAutocompleteInput.value.trim();
 
-      if (fiksnaUcionicaNaziv) {
-          const ucioniceResponse = await fetch('ucionice.json');
-          const ucioniceText = await ucioniceResponse.text();
-          let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
-          const postojecaUcionica = ucionice.find(u => u.naziv.toLowerCase() === fiksnaUcionicaNaziv.toLowerCase());
+    if (fiksnaUcionicaNaziv) {
+      const ucioniceResponse = await fetch("ucionice.json");
+      const ucioniceText = await ucioniceResponse.text();
+      let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+      const postojecaUcionica = ucionice.find(
+        (u) => u.naziv.toLowerCase() === fiksnaUcionicaNaziv.toLowerCase(),
+      );
 
-          if (postojecaUcionica) {
-              fiksnaUcionicaId = postojecaUcionica.id;
-          } else {
-              displayError("Odabrana fiksna učionica ne postoji. Odaberite s popisa.");
-              return null;
-          }
+      if (postojecaUcionica) {
+        fiksnaUcionicaId = postojecaUcionica.id;
       } else {
-          displayError("Ako je označeno, naziv fiksne učionice ne može biti prazan.");
-          return null;
+        displayError(
+          "Odabrana fiksna učionica ne postoji. Odaberite s popisa.",
+        );
+        return null;
       }
+    } else {
+      displayError(
+        "Ako je označeno, naziv fiksne učionice ne može biti prazan.",
+      );
+      return null;
+    }
   }
 
   return {
@@ -721,44 +831,66 @@ async function validirajIStvoriProfesora(modalContent, allTeachers, allSubjects)
  */
 async function dodajNovogProfesora(modalContent) {
   try {
-    const response = await fetch('profesori.json');
+    const response = await fetch("profesori.json");
     const text = await response.text();
     const allTeachers = text ? JSON.parse(text) : [];
 
-    const subjectsResponse = await fetch('predmeti.json');
+    const subjectsResponse = await fetch("predmeti.json");
     const subjectsText = await subjectsResponse.text();
     const allSubjects = subjectsText ? JSON.parse(subjectsText) : [];
 
-    const noviPrivremeniProfesor = await validirajIStvoriProfesora(modalContent, allTeachers, allSubjects);
+    const noviPrivremeniProfesor = await validirajIStvoriProfesora(
+      modalContent,
+      allTeachers,
+      allSubjects,
+    );
 
     if (noviPrivremeniProfesor) {
       privremeniUnosi.profesori.push(noviPrivremeniProfesor);
-      prikaziPrivremeneUnoseProfesori('profesori', allSubjects);
+      prikaziPrivremeneUnoseProfesori("profesori", allSubjects);
 
       modalContent.querySelector("#teacher-ime").value = ""; // Clear ime
       modalContent.querySelector("#teacher-prezime").value = ""; // Clear prezime
-      modalContent.querySelector(".multi-select-autocomplete .autocomplete-input").value = ""; // Clear subject input
+      modalContent.querySelector(
+        ".multi-select-autocomplete .autocomplete-input",
+      ).value = ""; // Clear subject input
       modalContent.selectedSubjectNames = []; // Clear selected subjects
       modalContent.querySelector(".selected-tags-container").innerHTML = ""; // Clear tags display
 
       // Reset unavailable times UI
-      const teacherUnavailableToggle = modalContent.querySelector('#teacher-unavailable-toggle');
-      const unavailableTimesSection = modalContent.querySelector('.unavailable-times-section');
-      const addedUnavailableTimesDisplay = modalContent.querySelector('.added-unavailable-times-display');
-      
+      const teacherUnavailableToggle = modalContent.querySelector(
+        "#teacher-unavailable-toggle",
+      );
+      const unavailableTimesSection = modalContent.querySelector(
+        ".unavailable-times-section",
+      );
+      const addedUnavailableTimesDisplay = modalContent.querySelector(
+        ".added-unavailable-times-display",
+      );
+
       if (teacherUnavailableToggle) teacherUnavailableToggle.checked = false;
-      if (unavailableTimesSection) unavailableTimesSection.style.display = 'none';
-      if (addedUnavailableTimesDisplay) addedUnavailableTimesDisplay.innerHTML = '';
+      if (unavailableTimesSection)
+        unavailableTimesSection.style.display = "none";
+      if (addedUnavailableTimesDisplay)
+        addedUnavailableTimesDisplay.innerHTML = "";
       modalContent.currentUnavailableTimes = []; // Clear internal array
 
       // Reset fixed classroom UI
-      const teacherFixedClassroomToggle = modalContent.querySelector('#teacher-fixed-classroom-toggle');
-      const fixedClassroomSection = modalContent.querySelector('.fixed-classroom-section');
-      const fixedClassroomAutocompleteInput = modalContent.querySelector('.fixed-classroom-section .autocomplete-input');
+      const teacherFixedClassroomToggle = modalContent.querySelector(
+        "#teacher-fixed-classroom-toggle",
+      );
+      const fixedClassroomSection = modalContent.querySelector(
+        ".fixed-classroom-section",
+      );
+      const fixedClassroomAutocompleteInput = modalContent.querySelector(
+        ".fixed-classroom-section .autocomplete-input",
+      );
 
-      if (teacherFixedClassroomToggle) teacherFixedClassroomToggle.checked = false;
-      if (fixedClassroomSection) fixedClassroomSection.style.display = 'none';
-      if (fixedClassroomAutocompleteInput) fixedClassroomAutocompleteInput.value = '';
+      if (teacherFixedClassroomToggle)
+        teacherFixedClassroomToggle.checked = false;
+      if (fixedClassroomSection) fixedClassroomSection.style.display = "none";
+      if (fixedClassroomAutocompleteInput)
+        fixedClassroomAutocompleteInput.value = "";
 
       modalContent.querySelector("div:nth-of-type(1) input").focus();
     }
@@ -773,7 +905,7 @@ async function dodajNovogProfesora(modalContent) {
  */
 async function spremiKorakProfesori() {
   try {
-    const response = await fetch('profesori.json');
+    const response = await fetch("profesori.json");
     const text = await response.text();
     let allTeachers = text ? JSON.parse(text) : [];
 
@@ -792,7 +924,7 @@ async function spremiKorakProfesori() {
       profesor.id = index + 1;
     });
 
-    const result = await spremiJSON('profesori.json', kombiniraniPodaci);
+    const result = await spremiJSON("profesori.json", kombiniraniPodaci);
 
     if (result.success) {
       privremeniUnosi.profesori = [];
@@ -801,7 +933,6 @@ async function spremiKorakProfesori() {
       displayError(result.message || "Došlo je do greške na serveru.");
       return { success: false, message: result.message };
     }
-
   } catch (error) {
     displayError("Greška pri spremanju: " + error.message);
     return { success: false, message: error.message };
@@ -817,21 +948,23 @@ async function spremiKorakProfesori() {
  */
 async function urediProfesora(teacherId, newTeacherData, allSubjects) {
   try {
-    const profesoriRes = await fetch('profesori.json');
+    const profesoriRes = await fetch("profesori.json");
     const profesoriText = await profesoriRes.text();
     let profesori = profesoriText ? JSON.parse(profesoriText) : [];
 
-    const index = profesori.findIndex(p => p.id === teacherId);
+    const index = profesori.findIndex((p) => p.id === teacherId);
     if (index === -1) throw new Error("Profesor nije pronađen.");
 
     // Ensure there is at least one subject
     if (newTeacherData.selectedSubjectNames.length === 0) {
-        throw new Error("Profesor mora imati barem jedan predmet.");
+      throw new Error("Profesor mora imati barem jedan predmet.");
     }
 
-    const subjectMap = new Map(allSubjects.map(s => [s.naziv.toLowerCase(), s.id]));
+    const subjectMap = new Map(
+      allSubjects.map((s) => [s.naziv.toLowerCase(), s.id]),
+    );
     const strukaPredmetiId = newTeacherData.selectedSubjectNames
-      .map(name => subjectMap.get(name.toLowerCase()))
+      .map((name) => subjectMap.get(name.toLowerCase()))
       .filter(Boolean);
 
     profesori[index].ime = newTeacherData.ime;
@@ -840,7 +973,7 @@ async function urediProfesora(teacherId, newTeacherData, allSubjects) {
     profesori[index].nedostupan = newTeacherData.nedostupan || {};
     profesori[index].fiksna_ucionica_id = newTeacherData.fiksna_ucionica_id; // Save the fixed classroom ID
 
-    const result = await spremiJSON('profesori.json', profesori);
+    const result = await spremiJSON("profesori.json", profesori);
     if (!result.success) throw new Error(result.message);
 
     return { success: true };
@@ -858,25 +991,29 @@ async function urediProfesora(teacherId, newTeacherData, allSubjects) {
 async function obrisiProfesora(teacherId) {
   try {
     // Dependency Check: kurikulum.json (for assigned lessons)
-    const kurikulumRes = await fetch('kurikulum.json');
+    const kurikulumRes = await fetch("kurikulum.json");
     const kurikulumText = await kurikulumRes.text();
     const kurikulum = kurikulumText ? JSON.parse(kurikulumText) : [];
 
-    const ovisnostKurikulum = kurikulum.find(a => a.profesor_id === teacherId);
+    const ovisnostKurikulum = kurikulum.find(
+      (a) => a.profesor_id === teacherId,
+    );
     if (ovisnostKurikulum) {
-      throw new Error(`Nije moguće obrisati. Profesor je dodijeljen u kurikulumu.`);
+      throw new Error(
+        `Nije moguće obrisati. Profesor je dodijeljen u kurikulumu.`,
+      );
     }
 
     // Dependency Check: profesori.json (for fiksna_ucionica_id - though this is a self-reference,
     // it's checked when deleting a classroom, not a teacher) - No direct check needed here.
 
-    const profesoriRes = await fetch('profesori.json');
+    const profesoriRes = await fetch("profesori.json");
     const profesoriText = await profesoriRes.text();
     let profesori = profesoriText ? JSON.parse(profesoriText) : [];
 
-    const filtriraniProfesori = profesori.filter(p => p.id !== teacherId);
+    const filtriraniProfesori = profesori.filter((p) => p.id !== teacherId);
 
-    const result = await spremiJSON('profesori.json', filtriraniProfesori);
+    const result = await spremiJSON("profesori.json", filtriraniProfesori);
     if (!result.success) throw new Error(result.message);
 
     return { success: true };
@@ -893,28 +1030,28 @@ async function obrisiProfesora(teacherId) {
  * @param {string} step - The key for privremeniUnosi ('razredi').
  */
 function prikaziPrivremeneUnoseRazredi(step) {
-    const display = document.querySelector(".new-items-display");
-    display.innerHTML = "";
+  const display = document.querySelector(".new-items-display");
+  display.innerHTML = "";
 
-    privremeniUnosi[step].forEach((item, index) => {
-        const tag = document.createElement("div");
-        tag.classList.add("new-item-tag");
-        
-        const textSpan = document.createElement("span");
-        textSpan.textContent = `Odjeljenje: ${item.oznaka} (1-${item.godine}. godina)`;
-        
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "X";
-        deleteBtn.classList.add("delete-temp-item-btn");
-        deleteBtn.onclick = () => {
-            privremeniUnosi[step].splice(index, 1);
-            prikaziPrivremeneUnoseRazredi(step);
-        };
+  privremeniUnosi[step].forEach((item, index) => {
+    const tag = document.createElement("div");
+    tag.classList.add("new-item-tag");
 
-        tag.appendChild(textSpan);
-        tag.appendChild(deleteBtn);
-        display.appendChild(tag);
-    });
+    const textSpan = document.createElement("span");
+    textSpan.textContent = `Odjeljenje: ${item.oznaka} (1-${item.godine}. godina)`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "X";
+    deleteBtn.classList.add("delete-temp-item-btn");
+    deleteBtn.onclick = () => {
+      privremeniUnosi[step].splice(index, 1);
+      prikaziPrivremeneUnoseRazredi(step);
+    };
+
+    tag.appendChild(textSpan);
+    tag.appendChild(deleteBtn);
+    display.appendChild(tag);
+  });
 }
 
 /**
@@ -922,42 +1059,46 @@ function prikaziPrivremeneUnoseRazredi(step) {
  * @param {HTMLElement} modalContent - The modal's form content element.
  */
 async function dodajNovoOdjeljenje(modalContent) {
-    const oznakaInput = modalContent.querySelector("#class-section-identifier");
-    const godineInput = modalContent.querySelector("#class-years-count");
-    const oznaka = oznakaInput.value.trim();
-    const godine = parseInt(godineInput.value, 10);
+  const oznakaInput = modalContent.querySelector("#class-section-identifier");
+  const godineInput = modalContent.querySelector("#class-years-count");
+  const oznaka = oznakaInput.value.trim();
+  const godine = parseInt(godineInput.value, 10);
 
-    if (!oznaka) {
-        return displayError("Oznaka odjeljenja ne može biti prazna.");
+  if (!oznaka) {
+    return displayError("Oznaka odjeljenja ne može biti prazna.");
+  }
+  if (isNaN(godine) || godine < 1 || godine > 8) {
+    return displayError("Broj godina mora biti između 1 i 8.");
+  }
+
+  try {
+    const response = await fetch("razredi.json");
+    const text = await response.text();
+    const postojeciRazredi = text ? JSON.parse(text) : [];
+
+    // Check for uniqueness in both existing and temporary data
+    const vecPostoji =
+      postojeciRazredi.some(
+        (r) => r.odjeljenje.toLowerCase() === oznaka.toLowerCase(),
+      ) ||
+      privremeniUnosi.razredi.some(
+        (r) => r.oznaka.toLowerCase() === oznaka.toLowerCase(),
+      );
+
+    if (vecPostoji) {
+      return displayError(`Odjeljenje s oznakom "${oznaka}" već postoji.`);
     }
-    if (isNaN(godine) || godine < 1 || godine > 8) {
-        return displayError("Broj godina mora biti između 1 i 8.");
-    }
 
-    try {
-        const response = await fetch('razredi.json');
-        const text = await response.text();
-        const postojeciRazredi = text ? JSON.parse(text) : [];
+    privremeniUnosi.razredi.push({ oznaka, godine });
+    prikaziPrivremeneUnoseRazredi("razredi");
 
-        // Check for uniqueness in both existing and temporary data
-        const vecPostoji = postojeciRazredi.some(r => r.odjeljenje.toLowerCase() === oznaka.toLowerCase()) ||
-                           privremeniUnosi.razredi.some(r => r.oznaka.toLowerCase() === oznaka.toLowerCase());
-
-        if (vecPostoji) {
-            return displayError(`Odjeljenje s oznakom "${oznaka}" već postoji.`);
-        }
-
-        privremeniUnosi.razredi.push({ oznaka, godine });
-        prikaziPrivremeneUnoseRazredi('razredi');
-
-        // Clear inputs
-        oznakaInput.value = "";
-        godineInput.value = "4";
-        oznakaInput.focus();
-
-    } catch (error) {
-        displayError("Greška pri provjeri postojećih razreda: " + error.message);
-    }
+    // Clear inputs
+    oznakaInput.value = "";
+    godineInput.value = "4";
+    oznakaInput.focus();
+  } catch (error) {
+    displayError("Greška pri provjeri postojećih razreda: " + error.message);
+  }
 }
 
 /**
@@ -965,52 +1106,51 @@ async function dodajNovoOdjeljenje(modalContent) {
  * @returns {Promise<object>} A result object { success: true/false }.
  */
 async function spremiKorakRazredi() {
-    try {
-        const response = await fetch('razredi.json');
-        const text = await response.text();
-        let postojeciRazredi = text ? JSON.parse(text) : [];
+  try {
+    const response = await fetch("razredi.json");
+    const text = await response.text();
+    let postojeciRazredi = text ? JSON.parse(text) : [];
 
-        if (privremeniUnosi.razredi.length === 0 && postojeciRazredi.length === 0) {
-            displayError("Nema unesenih razreda.");
-            return { success: false, message: "Nema unesenih razreda." };
-        }
-        if (privremeniUnosi.razredi.length === 0) {
-            return { success: true }; // Nothing new to save
-        }
-
-        const noviRazredi = [];
-        privremeniUnosi.razredi.forEach(odjeljenje => {
-            for (let i = 1; i <= odjeljenje.godine; i++) {
-                noviRazredi.push({
-                    id: -1, // Placeholder ID
-                    godina: i,
-                    odjeljenje: odjeljenje.oznaka,
-                    oznaka: `${i}.${odjeljenje.oznaka}`
-                });
-            }
-        });
-
-        let kombiniraniPodaci = [...postojeciRazredi, ...noviRazredi];
-
-        // Re-assign all IDs to ensure they are unique and sequential
-        kombiniraniPodaci.forEach((razred, index) => {
-            razred.id = index + 1;
-        });
-
-        const result = await spremiJSON('razredi.json', kombiniraniPodaci);
-
-        if (result.success) {
-            privremeniUnosi.razredi = []; // Clear temporary entries on successful save
-            return { success: true };
-        } else {
-            displayError(result.message || "Došlo je do greške na serveru.");
-            return { success: false, message: result.message };
-        }
-
-    } catch (error) {
-        displayError("Greška pri spremanju razreda: " + error.message);
-        return { success: false, message: error.message };
+    if (privremeniUnosi.razredi.length === 0 && postojeciRazredi.length === 0) {
+      displayError("Nema unesenih razreda.");
+      return { success: false, message: "Nema unesenih razreda." };
     }
+    if (privremeniUnosi.razredi.length === 0) {
+      return { success: true }; // Nothing new to save
+    }
+
+    const noviRazredi = [];
+    privremeniUnosi.razredi.forEach((odjeljenje) => {
+      for (let i = 1; i <= odjeljenje.godine; i++) {
+        noviRazredi.push({
+          id: -1, // Placeholder ID
+          godina: i,
+          odjeljenje: odjeljenje.oznaka,
+          oznaka: `${i}.${odjeljenje.oznaka}`,
+        });
+      }
+    });
+
+    let kombiniraniPodaci = [...postojeciRazredi, ...noviRazredi];
+
+    // Re-assign all IDs to ensure they are unique and sequential
+    kombiniraniPodaci.forEach((razred, index) => {
+      razred.id = index + 1;
+    });
+
+    const result = await spremiJSON("razredi.json", kombiniraniPodaci);
+
+    if (result.success) {
+      privremeniUnosi.razredi = []; // Clear temporary entries on successful save
+      return { success: true };
+    } else {
+      displayError(result.message || "Došlo je do greške na serveru.");
+      return { success: false, message: result.message };
+    }
+  } catch (error) {
+    displayError("Greška pri spremanju razreda: " + error.message);
+    return { success: false, message: error.message };
+  }
 }
 
 /**
@@ -1019,30 +1159,32 @@ async function spremiKorakRazredi() {
  * @returns {Promise<object>} A result object.
  */
 async function obrisiOdjeljenje(odjeljenjeOznaka) {
-    try {
-        // TODO: Add dependency checks for kurikulum.json
-        // const kurikulumRes = await fetch('kurikulum.json');
-        // ... find if any razred.id from this odjeljenje is used.
-        
-        const response = await fetch('razredi.json');
-        const text = await response.text();
-        let razredi = text ? JSON.parse(text) : [];
+  try {
+    // TODO: Add dependency checks for kurikulum.json
+    // const kurikulumRes = await fetch('kurikulum.json');
+    // ... find if any razred.id from this odjeljenje is used.
 
-        const filtriraniRazredi = razredi.filter(r => r.odjeljenje.toLowerCase() !== odjeljenjeOznaka.toLowerCase());
+    const response = await fetch("razredi.json");
+    const text = await response.text();
+    let razredi = text ? JSON.parse(text) : [];
 
-        // Re-assign IDs
-        filtriraniRazredi.forEach((razred, index) => {
-            razred.id = index + 1;
-        });
+    const filtriraniRazredi = razredi.filter(
+      (r) => r.odjeljenje.toLowerCase() !== odjeljenjeOznaka.toLowerCase(),
+    );
 
-        const result = await spremiJSON('razredi.json', filtriraniRazredi);
-        if (!result.success) throw new Error(result.message);
+    // Re-assign IDs
+    filtriraniRazredi.forEach((razred, index) => {
+      razred.id = index + 1;
+    });
 
-        return { success: true };
-    } catch (error) {
-        displayError(error.message);
-        return { success: false };
-    }
+    const result = await spremiJSON("razredi.json", filtriraniRazredi);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError(error.message);
+    return { success: false };
+  }
 }
 
 /**
@@ -1053,45 +1195,51 @@ async function obrisiOdjeljenje(odjeljenjeOznaka) {
  * @returns {Promise<object>} A result object.
  */
 async function urediOdjeljenje(staraOznaka, novaOznaka, noveGodine) {
-    try {
-        const response = await fetch('razredi.json');
-        const text = await response.text();
-        let razredi = text ? JSON.parse(text) : [];
+  try {
+    const response = await fetch("razredi.json");
+    const text = await response.text();
+    let razredi = text ? JSON.parse(text) : [];
 
-        // Check if the new name already exists (and it's not the same as the old one)
-        if (staraOznaka.toLowerCase() !== novaOznaka.toLowerCase()) {
-            if (razredi.some(r => r.odjeljenje.toLowerCase() === novaOznaka.toLowerCase())) {
-                throw new Error(`Odjeljenje s oznakom "${novaOznaka}" već postoji.`);
-            }
-        }
-        
-        // Remove old entries for the section
-        let ostatakRazreda = razredi.filter(r => r.odjeljenje.toLowerCase() !== staraOznaka.toLowerCase());
-        
-        // Create new entries
-        const noviRazredi = [];
-        for (let i = 1; i <= noveGodine; i++) {
-            noviRazredi.push({
-                id: -1, // Placeholder
-                godina: i,
-                odjeljenje: novaOznaka,
-                oznaka: `${i}.${novaOznaka}`
-            });
-        }
-        
-        let kombiniraniPodaci = [...ostatakRazreda, ...noviRazredi];
-
-        // Re-assign all IDs
-        kombiniraniPodaci.forEach((razred, index) => {
-            razred.id = index + 1;
-        });
-        
-        const result = await spremiJSON('razredi.json', kombiniraniPodaci);
-        if (!result.success) throw new Error(result.message);
-
-        return { success: true };
-    } catch (error) {
-        displayError("Greška pri uređivanju: " + error.message);
-        return { success: false, message: error.message };
+    // Check if the new name already exists (and it's not the same as the old one)
+    if (staraOznaka.toLowerCase() !== novaOznaka.toLowerCase()) {
+      if (
+        razredi.some(
+          (r) => r.odjeljenje.toLowerCase() === novaOznaka.toLowerCase(),
+        )
+      ) {
+        throw new Error(`Odjeljenje s oznakom "${novaOznaka}" već postoji.`);
+      }
     }
+
+    // Remove old entries for the section
+    let ostatakRazreda = razredi.filter(
+      (r) => r.odjeljenje.toLowerCase() !== staraOznaka.toLowerCase(),
+    );
+
+    // Create new entries
+    const noviRazredi = [];
+    for (let i = 1; i <= noveGodine; i++) {
+      noviRazredi.push({
+        id: -1, // Placeholder
+        godina: i,
+        odjeljenje: novaOznaka,
+        oznaka: `${i}.${novaOznaka}`,
+      });
+    }
+
+    let kombiniraniPodaci = [...ostatakRazreda, ...noviRazredi];
+
+    // Re-assign all IDs
+    kombiniraniPodaci.forEach((razred, index) => {
+      razred.id = index + 1;
+    });
+
+    const result = await spremiJSON("razredi.json", kombiniraniPodaci);
+    if (!result.success) throw new Error(result.message);
+
+    return { success: true };
+  } catch (error) {
+    displayError("Greška pri uređivanju: " + error.message);
+    return { success: false, message: error.message };
+  }
 }

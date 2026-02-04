@@ -95,20 +95,23 @@ This section of the documentation describes the purpose of each file within the 
 - **`upraviteljPrijedloga.js`:** A generic module for fetching and processing data:
   - `fetchSuggestions(fileName, propertyExtractor)`: Fetches a JSON file and extracts unique values of a specific property for use as suggestions.
 - **`koraciUpravitelj.js`:** Contains specific data management logic (validation, saving, editing, deleting) for each step, along with some generic helper functions:
-  - `temporaryEntries`: A global object for storing temporarily added items before final saving (now includes `profesori`).
+  - `temporaryEntries`: A global object for storing temporarily added items before final saving (now includes `profesori` and `razredi`).
   - `checkDuplicateName(...)`: A generic function for checking duplicate names.
   - `findOrCreateId(fileName, itemName, nameField)`: A generic function that finds an item's ID by name in any JSON file, or creates a new item and returns its ID if it doesn't exist.
   - **Classroom-specific functions:** `displayTemporaryClassroomEntries`, `validateAndCreateClassroom`, `addClassroomTemporarily`, `saveClassroomStep`, `editClassroom`, `deleteClassroom`.
   - **Subject-specific functions:** `validateAndCreateSubject`, `addSubjectTemporarily`, `saveSubjectStep`, `editSubject`, `deleteSubject`, `displayTemporarySubjectEntries`.
   - **Teacher-specific functions:** `displayTemporaryTeacherEntries`, `validateAndCreateTeacher`, `addTeacherTemporarily`, `saveTeacherStep`, `editTeacher`, `deleteTeacher`.
+  - **Class-specific functions:** `prikaziPrivremeneUnoseRazredi`, `dodajNovoOdjeljenje`, `spremiKorakRazredi`, `obrisiOdjeljenje`, `urediOdjeljenje`.
 - **`korakGeneriraj.js`:** Responsible for building the dynamic UI (forms) for each step within the modal window.
   - `displayClassroomStep(modalBody)`: Builds the form for entering classrooms.
   - `displaySubjectStep(modalBody)`: Builds the form for entering subjects.
   - `displayTeacherStep(modalBody)`: Builds the form for entering teachers (including multi-select subjects).
+  - `prikaziKorakRazredi(modalBody)`: Builds the form for entering class sections.
 - **`korakPrikaziDodano.js`:** Responsible for rendering and managing interactions (editing/deleting) with existing data in the right-hand column of the modal window.
   - **Classrooms:** `displayExistingClassrooms`, `renderClassroomDisplayMode`, `renderClassroomEditMode`.
   - **Subjects:** `displayExistingSubjects`, `renderSubjectDisplayMode`, `renderSubjectEditMode`.
   - **Teachers:** `displayExistingTeachers`, `renderTeacherDisplayMode`, `renderTeacherEditMode`.
+  - **Classes:** `prikaziPostojeceRazrede`, `renderRazredDisplayMode`, `renderRazredEditMode`.
 
 #### **4. PHP Files (`server/` directory)**
 
