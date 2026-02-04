@@ -244,31 +244,58 @@ async function urediUcionicu(ucionicaId, noviPodaci) {
  */
 async function obrisiUcionicu(ucionicaId) {
     try {
-        // 1. Dependency Check
-        const profesoriRes = await fetch('profesori.json');
-        const profesoriText = await profesoriRes.text();
-        const profesori = profesoriText ? JSON.parse(profesoriText) : [];
+        // Fetch all necessary data in parallel
+        const [profesoriRes, ucioniceRes, predmetiRes, tipoviRes] = await Promise.all([
+            fetch('profesori.json'),
+            fetch('ucionice.json'),
+            fetch('predmeti.json'),
+            fetch('tipoviUcionica.json')
+        ]);
 
-        const ovisnost = profesori.find(p => p.fiksna_ucionica_id === ucionicaId);
-        if (ovisnost) {
-            throw new Error(`Nije moguće obrisati. Učionica je dodijeljena profesoru ${ovisnost.ime} ${ovisnost.prezime}.`);
+        const profesori = await profesoriRes.text().then(text => text ? JSON.parse(text) : []);
+        const ucionice = await ucioniceRes.text().then(text => text ? JSON.parse(text) : []);
+        const predmeti = await predmetiRes.text().then(text => text ? JSON.parse(text) : []);
+        const tipovi = await tipoviRes.text().then(text => text ? JSON.parse(text) : []);
+        const tipoviMapa = new Map(tipovi.map(t => [t.id, t.naziv]));
+
+        // 1. Dependency Check: Is it a fixed classroom for a teacher?
+        const ovisnostProfesor = profesori.find(p => p.fiksna_ucionica_id === ucionicaId);
+        if (ovisnostProfesor) {
+            throw new Error(`Nije moguće obrisati. Učionica je dodijeljena profesoru ${ovisnostProfesor.ime} ${ovisnostProfesor.prezime}.`);
         }
 
-        // 2. Deletion
-        const ucioniceRes = await fetch('ucionice.json');
-        const ucioniceText = await ucioniceRes.text();
-        let ucionice = ucioniceText ? JSON.parse(ucioniceText) : [];
+        // 2. Dependency Check: Is it the last room of a required type?
+        const ucionicaZaBrisanje = ucionice.find(u => u.id === ucionicaId);
+        if (ucionicaZaBrisanje && ucionicaZaBrisanje.tipovi_id.length > 0) {
+            for (const tipId of ucionicaZaBrisanje.tipovi_id) {
+                // Find all subjects that require this specific type
+                const predmetiKojiTrebajuTip = predmeti.filter(p => p.potreban_tip_ucionice_id === tipId);
 
+                if (predmetiKojiTrebajuTip.length > 0) {
+                    // Check if any other classroom has this type
+                    const drugeUcioniceSTimTipom = ucionice.filter(u => u.id !== ucionicaId && u.tipovi_id.includes(tipId));
+                    
+                    if (drugeUcioniceSTimTipom.length === 0) {
+                        const nazivTipa = tipoviMapa.get(tipId) || `ID: ${tipId}`;
+                        const nazivPredmeta = predmetiKojiTrebajuTip.map(p => p.naziv).join(', ');
+                        throw new Error(`Nije moguće obrisati. Ovo je zadnja učionica tipa "${nazivTipa}" koji je potreban za predmet(e): ${nazivPredmeta}.`);
+                    }
+                }
+            }
+        }
+        
+        // --- TODO: Future Dependency Check for kurikulum.json ---
+
+        // Proceed with deletion
         const filtriraneUcionice = ucionice.filter(u => u.id !== ucionicaId);
 
-        // 3. Save
         const result = await spremiJSON('ucionice.json', filtriraneUcionice);
         if (!result.success) throw new Error(result.message);
 
         return { success: true };
     } catch (error) {
         displayError(error.message);
-        return { success: false };
+        return { success: false, message: error.message };
     }
 }
 
@@ -441,23 +468,32 @@ async function urediPredmet(predmetId, noviPodaci) {
  */
 async function obrisiPredmet(predmetId) {
     try {
-        // Dependency Check: Check program.json and kurikulum.json
-        // For now, a placeholder check for program.json
-        const programRes = await fetch('program.json');
-        const programText = await programRes.text();
-        const programi = programText ? JSON.parse(programText) : [];
+        // Fetch all necessary data in parallel
+        const [programRes, profesoriRes, predmetiRes] = await Promise.all([
+            fetch('program.json'),
+            fetch('profesori.json'),
+            fetch('predmeti.json')
+        ]);
+        
+        const programi = await programRes.text().then(text => text ? JSON.parse(text) : []);
+        const profesori = await profesoriRes.text().then(text => text ? JSON.parse(text) : []);
+        const predmeti = await predmetiRes.text().then(text => text ? JSON.parse(text) : []);
 
+        // 1. Dependency Check: Is it part of a program?
         const ovisnostProgram = programi.find(p => p.popis_predmeta.some(item => item.predmet_id === predmetId));
         if (ovisnostProgram) {
-            throw new Error(`Nije moguće obrisati. Predmet je spomenut u programu "${ovisnostProgram.naziv}".`);
+            throw new Error(`Nije moguće obrisati. Predmet se koristi u programu "${ovisnostProgram.naziv}".`);
         }
 
-        // Add more dependency checks here (e.g., kurikulum.json)
+        // 2. Dependency Check: Is it taught by a teacher?
+        const ovisnostProfesor = profesori.find(p => p.struka_predmeti_id.includes(predmetId));
+        if (ovisnostProfesor) {
+            throw new Error(`Nije moguće obrisati. Predmet je dodijeljen profesoru ${ovisnostProfesor.ime} ${ovisnostProfesor.prezime}.`);
+        }
 
-        const predmetiRes = await fetch('predmeti.json');
-        const predmetiText = await predmetiRes.text();
-        let predmeti = predmetiText ? JSON.parse(predmetiText) : [];
+        // --- TODO: Future Dependency Check for kurikulum.json ---
 
+        // Proceed with deletion
         const filtriraniPredmeti = predmeti.filter(p => p.id !== predmetId);
 
         const result = await spremiJSON('predmeti.json', filtriraniPredmeti);
@@ -466,7 +502,7 @@ async function obrisiPredmet(predmetId) {
         return { success: true };
     } catch (error) {
         displayError(error.message);
-        return { success: false };
+        return { success: false, message: error.message };
     }
 }
 
