@@ -60,9 +60,15 @@ function createAutocompleteInput(labelText, placeholder) {
  * @param {HTMLInputElement} inputElement - The input element to attach listeners to.
  * @param {string[]} suggestionsArray - An array of suggestion strings.
  * @param {boolean} [strictMode=false] - If true, only values from suggestionsArray are allowed.
+ * @param {HTMLElement} [suggestionsListElement=null] - Optional: A specific HTMLElement to use as the suggestions list container.
  */
-function initializeAutocomplete(inputElement, suggestionsArray, strictMode = false) {
-  const suggestionsList = inputElement.parentElement.querySelector(".suggestions-list");
+function initializeAutocomplete(inputElement, suggestionsArray, strictMode = false, suggestionsListElement = null) {
+  const suggestionsList = suggestionsListElement || inputElement.parentElement.querySelector(".suggestions-list");
+
+  if (!suggestionsList) {
+    console.warn("Nema 'suggestions-list' elementa za autocomplete input:", inputElement);
+    return; // Cannot initialize if no suggestions list element is found
+  }
 
   const showSuggestions = (filter = "") => {
     suggestionsList.innerHTML = "";

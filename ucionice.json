@@ -1,9 +1,9 @@
 [
     {
         "id": 1,
-        "naziv": "test",
+        "naziv": "teas",
         "tipovi_id": [
-            1
+            7
         ],
         "prioritet": 0
     },
@@ -36,6 +36,14 @@
         "naziv": "inf",
         "tipovi_id": [
             7
+        ],
+        "prioritet": 0
+    },
+    {
+        "id": 6,
+        "naziv": "test",
+        "tipovi_id": [
+            6
         ],
         "prioritet": 0
     }

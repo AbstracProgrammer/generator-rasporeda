@@ -193,50 +193,105 @@ function renderPredmetDisplayMode(card, predmet, tipoviMapa) {
 }
 
 /** Renders the editing view of a subject card */
+
 function renderPredmetEditMode(card, predmet, tipoviMapa) {
+
     const nazivTipaUcionice = predmet.potreban_tip_ucionice_id ? tipoviMapa.get(predmet.potreban_tip_ucionice_id) : '';
+
     card.classList.add('edit-mode');
 
+
+
     card.innerHTML = `
+
         <div class="card-edit-form">
+
             <input type="text" class="edit-naziv" value="${predmet.naziv}">
-            <input type="text" class="edit-tip-ucionice" value="${nazivTipaUcionice || ''}" placeholder="Potreban tip učionice">
+
+            <div class="autocomplete-wrapper"> <!-- Replicating structure from createStrictAutocompleteInput -->
+
+                <input type="text" class="edit-tip-ucionice autocomplete-input" value="${nazivTipaUcionice || ''}" placeholder="Potreban tip učionice" autocomplete="off">
+
+                <div class="suggestions-list" style="display: none;"></div>
+
+            </div>
+
         </div>
+
         <div class="card-actions">
+
             <img src="assets/save.svg" alt="Spremi" class="save-edit-btn">
+
             <button class="cancel-edit-btn delete-temp-item-btn">X</button>
+
         </div>
+
     `;
 
+
+
     // Initialize strict autocomplete for the type input
-    const tipUcioniceInput = card.querySelector('.edit-tip-ucionice');
-    // We need to fetch current suggestions for classroom types
-    fetch('tipoviUcionica.json')
-        .then(res => res.text())
-        .then(text => {
-            const tipovi = text ? JSON.parse(text) : [];
-            const prijedloziTipova = tipovi.map(t => t.naziv);
-            initializeAutocomplete(tipUcioniceInput, prijedloziTipova, true); // Strict mode for editing!
-        })
-        .catch(error => console.error("Greška pri dohvatu tipova učionica za uređivanje predmeta:", error));
+
+        const tipUcioniceInput = card.querySelector('.edit-tip-ucionice');
+
+        const suggestionsListElement = card.querySelector('.suggestions-list'); // Explicitly find the element
+
+    
+
+        fetch('tipoviUcionica.json')
+
+            .then(res => res.text())
+
+            .then(text => {
+
+                const tipovi = text ? JSON.parse(text) : [];
+
+                const prijedloziTipova = tipovi.map(t => t.naziv);
+
+                initializeAutocomplete(tipUcioniceInput, prijedloziTipova, true, suggestionsListElement); // Pass explicitly
+
+            })
+
+            .catch(error => console.error("Greška pri dohvatu tipova učionica za uređivanje predmeta:", error));
+
+
+
 
 
     card.querySelector('.save-edit-btn').addEventListener('click', async () => {
+
         const noviNaziv = card.querySelector('.edit-naziv').value.trim();
+
         const noviNazivTipaUcionice = card.querySelector('.edit-tip-ucionice').value.trim();
 
+
+
         if (!noviNaziv) {
+
             return displayError("Naziv predmeta ne može biti prazan.");
+
         }
+
+
 
         const result = await urediPredmet(predmet.id, { naziv: noviNaziv, nazivTipaUcionice: noviNazivTipaUcionice });
+
         if (result.success) {
+
             prikaziPostojecePredmete(card.parentElement);
+
         }
+
     });
 
+
+
     card.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+
         card.classList.remove('edit-mode');
+
         renderPredmetDisplayMode(card, predmet, tipoviMapa);
+
     });
+
 }
