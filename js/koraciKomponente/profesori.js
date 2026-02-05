@@ -1,10 +1,10 @@
 import {
-  displayError,
-  createSimpleInput,
   createMultiSelectAutocompleteInput,
+  createSimpleInput,
   createStrictAutocompleteInput,
-  initializeMultiSelectAutocomplete,
+  displayError,
   initializeAutocomplete,
+  initializeMultiSelectAutocomplete,
 } from "../korakProzor.js";
 import { spremiJSON } from "../spremiJSON.js";
 import { dohvatiPrijedloge } from "../upraviteljPrijedloga.js";
@@ -148,7 +148,6 @@ export async function validirajIStvoriProfesora(
     displayError("Profesor mora predavati barem jedan predmet.");
     return null;
   }
-
 
   // Process unavailable times
   const unavailableTimesToggle = modalContent.querySelector(
@@ -421,21 +420,36 @@ export async function obrisiProfesora(teacherId) {
  * @param {HTMLElement} modalBody - The main body container of the modal.
  */
 export async function prikaziKorakProfesori(modalBody) {
-    const formContainer = modalBody.querySelector('.modal-form-container .modal-content');
-    const existingItemsContainer = modalBody.querySelector('.existing-items-container');
+  const formContainer = modalBody.querySelector(
+    ".modal-form-container .modal-content",
+  );
+  const existingItemsContainer = modalBody.querySelector(
+    ".existing-items-container",
+  );
 
-    // --- Left Column: Form ---
-    let prijedloziPredmeta = await dohvatiPrijedloge('predmeti.json', (item) => item.naziv);
+  // --- Left Column: Form ---
+  let prijedloziPredmeta = await dohvatiPrijedloge(
+    "predmeti",
+    (item) => item.naziv,
+  );
 
-    const imeInputHtml = createSimpleInput("Ime profesora:", "Npr. Ivan", "teacher-ime");
-    const prezimeInputHtml = createSimpleInput("Prezime profesora:", "Npr. Horvat", "teacher-prezime");
-    const strukaInputHtml = createMultiSelectAutocompleteInput(
-        "Predaje predmete:",
-        "Npr. Matematika, Fizika..."
-    );
+  const imeInputHtml = createSimpleInput(
+    "Ime profesora:",
+    "Npr. Ivan",
+    "teacher-ime",
+  );
+  const prezimeInputHtml = createSimpleInput(
+    "Prezime profesora:",
+    "Npr. Horvat",
+    "teacher-prezime",
+  );
+  const strukaInputHtml = createMultiSelectAutocompleteInput(
+    "Predaje predmete:",
+    "Npr. Matematika, Fizika...",
+  );
 
-    // Unavailable Times Section HTML
-    const unavailableHtml = `
+  // Unavailable Times Section HTML
+  const unavailableHtml = `
         <div class="input-field checkbox-field">
             <label for="teacher-unavailable-toggle" class="field-label">Profesor ima definirane nedostupnosti</label>
             <input type="checkbox" id="teacher-unavailable-toggle" class="custom-checkbox">
@@ -460,13 +474,13 @@ export async function prikaziKorakProfesori(modalBody) {
                     <div class="select-wrapper">
                         <label for="unavailable-start-hour" class="field-label">Početni sat:</label>
                         <select id="unavailable-start-hour">
-                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join("")}
                         </select>
                     </div>
                     <div class="select-wrapper">
                         <label for="unavailable-end-hour" class="field-label">Krajnji sat:</label>
                         <select id="unavailable-end-hour">
-                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                            ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join("")}
                         </select>
                     </div>
                     <button class="button add-unavailable-time-btn">+</button>
@@ -476,7 +490,7 @@ export async function prikaziKorakProfesori(modalBody) {
         </div>
     `;
 
-    const fixedClassroomHtml = `
+  const fixedClassroomHtml = `
         <div class="input-field checkbox-field">
             <label for="teacher-fixed-classroom-toggle" class="field-label">Profesor ima fiksnu učionicu</label>
             <input type="checkbox" id="teacher-fixed-classroom-toggle" class="custom-checkbox">
@@ -486,137 +500,195 @@ export async function prikaziKorakProfesori(modalBody) {
         </div>
     `;
 
-    // Set innerHTML only once with all generated HTML
-    formContainer.innerHTML = imeInputHtml + prezimeInputHtml + strukaInputHtml + unavailableHtml + fixedClassroomHtml;
+  // Set innerHTML only once with all generated HTML
+  formContainer.innerHTML =
+    imeInputHtml +
+    prezimeInputHtml +
+    strukaInputHtml +
+    unavailableHtml +
+    fixedClassroomHtml;
 
-    // --- Query elements AFTER innerHTML is set ---
-    const strukaAutocompleteInput = formContainer.querySelector(".multi-select-autocomplete .autocomplete-input");
-    const selectedTagsContainer = formContainer.querySelector(".selected-tags-container");
-    const suggestionsListElement = formContainer.querySelector(".multi-select-autocomplete .suggestions-list");
+  // --- Query elements AFTER innerHTML is set ---
+  const strukaAutocompleteInput = formContainer.querySelector(
+    ".multi-select-autocomplete .autocomplete-input",
+  );
+  const selectedTagsContainer = formContainer.querySelector(
+    ".selected-tags-container",
+  );
+  const suggestionsListElement = formContainer.querySelector(
+    ".multi-select-autocomplete .suggestions-list",
+  );
 
-    const teacherUnavailableToggle = formContainer.querySelector('#teacher-unavailable-toggle');
-    const unavailableTimesSection = formContainer.querySelector('.unavailable-times-section');
-    const fullDayUnavailableCheckbox = formContainer.querySelector('#full-day-unavailable');
-    const startHourSelect = formContainer.querySelector('#unavailable-start-hour');
-    const endHourSelect = formContainer.querySelector('#unavailable-end-hour');
-    const addUnavailableTimeBtn = formContainer.querySelector('.add-unavailable-time-btn');
-    const addedUnavailableTimesDisplay = formContainer.querySelector('.added-unavailable-times-display');
-    const unavailableDaySelect = formContainer.querySelector('#unavailable-day');
+  const teacherUnavailableToggle = formContainer.querySelector(
+    "#teacher-unavailable-toggle",
+  );
+  const unavailableTimesSection = formContainer.querySelector(
+    ".unavailable-times-section",
+  );
+  const fullDayUnavailableCheckbox = formContainer.querySelector(
+    "#full-day-unavailable",
+  );
+  const startHourSelect = formContainer.querySelector(
+    "#unavailable-start-hour",
+  );
+  const endHourSelect = formContainer.querySelector("#unavailable-end-hour");
+  const addUnavailableTimeBtn = formContainer.querySelector(
+    ".add-unavailable-time-btn",
+  );
+  const addedUnavailableTimesDisplay = formContainer.querySelector(
+    ".added-unavailable-times-display",
+  );
+  const unavailableDaySelect = formContainer.querySelector("#unavailable-day");
 
-    const teacherFixedClassroomToggle = formContainer.querySelector('#teacher-fixed-classroom-toggle');
-    const fixedClassroomSection = formContainer.querySelector('.fixed-classroom-section');
-    const fixedClassroomAutocompleteInput = fixedClassroomSection.querySelector('.autocomplete-input');
+  const teacherFixedClassroomToggle = formContainer.querySelector(
+    "#teacher-fixed-classroom-toggle",
+  );
+  const fixedClassroomSection = formContainer.querySelector(
+    ".fixed-classroom-section",
+  );
+  const fixedClassroomAutocompleteInput = fixedClassroomSection.querySelector(
+    ".autocomplete-input",
+  );
 
-    // Fetch classroom suggestions for strict autocomplete
-    let prijedloziUcionica = await dohvatiPrijedloge('ucionice.json', (item) => item.naziv);
-    initializeAutocomplete(fixedClassroomAutocompleteInput, prijedloziUcionica, true); // Strict mode!
+  // Fetch classroom suggestions for strict autocomplete
+  let prijedloziUcionica = await dohvatiPrijedloge(
+    "ucionice",
+    (item) => item.naziv,
+  );
+  initializeAutocomplete(
+    fixedClassroomAutocompleteInput,
+    prijedloziUcionica,
+    true,
+  ); // Strict mode!
 
-    const dayNames = {
-        1: "Ponedjeljak", 2: "Utorak", 3: "Srijeda", 4: "Četvrtak", 5: "Petak"
-    };
+  const dayNames = {
+    1: "Ponedjeljak",
+    2: "Utorak",
+    3: "Srijeda",
+    4: "Četvrtak",
+    5: "Petak",
+  };
 
-    // Initialize an array to hold selected subject names for the current form instance
-    formContainer.selectedSubjectNames = [];
+  // Initialize an array to hold selected subject names for the current form instance
+  formContainer.selectedSubjectNames = [];
 
-    const multiSelectFunctions = initializeMultiSelectAutocomplete(
-        strukaAutocompleteInput,
-        prijedloziPredmeta,
-        selectedTagsContainer,
-        (itemText) => {
-            if (!formContainer.selectedSubjectNames.includes(itemText)) {
-                formContainer.selectedSubjectNames.push(itemText);
-                multiSelectFunctions.renderSelectedTags(formContainer.selectedSubjectNames);
-            }
-        },
-        (itemText) => {
-            formContainer.selectedSubjectNames = formContainer.selectedSubjectNames.filter(name => name !== itemText);
-            multiSelectFunctions.renderSelectedTags(formContainer.selectedSubjectNames);
-        },
-        suggestionsListElement // Explicitly pass the suggestions list element
-    );
+  const multiSelectFunctions = initializeMultiSelectAutocomplete(
+    strukaAutocompleteInput,
+    prijedloziPredmeta,
+    selectedTagsContainer,
+    (itemText) => {
+      if (!formContainer.selectedSubjectNames.includes(itemText)) {
+        formContainer.selectedSubjectNames.push(itemText);
+        multiSelectFunctions.renderSelectedTags(
+          formContainer.selectedSubjectNames,
+        );
+      }
+    },
+    (itemText) => {
+      formContainer.selectedSubjectNames =
+        formContainer.selectedSubjectNames.filter((name) => name !== itemText);
+      multiSelectFunctions.renderSelectedTags(
+        formContainer.selectedSubjectNames,
+      );
+    },
+    suggestionsListElement, // Explicitly pass the suggestions list element
+  );
 
-    // Initialize current unavailable times array for this form instance
-    formContainer.currentUnavailableTimes = [];
+  // Initialize current unavailable times array for this form instance
+  formContainer.currentUnavailableTimes = [];
 
-    // Helper to render currentUnavailableTimes
-    const renderUnavailableTimes = () => {
-        addedUnavailableTimesDisplay.innerHTML = '';
-        formContainer.currentUnavailableTimes.forEach((entry, index) => {
-            const timeTag = document.createElement('div');
-            timeTag.classList.add('new-item-tag'); // Reuse existing style
+  // Helper to render currentUnavailableTimes
+  const renderUnavailableTimes = () => {
+    addedUnavailableTimesDisplay.innerHTML = "";
+    formContainer.currentUnavailableTimes.forEach((entry, index) => {
+      const timeTag = document.createElement("div");
+      timeTag.classList.add("new-item-tag"); // Reuse existing style
 
-            let text = `${dayNames[entry.day]}: `;
-            if (entry.fullDay) {
-                text += 'Cijeli dan';
-            } else {
-                text += `${entry.startHour}.-${entry.endHour}. sat`;
-            }
-            timeTag.textContent = text;
+      let text = `${dayNames[entry.day]}: `;
+      if (entry.fullDay) {
+        text += "Cijeli dan";
+      } else {
+        text += `${entry.startHour}.-${entry.endHour}. sat`;
+      }
+      timeTag.textContent = text;
 
-            const removeBtn = document.createElement('button');
-            removeBtn.textContent = 'X';
-            removeBtn.classList.add('delete-temp-item-btn'); // Reuse existing style
-            removeBtn.onclick = () => {
-                formContainer.currentUnavailableTimes.splice(index, 1);
-                renderUnavailableTimes();
-            };
-
-            timeTag.appendChild(removeBtn);
-            addedUnavailableTimesDisplay.appendChild(timeTag);
-        });
-    };
-
-    // Event listeners
-    teacherUnavailableToggle.addEventListener('change', () => {
-        unavailableTimesSection.style.display = teacherUnavailableToggle.checked ? 'block' : 'none';
-    });
-
-    teacherFixedClassroomToggle.addEventListener('change', () => {
-        fixedClassroomSection.style.display = teacherFixedClassroomToggle.checked ? 'block' : 'none';
-    });
-
-    fullDayUnavailableCheckbox.addEventListener('change', () => {
-        const isDisabled = fullDayUnavailableCheckbox.checked;
-        startHourSelect.disabled = isDisabled;
-        endHourSelect.disabled = isDisabled;
-    });
-
-    addUnavailableTimeBtn.addEventListener('click', () => {
-        const day = parseInt(unavailableDaySelect.value);
-        const fullDay = fullDayUnavailableCheckbox.checked;
-        let startHour = null;
-        let endHour = null;
-
-        if (!fullDay) {
-            startHour = parseInt(startHourSelect.value);
-            endHour = parseInt(endHourSelect.value);
-
-            if (isNaN(startHour) || isNaN(endHour) || startHour > endHour) {
-                displayError("Početni sat mora biti manji ili jednak krajnjem satu.");
-                return;
-            }
-        }
-        
-        // Check for existing entry for the same day (since only one continuous range is allowed for MVP)
-        const existingEntryIndex = formContainer.currentUnavailableTimes.findIndex(e => e.day === day);
-        if (existingEntryIndex !== -1) {
-             displayError(`Nedostupnost za ${dayNames[day]} već postoji. Prvo je obrišite pa dodajte novu.`);
-             return;
-        }
-
-        formContainer.currentUnavailableTimes.push({ day, fullDay, startHour, endHour });
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "X";
+      removeBtn.classList.add("delete-temp-item-btn"); // Reuse existing style
+      removeBtn.onclick = () => {
+        formContainer.currentUnavailableTimes.splice(index, 1);
         renderUnavailableTimes();
-        // Reset inputs to default after adding
-        unavailableDaySelect.value = "1";
-        fullDayUnavailableCheckbox.checked = false;
-        startHourSelect.disabled = false;
-        endHourSelect.disabled = false;
-        startHourSelect.value = "1";
-        endHourSelect.value = "7";
-    });
+      };
 
-    // --- Right Column: Existing Items ---
-    prikaziPostojeceProfesore(existingItemsContainer);
+      timeTag.appendChild(removeBtn);
+      addedUnavailableTimesDisplay.appendChild(timeTag);
+    });
+  };
+
+  // Event listeners
+  teacherUnavailableToggle.addEventListener("change", () => {
+    unavailableTimesSection.style.display = teacherUnavailableToggle.checked
+      ? "block"
+      : "none";
+  });
+
+  teacherFixedClassroomToggle.addEventListener("change", () => {
+    fixedClassroomSection.style.display = teacherFixedClassroomToggle.checked
+      ? "block"
+      : "none";
+  });
+
+  fullDayUnavailableCheckbox.addEventListener("change", () => {
+    const isDisabled = fullDayUnavailableCheckbox.checked;
+    startHourSelect.disabled = isDisabled;
+    endHourSelect.disabled = isDisabled;
+  });
+
+  addUnavailableTimeBtn.addEventListener("click", () => {
+    const day = parseInt(unavailableDaySelect.value);
+    const fullDay = fullDayUnavailableCheckbox.checked;
+    let startHour = null;
+    let endHour = null;
+
+    if (!fullDay) {
+      startHour = parseInt(startHourSelect.value);
+      endHour = parseInt(endHourSelect.value);
+
+      if (isNaN(startHour) || isNaN(endHour) || startHour > endHour) {
+        displayError("Početni sat mora biti manji ili jednak krajnjem satu.");
+        return;
+      }
+    }
+
+    // Check for existing entry for the same day (since only one continuous range is allowed for MVP)
+    const existingEntryIndex = formContainer.currentUnavailableTimes.findIndex(
+      (e) => e.day === day,
+    );
+    if (existingEntryIndex !== -1) {
+      displayError(
+        `Nedostupnost za ${dayNames[day]} već postoji. Prvo je obrišite pa dodajte novu.`,
+      );
+      return;
+    }
+
+    formContainer.currentUnavailableTimes.push({
+      day,
+      fullDay,
+      startHour,
+      endHour,
+    });
+    renderUnavailableTimes();
+    // Reset inputs to default after adding
+    unavailableDaySelect.value = "1";
+    fullDayUnavailableCheckbox.checked = false;
+    startHourSelect.disabled = false;
+    endHourSelect.disabled = false;
+    startHourSelect.value = "1";
+    endHourSelect.value = "7";
+  });
+
+  // --- Right Column: Existing Items ---
+  prikaziPostojeceProfesore(existingItemsContainer);
 }
 
 /**
@@ -624,79 +696,97 @@ export async function prikaziKorakProfesori(modalBody) {
  * @param {HTMLElement} container - The HTML element to populate.
  */
 export async function prikaziPostojeceProfesore(container) {
-    container.innerHTML = 'Učitavanje...';
+  container.innerHTML = "Učitavanje...";
 
-    try {
-        const [profesoriRes, predmetiRes, ucioniceRes] = await Promise.all([
-            fetch('profesori.json'),
-            fetch('predmeti.json'),
-            fetch('ucionice.json')
-        ]);
+  try {
+    const [profesoriRes, predmetiRes, ucioniceRes] = await Promise.all([
+      fetch("profesori.json"),
+      fetch("predmeti.json"),
+      fetch("ucionice.json"),
+    ]);
 
-        const profesori = await (profesoriRes.text().then(text => text ? JSON.parse(text) : []));
-        const predmeti = await (predmetiRes.text().then(text => text ? JSON.parse(text) : []));
-        const ucionice = await (ucioniceRes.text().then(text => text ? JSON.parse(text) : []));
-        
-        if (profesori.length === 0) {
-            container.innerHTML = 'Nema unesenih profesora.';
-            return;
-        }
+    const profesori = await profesoriRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const predmeti = await predmetiRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
+    const ucionice = await ucioniceRes
+      .text()
+      .then((text) => (text ? JSON.parse(text) : []));
 
-        const predmetiMapa = new Map(predmeti.map(p => [p.id, p.naziv]));
-        const ucioniceMapa = new Map(ucionice.map(u => [u.id, u.naziv]));
-        
-        container.innerHTML = ""; // Clear loading message
-
-        profesori.forEach(profesor => {
-            const card = document.createElement('div');
-            card.className = 'existing-item-card profesor-card';
-            card.dataset.id = profesor.id;
-
-            renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa);
-            container.appendChild(card);
-        });
-        
-    } catch (error) {
-        console.error(`Greška pri prikazivanju postojećih profesora:`, error);
-        container.innerHTML = `<p style="color: red;">Nije moguće učitati podatke.</p>`;
+    if (profesori.length === 0) {
+      container.innerHTML = "Nema unesenih profesora.";
+      return;
     }
+
+    const predmetiMapa = new Map(predmeti.map((p) => [p.id, p.naziv]));
+    const ucioniceMapa = new Map(ucionice.map((u) => [u.id, u.naziv]));
+
+    container.innerHTML = ""; // Clear loading message
+
+    profesori.forEach((profesor) => {
+      const card = document.createElement("div");
+      card.className = "existing-item-card profesor-card";
+      card.dataset.id = profesor.id;
+
+      renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa);
+      container.appendChild(card);
+    });
+  } catch (error) {
+    console.error(`Greška pri prikazivanju postojećih profesora:`, error);
+    container.innerHTML = `<p style="color: red;">Nije moguće učitati podatke.</p>`;
+  }
 }
 
 /** Renders the default display view of a teacher card */
-function renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa) {
-    const subjectNames = profesor.struka_predmeti_id
-        .map(id => predmetiMapa.get(id))
-        .filter(Boolean)
-        .join(', ') || 'Nema predmeta';
+function renderProfessorDisplayMode(
+  card,
+  profesor,
+  predmetiMapa,
+  ucioniceMapa,
+) {
+  const subjectNames =
+    profesor.struka_predmeti_id
+      .map((id) => predmetiMapa.get(id))
+      .filter(Boolean)
+      .join(", ") || "Nema predmeta";
 
-    const dayNames = {
-        1: "Ponedjeljak", 2: "Utorak", 3: "Srijeda", 4: "Četvrtak", 5: "Petak"
-    };
-    
-    let fixedClassroomHtml = '';
-    if (profesor.fiksna_ucionica_id) {
-        const classroomName = ucioniceMapa.get(profesor.fiksna_ucionica_id) || 'Nepoznata učionica';
-        fixedClassroomHtml = `<div class="tip">Fiksna učionica: ${classroomName}</div>`;
+  const dayNames = {
+    1: "Ponedjeljak",
+    2: "Utorak",
+    3: "Srijeda",
+    4: "Četvrtak",
+    5: "Petak",
+  };
+
+  let fixedClassroomHtml = "";
+  if (profesor.fiksna_ucionica_id) {
+    const classroomName =
+      ucioniceMapa.get(profesor.fiksna_ucionica_id) || "Nepoznata učionica";
+    fixedClassroomHtml = `<div class="tip">Fiksna učionica: ${classroomName}</div>`;
+  }
+
+  let unavailableHtml = "";
+  if (profesor.nedostupan && Object.keys(profesor.nedostupan).length > 0) {
+    unavailableHtml +=
+      '<div class="unavailable-display-section"><span class="field-label">Nedostupan:</span><ul>';
+    for (const dayNum in profesor.nedostupan) {
+      const hours = profesor.nedostupan[dayNum];
+      let hoursText;
+      if (hours.length === 7 && hours.every((val, i) => val === i + 1)) {
+        // Check if it's 1-7
+        hoursText = "Cijeli dan";
+      } else {
+        // Assuming continuous ranges from the MVP decision
+        hoursText = `${Math.min(...hours)}.-${Math.max(...hours)}. sat`;
+      }
+      unavailableHtml += `<li>${dayNames[dayNum]}: ${hoursText}</li>`;
     }
+    unavailableHtml += "</ul></div>";
+  }
 
-    let unavailableHtml = '';
-    if (profesor.nedostupan && Object.keys(profesor.nedostupan).length > 0) {
-        unavailableHtml += '<div class="unavailable-display-section"><span class="field-label">Nedostupan:</span><ul>';
-        for (const dayNum in profesor.nedostupan) {
-            const hours = profesor.nedostupan[dayNum];
-            let hoursText;
-            if (hours.length === 7 && hours.every((val, i) => val === i + 1)) { // Check if it's 1-7
-                hoursText = 'Cijeli dan';
-            } else {
-                // Assuming continuous ranges from the MVP decision
-                hoursText = `${Math.min(...hours)}.-${Math.max(...hours)}. sat`;
-            }
-            unavailableHtml += `<li>${dayNames[dayNum]}: ${hoursText}</li>`;
-        }
-        unavailableHtml += '</ul></div>';
-    }
-
-    card.innerHTML = `
+  card.innerHTML = `
         <div class="card-content">
             <div class="naziv">${profesor.ime} ${profesor.prezime}</div>
             <div class="tip">Predaje: ${subjectNames}</div>
@@ -709,69 +799,90 @@ function renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa) 
         </div>
     `;
 
-    card.querySelector('.edit-btn').addEventListener('click', () => renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMapa));
-    card.querySelector('.delete-btn').addEventListener('click', async () => {
-        if (confirm(`Jeste li sigurni da želite obrisati profesora "${profesor.ime} ${profesor.prezime}"?`)) {
-            const result = await obrisiProfesora(profesor.id);
-            if (result.success) {
-                prikaziPostojeceProfesore(card.parentElement); // Re-render the whole list
-            }
-        }
-    });
+  card
+    .querySelector(".edit-btn")
+    .addEventListener("click", () =>
+      renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMapa),
+    );
+  card.querySelector(".delete-btn").addEventListener("click", async () => {
+    if (
+      confirm(
+        `Jeste li sigurni da želite obrisati profesora "${profesor.ime} ${profesor.prezime}"?`,
+      )
+    ) {
+      const result = await obrisiProfesora(profesor.id);
+      if (result.success) {
+        prikaziPostojeceProfesore(card.parentElement); // Re-render the whole list
+      }
+    }
+  });
 }
 
 /** Renders the editing view of a teacher card */
-async function renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMapa) {
-    card.classList.add('edit-mode');
+async function renderProfessorEditMode(
+  card,
+  profesor,
+  predmetiMapa,
+  ucioniceMapa,
+) {
+  card.classList.add("edit-mode");
 
-    // Fetch all subjects and classrooms for suggestions
-    const [predmetiRes, ucioniceRes] = await Promise.all([
-        fetch('predmeti.json'),
-        fetch('ucionice.json')
-    ]);
-    const predmetiData = await predmetiRes.text().then(text => text ? JSON.parse(text) : []);
-    const ucioniceData = await ucioniceRes.text().then(text => text ? JSON.parse(text) : []);
-    const prijedloziPredmeta = predmetiData.map(p => p.naziv);
-    const prijedloziUcionica = ucioniceData.map(u => u.naziv);
+  // Fetch all subjects and classrooms for suggestions
+  const [predmetiRes, ucioniceRes] = await Promise.all([
+    fetch("predmeti.json"),
+    fetch("ucionice.json"),
+  ]);
+  const predmetiData = await predmetiRes
+    .text()
+    .then((text) => (text ? JSON.parse(text) : []));
+  const ucioniceData = await ucioniceRes
+    .text()
+    .then((text) => (text ? JSON.parse(text) : []));
+  const prijedloziPredmeta = predmetiData.map((p) => p.naziv);
+  const prijedloziUcionica = ucioniceData.map((u) => u.naziv);
 
-    // Get current data for the teacher
-    const currentSubjectNames = profesor.struka_predmeti_id
-        .map(id => predmetiMapa.get(id))
-        .filter(Boolean);
-    
-    const currentFixedClassroomName = profesor.fiksna_ucionica_id 
-        ? ucioniceMapa.get(profesor.fiksna_ucionica_id) 
-        : "";
+  // Get current data for the teacher
+  const currentSubjectNames = profesor.struka_predmeti_id
+    .map((id) => predmetiMapa.get(id))
+    .filter(Boolean);
 
-    // Prepare initial currentUnavailableTimes from profesor.nedostupan
-    const initialUnavailableTimes = [];
-    for (const dayNumStr in profesor.nedostupan) {
-        const dayNum = parseInt(dayNumStr);
-        const hours = profesor.nedostupan[dayNumStr];
-        let fullDay = false;
-        let startHour = 1;
-        let endHour = 7;
+  const currentFixedClassroomName = profesor.fiksna_ucionica_id
+    ? ucioniceMapa.get(profesor.fiksna_ucionica_id)
+    : "";
 
-        if (hours.length === 7 && hours.every((val, i) => val === i + 1)) {
-            fullDay = true;
-        } else if (hours.length > 0) {
-            startHour = Math.min(...hours);
-            endHour = Math.max(...hours);
-        }
-        initialUnavailableTimes.push({ day: dayNum, fullDay, startHour, endHour });
+  // Prepare initial currentUnavailableTimes from profesor.nedostupan
+  const initialUnavailableTimes = [];
+  for (const dayNumStr in profesor.nedostupan) {
+    const dayNum = parseInt(dayNumStr);
+    const hours = profesor.nedostupan[dayNumStr];
+    let fullDay = false;
+    let startHour = 1;
+    let endHour = 7;
+
+    if (hours.length === 7 && hours.every((val, i) => val === i + 1)) {
+      fullDay = true;
+    } else if (hours.length > 0) {
+      startHour = Math.min(...hours);
+      endHour = Math.max(...hours);
     }
-    
-    // Day names for display
-    const dayNames = {
-        1: "Ponedjeljak", 2: "Utorak", 3: "Srijeda", 4: "Četvrtak", 5: "Petak"
-    };
+    initialUnavailableTimes.push({ day: dayNum, fullDay, startHour, endHour });
+  }
 
-    // Generate HTML, including the new fixed classroom section
-    card.innerHTML = `
+  // Day names for display
+  const dayNames = {
+    1: "Ponedjeljak",
+    2: "Utorak",
+    3: "Srijeda",
+    4: "Četvrtak",
+    5: "Petak",
+  };
+
+  // Generate HTML, including the new fixed classroom section
+  card.innerHTML = `
         <div class="card-edit-form">
             <input type="text" class="edit-ime" value="${profesor.ime}">
             <input type="text" class="edit-prezime" value="${profesor.prezime}">
-            
+
             <div class="autocomplete-field multi-select-autocomplete">
                 <span class="field-label">Predaje predmete:</span>
                 <div class="autocomplete-wrapper">
@@ -783,9 +894,9 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMap
 
             <div class="input-field checkbox-field">
                 <label for="teacher-unavailable-toggle-edit" class="field-label">Profesor ima definirane nedostupnosti</label>
-                <input type="checkbox" id="teacher-unavailable-toggle-edit" class="custom-checkbox" ${Object.keys(profesor.nedostupan).length > 0 ? 'checked' : ''}>
+                <input type="checkbox" id="teacher-unavailable-toggle-edit" class="custom-checkbox" ${Object.keys(profesor.nedostupan).length > 0 ? "checked" : ""}>
             </div>
-            <div class="unavailable-times-section" style="display: ${Object.keys(profesor.nedostupan).length > 0 ? 'block' : 'none'};">
+            <div class="unavailable-times-section" style="display: ${Object.keys(profesor.nedostupan).length > 0 ? "block" : "none"};">
                 <!-- Unavailability editor content -->
                 <div class="unavailable-input-row">
                     <div class="select-wrapper">
@@ -806,13 +917,13 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMap
                         <div class="select-wrapper">
                             <label for="unavailable-start-hour-edit" class="field-label">Početni sat:</label>
                             <select id="unavailable-start-hour-edit">
-                                ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                                ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join("")}
                             </select>
                         </div>
                         <div class="select-wrapper">
                             <label for="unavailable-end-hour-edit" class="field-label">Krajnji sat:</label>
                             <select id="unavailable-end-hour-edit">
-                                ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join('')}
+                                ${Array.from({ length: 7 }, (_, i) => `<option value="${i + 1}">${i + 1}. sat</option>`).join("")}
                             </select>
                         </div>
                         <button class="button add-unavailable-time-btn">+</button>
@@ -823,9 +934,9 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMap
 
             <div class="input-field checkbox-field">
                 <label for="teacher-fixed-classroom-toggle-edit" class="field-label">Profesor ima fiksnu učionicu</label>
-                <input type="checkbox" id="teacher-fixed-classroom-toggle-edit" class="custom-checkbox" ${profesor.fiksna_ucionica_id ? 'checked' : ''}>
+                <input type="checkbox" id="teacher-fixed-classroom-toggle-edit" class="custom-checkbox" ${profesor.fiksna_ucionica_id ? "checked" : ""}>
             </div>
-            <div class="fixed-classroom-section" style="display: ${profesor.fiksna_ucionica_id ? 'block' : 'none'};">
+            <div class="fixed-classroom-section" style="display: ${profesor.fiksna_ucionica_id ? "block" : "none"};">
                 <div class="autocomplete-wrapper">
                      <input type="text" class="autocomplete-input edit-fixed-classroom" value="${currentFixedClassroomName}" placeholder="Npr. U-15..." autocomplete="off">
                      <div class="suggestions-list" style="display: none;"></div>
@@ -838,168 +949,208 @@ async function renderProfessorEditMode(card, profesor, predmetiMapa, ucioniceMap
         </div>
     `;
 
-    // Initialize multi-select for subjects
-    const strukaAutocompleteInput = card.querySelector('.edit-struka');
-    const selectedTagsContainer = card.querySelector('.selected-tags-container');
-    const suggestionsListElementEdit = card.querySelector('.multi-select-autocomplete .suggestions-list');
-    const selectedSubjectNames = [...currentSubjectNames];
-    
-    const multiSelectFunctions = initializeMultiSelectAutocomplete(
-        strukaAutocompleteInput,
-        prijedloziPredmeta,
-        selectedTagsContainer,
-        (itemText) => {
-            if (!selectedSubjectNames.includes(itemText)) {
-                selectedSubjectNames.push(itemText);
-                multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
-            }
-        },
-        (itemText) => {
-            selectedSubjectNames.splice(selectedSubjectNames.indexOf(itemText), 1);
-            multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
-        },
-        suggestionsListElementEdit
-    );
-    multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+  // Initialize multi-select for subjects
+  const strukaAutocompleteInput = card.querySelector(".edit-struka");
+  const selectedTagsContainer = card.querySelector(".selected-tags-container");
+  const suggestionsListElementEdit = card.querySelector(
+    ".multi-select-autocomplete .suggestions-list",
+  );
+  const selectedSubjectNames = [...currentSubjectNames];
 
-    // Initialize strict autocomplete for fixed classroom
-    const fixedClassroomToggle = card.querySelector('#teacher-fixed-classroom-toggle-edit');
-    const fixedClassroomSection = card.querySelector('.fixed-classroom-section');
-    const fixedClassroomInput = card.querySelector('.edit-fixed-classroom');
-    const fixedClassroomSuggestions = fixedClassroomSection.querySelector('.suggestions-list');
-    
-    fixedClassroomToggle.addEventListener('change', () => {
-        fixedClassroomSection.style.display = fixedClassroomToggle.checked ? 'block' : 'none';
-    });
-    initializeAutocomplete(fixedClassroomInput, prijedloziUcionica, true, fixedClassroomSuggestions);
+  const multiSelectFunctions = initializeMultiSelectAutocomplete(
+    strukaAutocompleteInput,
+    prijedloziPredmeta,
+    selectedTagsContainer,
+    (itemText) => {
+      if (!selectedSubjectNames.includes(itemText)) {
+        selectedSubjectNames.push(itemText);
+        multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+      }
+    },
+    (itemText) => {
+      selectedSubjectNames.splice(selectedSubjectNames.indexOf(itemText), 1);
+      multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
+    },
+    suggestionsListElementEdit,
+  );
+  multiSelectFunctions.renderSelectedTags(selectedSubjectNames);
 
-    // Unavailability logic
-    const teacherUnavailableToggleEdit = card.querySelector('#teacher-unavailable-toggle-edit');
-    const unavailableTimesSectionEdit = card.querySelector('.unavailable-times-section');
-    const fullDayUnavailableCheckboxEdit = card.querySelector('#full-day-unavailable-edit');
-    const startHourSelectEdit = card.querySelector('#unavailable-start-hour-edit');
-    const endHourSelectEdit = card.querySelector('#unavailable-end-hour-edit');
-    const addUnavailableTimeBtnEdit = card.querySelector('.add-unavailable-time-btn');
-    const addedUnavailableTimesDisplayEdit = card.querySelector('.added-unavailable-times-display');
-    const unavailableDaySelectEdit = card.querySelector('#unavailable-day-edit');
-    const currentUnavailableTimes = [...initialUnavailableTimes];
+  // Initialize strict autocomplete for fixed classroom
+  const fixedClassroomToggle = card.querySelector(
+    "#teacher-fixed-classroom-toggle-edit",
+  );
+  const fixedClassroomSection = card.querySelector(".fixed-classroom-section");
+  const fixedClassroomInput = card.querySelector(".edit-fixed-classroom");
+  const fixedClassroomSuggestions =
+    fixedClassroomSection.querySelector(".suggestions-list");
 
-    const renderUnavailableTimesEdit = () => {
-        addedUnavailableTimesDisplayEdit.innerHTML = '';
-        currentUnavailableTimes.forEach((entry, index) => {
-            const timeTag = document.createElement('div');
-            timeTag.classList.add('new-item-tag');
+  fixedClassroomToggle.addEventListener("change", () => {
+    fixedClassroomSection.style.display = fixedClassroomToggle.checked
+      ? "block"
+      : "none";
+  });
+  initializeAutocomplete(
+    fixedClassroomInput,
+    prijedloziUcionica,
+    true,
+    fixedClassroomSuggestions,
+  );
 
-            let text = `${dayNames[entry.day]}: `;
-            if (entry.fullDay) {
-                text += 'Cijeli dan';
-            } else {
-                text += `${entry.startHour}.-${entry.endHour}. sat`;
-            }
-            timeTag.textContent = text;
+  // Unavailability logic
+  const teacherUnavailableToggleEdit = card.querySelector(
+    "#teacher-unavailable-toggle-edit",
+  );
+  const unavailableTimesSectionEdit = card.querySelector(
+    ".unavailable-times-section",
+  );
+  const fullDayUnavailableCheckboxEdit = card.querySelector(
+    "#full-day-unavailable-edit",
+  );
+  const startHourSelectEdit = card.querySelector(
+    "#unavailable-start-hour-edit",
+  );
+  const endHourSelectEdit = card.querySelector("#unavailable-end-hour-edit");
+  const addUnavailableTimeBtnEdit = card.querySelector(
+    ".add-unavailable-time-btn",
+  );
+  const addedUnavailableTimesDisplayEdit = card.querySelector(
+    ".added-unavailable-times-display",
+  );
+  const unavailableDaySelectEdit = card.querySelector("#unavailable-day-edit");
+  const currentUnavailableTimes = [...initialUnavailableTimes];
 
-            const removeBtn = document.createElement('button');
-            removeBtn.textContent = 'X';
-            removeBtn.classList.add('delete-temp-item-btn');
-            removeBtn.onclick = () => {
-                currentUnavailableTimes.splice(index, 1);
-                renderUnavailableTimesEdit();
-            };
+  const renderUnavailableTimesEdit = () => {
+    addedUnavailableTimesDisplayEdit.innerHTML = "";
+    currentUnavailableTimes.forEach((entry, index) => {
+      const timeTag = document.createElement("div");
+      timeTag.classList.add("new-item-tag");
 
-            timeTag.appendChild(removeBtn);
-            addedUnavailableTimesDisplayEdit.appendChild(timeTag);
-        });
-    };
-    renderUnavailableTimesEdit();
+      let text = `${dayNames[entry.day]}: `;
+      if (entry.fullDay) {
+        text += "Cijeli dan";
+      } else {
+        text += `${entry.startHour}.-${entry.endHour}. sat`;
+      }
+      timeTag.textContent = text;
 
-    teacherUnavailableToggleEdit.addEventListener('change', () => {
-        unavailableTimesSectionEdit.style.display = teacherUnavailableToggleEdit.checked ? 'block' : 'none';
-    });
-
-    fullDayUnavailableCheckboxEdit.addEventListener('change', () => {
-        const isDisabled = fullDayUnavailableCheckboxEdit.checked;
-        startHourSelectEdit.disabled = isDisabled;
-        endHourSelectEdit.disabled = isDisabled;
-    });
-
-    addUnavailableTimeBtnEdit.addEventListener('click', () => {
-        const day = parseInt(unavailableDaySelectEdit.value);
-        const fullDay = fullDayUnavailableCheckboxEdit.checked;
-        let startHour = null;
-        let endHour = null;
-
-        if (!fullDay) {
-            startHour = parseInt(startHourSelectEdit.value);
-            endHour = parseInt(endHourSelectEdit.value);
-            if (isNaN(startHour) || isNaN(endHour) || startHour > endHour) {
-                return displayError("Početni sat mora biti manji ili jednak krajnjem satu.");
-            }
-        }
-        
-        const existingEntryIndex = currentUnavailableTimes.findIndex(e => e.day === day);
-        if (existingEntryIndex !== -1) {
-             return displayError(`Nedostupnost za ${dayNames[day]} već postoji. Prvo je obrišite pa dodajte novu.`);
-        }
-
-        currentUnavailableTimes.push({ day, fullDay, startHour, endHour });
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "X";
+      removeBtn.classList.add("delete-temp-item-btn");
+      removeBtn.onclick = () => {
+        currentUnavailableTimes.splice(index, 1);
         renderUnavailableTimesEdit();
+      };
+
+      timeTag.appendChild(removeBtn);
+      addedUnavailableTimesDisplayEdit.appendChild(timeTag);
     });
+  };
+  renderUnavailableTimesEdit();
 
-    // Save and Cancel button logic
-    card.querySelector('.save-edit-btn').addEventListener('click', async () => {
-        const novoIme = card.querySelector('.edit-ime').value.trim();
-        const novoPrezime = card.querySelector('.edit-prezime').value.trim();
+  teacherUnavailableToggleEdit.addEventListener("change", () => {
+    unavailableTimesSectionEdit.style.display =
+      teacherUnavailableToggleEdit.checked ? "block" : "none";
+  });
 
-        if (!novoIme || !novoPrezime) {
-            return displayError("Ime i prezime ne mogu biti prazni.");
+  fullDayUnavailableCheckboxEdit.addEventListener("change", () => {
+    const isDisabled = fullDayUnavailableCheckboxEdit.checked;
+    startHourSelectEdit.disabled = isDisabled;
+    endHourSelectEdit.disabled = isDisabled;
+  });
+
+  addUnavailableTimeBtnEdit.addEventListener("click", () => {
+    const day = parseInt(unavailableDaySelectEdit.value);
+    const fullDay = fullDayUnavailableCheckboxEdit.checked;
+    let startHour = null;
+    let endHour = null;
+
+    if (!fullDay) {
+      startHour = parseInt(startHourSelectEdit.value);
+      endHour = parseInt(endHourSelectEdit.value);
+      if (isNaN(startHour) || isNaN(endHour) || startHour > endHour) {
+        return displayError(
+          "Početni sat mora biti manji ili jednak krajnjem satu.",
+        );
+      }
+    }
+
+    const existingEntryIndex = currentUnavailableTimes.findIndex(
+      (e) => e.day === day,
+    );
+    if (existingEntryIndex !== -1) {
+      return displayError(
+        `Nedostupnost za ${dayNames[day]} već postoji. Prvo je obrišite pa dodajte novu.`,
+      );
+    }
+
+    currentUnavailableTimes.push({ day, fullDay, startHour, endHour });
+    renderUnavailableTimesEdit();
+  });
+
+  // Save and Cancel button logic
+  card.querySelector(".save-edit-btn").addEventListener("click", async () => {
+    const novoIme = card.querySelector(".edit-ime").value.trim();
+    const novoPrezime = card.querySelector(".edit-prezime").value.trim();
+
+    if (!novoIme || !novoPrezime) {
+      return displayError("Ime i prezime ne mogu biti prazni.");
+    }
+    if (selectedSubjectNames.length === 0) {
+      return displayError("Profesor mora predavati barem jedan predmet.");
+    }
+
+    let updatedNedostupan = {};
+    if (
+      teacherUnavailableToggleEdit.checked &&
+      currentUnavailableTimes.length > 0
+    ) {
+      currentUnavailableTimes.forEach((entry) => {
+        let hours = [];
+        if (entry.fullDay) {
+          hours = Array.from({ length: 7 }, (_, i) => i + 1);
+        } else {
+          for (let i = entry.startHour; i <= entry.endHour; i++) {
+            hours.push(i);
+          }
         }
-        if (selectedSubjectNames.length === 0) {
-            return displayError("Profesor mora predavati barem jedan predmet.");
-        }
+        updatedNedostupan[entry.day.toString()] = hours;
+      });
+    }
 
-        let updatedNedostupan = {};
-        if (teacherUnavailableToggleEdit.checked && currentUnavailableTimes.length > 0) {
-            currentUnavailableTimes.forEach(entry => {
-                let hours = [];
-                if (entry.fullDay) {
-                    hours = Array.from({ length: 7 }, (_, i) => i + 1);
-                } else {
-                    for (let i = entry.startHour; i <= entry.endHour; i++) {
-                        hours.push(i);
-                    }
-                }
-                updatedNedostupan[entry.day.toString()] = hours;
-            });
+    let fiksnaUcionicaId = null;
+    if (fixedClassroomToggle.checked) {
+      const classroomName = fixedClassroomInput.value.trim();
+      if (classroomName) {
+        const foundClassroom = ucioniceData.find(
+          (u) => u.naziv.toLowerCase() === classroomName.toLowerCase(),
+        );
+        if (foundClassroom) {
+          fiksnaUcionicaId = foundClassroom.id;
+        } else {
+          return displayError("Odabrana fiksna učionica ne postoji.");
         }
-        
-        let fiksnaUcionicaId = null;
-        if (fixedClassroomToggle.checked) {
-            const classroomName = fixedClassroomInput.value.trim();
-            if (classroomName) {
-                const foundClassroom = ucioniceData.find(u => u.naziv.toLowerCase() === classroomName.toLowerCase());
-                if (foundClassroom) {
-                    fiksnaUcionicaId = foundClassroom.id;
-                } else {
-                    return displayError("Odabrana fiksna učionica ne postoji.");
-                }
-            }
-        }
+      }
+    }
 
-        const result = await urediProfesora(profesor.id, {
-            ime: novoIme,
-            prezime: novoPrezime,
-            selectedSubjectNames: selectedSubjectNames,
-            nedostupan: updatedNedostupan,
-            fiksna_ucionica_id: fiksnaUcionicaId
-        }, predmetiData);
+    const result = await urediProfesora(
+      profesor.id,
+      {
+        ime: novoIme,
+        prezime: novoPrezime,
+        selectedSubjectNames: selectedSubjectNames,
+        nedostupan: updatedNedostupan,
+        fiksna_ucionica_id: fiksnaUcionicaId,
+      },
+      predmetiData,
+    );
 
-        if (result.success) {
-            prikaziPostojeceProfesore(card.parentElement);
-        }
-    });
+    if (result.success) {
+      prikaziPostojeceProfesore(card.parentElement);
+    }
+  });
 
-    card.querySelector('.cancel-edit-btn').addEventListener('click', () => {
-        card.classList.remove('edit-mode');
-        renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa);
-    });
+  card.querySelector(".cancel-edit-btn").addEventListener("click", () => {
+    card.classList.remove("edit-mode");
+    renderProfessorDisplayMode(card, profesor, predmetiMapa, ucioniceMapa);
+  });
 }

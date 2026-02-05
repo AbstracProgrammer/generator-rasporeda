@@ -1,12 +1,12 @@
 import {
-  displayError,
-  createSimpleInput,
   createAutocompleteInput,
+  createSimpleInput,
+  displayError,
   initializeAutocomplete,
 } from "../korakProzor.js";
 import { spremiJSON } from "../spremiJSON.js";
-import { provjeriDupliNaziv, pronadjiIliStvoriId } from "../utils.js";
 import { dohvatiPrijedloge } from "../upraviteljPrijedloga.js";
+import { pronadjiIliStvoriId, provjeriDupliNaziv } from "../utils.js";
 
 let privremeniUnosiUcionice = []; // Dedicated temporary storage for classrooms
 
@@ -187,7 +187,7 @@ export async function urediUcionicu(ucionicaId, noviPodaci) {
     }
 
     const tipId = await pronadjiIliStvoriId(
-      "tipoviUcionica.json",
+      "tipoviUcionica",
       noviPodaci.nazivTipa,
     );
 
@@ -294,13 +294,20 @@ export async function obrisiUcionicu(ucionicaId) {
  */
 export async function prikaziKorakUcionice(modalBody) {
   // Define containers for left and right columns
-  const formContainer = modalBody.querySelector('.modal-form-container .modal-content');
-  const existingItemsContainer = modalBody.querySelector('.existing-items-container');
+  const formContainer = modalBody.querySelector(
+    ".modal-form-container .modal-content",
+  );
+  const existingItemsContainer = modalBody.querySelector(
+    ".existing-items-container",
+  );
 
   // --- Left Column: Form ---
   // Fetch type *names* for suggestions from the new central file
-  let prijedloziTipovaUcionica = await dohvatiPrijedloge('tipoviUcionica.json', (item) => item.naziv);
-  
+  let prijedloziTipovaUcionica = await dohvatiPrijedloge(
+    "tipoviUcionica",
+    (item) => item.naziv,
+  );
+
   formContainer.innerHTML = ""; // Clear previous form content
 
   const nazivInputHtml = createSimpleInput("Naziv učionice:", "Npr. U-15");

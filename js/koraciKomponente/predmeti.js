@@ -295,7 +295,7 @@ export async function prikaziKorakPredmeti(modalBody) {
   // --- Left Column: Form ---
   // Fetch type *names* for suggestions for strict autocomplete
   let prijedloziTipovaUcionica = await dohvatiPrijedloge(
-    "tipoviUcionica.json",
+    "tipoviUcionica",
     (item) => item.naziv,
   );
 
