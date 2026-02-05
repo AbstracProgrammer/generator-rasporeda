@@ -120,7 +120,7 @@
 /* Styles for when the card is in edit mode */
 .existing-item-card.edit-mode {
   background-color: #fffbe6; /* A light yellow to indicate editing */
-  padding-right: 70px; /* Make space for action icons */
+  padding-right: 50px; /* Make space for action icons */
 }
 
 .card-edit-form {
@@ -165,12 +165,6 @@ img.save-edit-btn {
   opacity: 1;
 }
 
-/* Styles for when the card is in edit mode */
-.existing-item-card.edit-mode {
-  background-color: #fffbe6; /* A light yellow to indicate editing */
-  padding-right: 70px; /* Make space for action icons */
-}
-
 .card-edit-form,
 .card-actions {
   display: flex;
@@ -179,14 +173,6 @@ img.save-edit-btn {
 
 .card-actions {
   align-items: center;
-}
-
-.existing-item-card .card-edit-form input {
-  width: auto; /* Allow input to respect padding */
-  padding: 6px;
-  margin-bottom: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
 /* Styles for Program Card */

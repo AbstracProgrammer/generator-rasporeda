@@ -205,9 +205,10 @@
 /* Styles for Programi Step */
 .predmet-dodavanje {
   display: flex;
-  align-items: baseline; /* Make items have the same height */
+  align-items: center; /* Changed from baseline to center for better alignment */
   gap: 10px;
   width: 100%;
+  margin-bottom: 20px; /* Add margin to separate from content below */
 }
 
 .predmet-dodavanje-input {
@@ -220,6 +221,13 @@
 .predmet-dodavanje .autocomplete-field {
   padding: 0;
   background-color: transparent;
+  margin-bottom: 0; /* Ensure no extra margin here */
+}
+
+.predmet-dodavanje .autocomplete-field .field-label {
+  flex-basis: 150px; /* Reduced label width by 50px as suggested */
+  flex-shrink: 0;
+  padding-right: 15px;
 }
 
 .predmet-dodavanje .broj-input {
@@ -232,13 +240,15 @@
 }
 
 .button-add-special {
-  padding: 0 15px; /* Use !important to override general button styles */
+  padding: 0 15px;
   font-size: 1.5em;
   flex-shrink: 0; /* Prevent the button from shrinking */
+  height: 40px; /* Explicit height to match input */
+  align-self: flex-start;
 }
 
 .dodani-predmeti-kontejner {
-  margin-top: 15px;
+  margin-bottom: 20px; /* Added margin for separation */
   display: flex;
   flex-wrap: wrap;
   gap: 10px;

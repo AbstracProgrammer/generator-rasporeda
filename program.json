@@ -2,7 +2,12 @@
     {
         "id": 1770316426038,
         "naziv": "123467",
-        "popis_predmeta": []
+        "popis_predmeta": [
+            {
+                "predmet_id": 2,
+                "weekly_requirement": 2
+            }
+        ]
     },
     {
         "id": 1770318764573,
@@ -21,6 +26,16 @@
             {
                 "predmet_id": 2,
                 "weekly_requirement": 2
+            }
+        ]
+    },
+    {
+        "id": 1770319765223,
+        "naziv": "123",
+        "popis_predmeta": [
+            {
+                "predmet_id": 2,
+                "weekly_requirement": 4
             }
         ]
     }
