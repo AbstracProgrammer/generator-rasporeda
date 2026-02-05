@@ -151,61 +151,61 @@
 }
 
 .unavailable-times-section {
-    border: 1px solid #e0e0e0;
-    padding: 15px;
-    margin-top: 10px;
-    border-radius: 8px;
-    background-color: #fafafa;
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 8px;
+  background-color: #fafafa;
 }
 
 .unavailable-input-row {
-    display: flex;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-    align-items: center;
-    gap: 15px; /* Space between elements */
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  align-items: center;
+  gap: 15px; /* Space between elements */
 }
 
 .unavailable-input-row .select-wrapper,
 .unavailable-input-row .checkbox-field {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 0; /* Remove margin from parent .input-field style */
-    padding: 0;
-    background-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 0; /* Remove margin from parent .input-field style */
+  padding: 0;
+  background-color: transparent;
 }
 
 .unavailable-input-row .field-label {
-    flex-basis: auto; /* Key change */
-    padding-right: 5px;
+  flex-basis: auto; /* Key change */
+  padding-right: 5px;
 }
 
 .unavailable-input-row .button.add-unavailable-time-btn {
-    padding: 5px 10px;
-    font-size: 1.2em;
-    min-width: 40px; /* Ensure button has a decent size */
+  padding: 5px 10px;
+  font-size: 1.2em;
+  min-width: 40px; /* Ensure button has a decent size */
 }
 
 .unavailable-hour-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 15px;
-    flex-basis: 100%; /* Force it to a new line */
-    margin-top: 10px; /* Space from the elements above */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  flex-basis: 100%; /* Force it to a new line */
+  margin-top: 10px; /* Space from the elements above */
 }
 
 .added-unavailable-times-display {
-    margin-top: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 /* Styles for Programi Step */
 .predmet-dodavanje {
   display: flex;
-  align-items: stretch; /* Make items have the same height */
+  align-items: baseline; /* Make items have the same height */
   gap: 10px;
   width: 100%;
 }
@@ -218,7 +218,6 @@
 
 /* Make autocomplete field inside this structure have no bottom margin */
 .predmet-dodavanje .autocomplete-field {
-  margin-bottom: 0;
   padding: 0;
   background-color: transparent;
 }
@@ -233,9 +232,8 @@
 }
 
 .button-add-special {
-  padding: 0 15px !important; /* Use !important to override general button styles */
-  font-size: 1.5em !important;
-  line-height: 1;
+  padding: 0 15px; /* Use !important to override general button styles */
+  font-size: 1.5em;
   flex-shrink: 0; /* Prevent the button from shrinking */
 }
 
