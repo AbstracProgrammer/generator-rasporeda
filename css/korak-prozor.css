@@ -201,3 +201,47 @@
     flex-wrap: wrap;
     gap: 10px;
 }
+
+/* Styles for Programi Step */
+.predmet-dodavanje {
+  display: flex;
+  align-items: stretch; /* Make items have the same height */
+  gap: 10px;
+  width: 100%;
+}
+
+.predmet-dodavanje-input {
+  flex-grow: 1; /* Allow input fields to grow */
+  display: flex;
+  flex-direction: column; /* Stack label and input vertically if needed */
+}
+
+/* Make autocomplete field inside this structure have no bottom margin */
+.predmet-dodavanje .autocomplete-field {
+  margin-bottom: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+.predmet-dodavanje .broj-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  width: 100%; /* Make it fill the container */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.button-add-special {
+  padding: 0 15px !important; /* Use !important to override general button styles */
+  font-size: 1.5em !important;
+  line-height: 1;
+  flex-shrink: 0; /* Prevent the button from shrinking */
+}
+
+.dodani-predmeti-kontejner {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

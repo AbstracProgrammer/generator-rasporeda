@@ -2,6 +2,7 @@ import { prikaziKorakUcionice, spremiKorakUcionice, dodajNovuUcionicu } from './
 import { prikaziKorakPredmeti, spremiKorakPredmeti, dodajNoviPredmet } from './koraciKomponente/predmeti.js';
 import { prikaziKorakProfesori, spremiKorakProfesori, dodajNovogProfesora } from './koraciKomponente/profesori.js';
 import { prikaziKorakRazredi, spremiKorakRazredi, dodajNovoOdjeljenje } from './koraciKomponente/razredi.js';
+import { prikaziProzorZaUnosPrograma, spremiNovePrograme, dodajNoviProgram } from './koraciKomponente/programi.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const koraci = document.querySelectorAll(".korak");
@@ -13,12 +14,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveAndAddNewButton = modal.querySelector(".save-and-add-new-button");
   const saveStepButton = modal.querySelector(".save-step");
 
+  const closeModalAndRefresh = () => {
+    closeModal();
+    azurirajStatusKorakaNaUcitavanju();
+  };
+
   /**
    * Acts as a router to call the correct function for building the modal content.
    * @param {string} step - The 'data-step' attribute value.
    */
   const prikaziKorak = (step) => {
     modal.dataset.step = step; // Set current step on the modal
+
+    // Reset button text to default, then customize if needed
+    saveAndAddNewButton.textContent = "Spremi i dodaj novi";
+
     switch (step) {
       case "ucionice":
         prikaziKorakUcionice(modalBody); // Pass the main body
@@ -31,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "razredi":
         prikaziKorakRazredi(modalBody);
+        break;
+      case "programi":
+        saveAndAddNewButton.textContent = "Dodaj novi";
+        prikaziProzorZaUnosPrograma(modalBody);
         break;
       // Add cases for other steps here in the future
       default:
@@ -92,6 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return await spremiKorakProfesori();
       case "razredi":
         return await spremiKorakRazredi();
+      case "programi":
+        return await spremiNovePrograme();
       default:
         console.error("Nema definirane logike spremanja za korak:", step);
         return {
@@ -121,6 +137,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "razredi":
         await dodajNovoOdjeljenje(formContainer);
+        break;
+      case "programi":
+        await dodajNoviProgram();
         break;
     }
   };
