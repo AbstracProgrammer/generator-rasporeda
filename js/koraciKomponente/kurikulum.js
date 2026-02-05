@@ -3,7 +3,7 @@ import {
   displayError,
   initializeAutocomplete,
 } from "../korakProzor.js";
-import { dohvatiPrijedloge } from "../upraviteljPrijedloga.js";
+import { spremiJSON } from "../spremiJSON.js";
 
 // Helper to fetch full data (not just suggestions)
 async function fetchJsonData(fileName) {
@@ -25,15 +25,22 @@ async function fetchJsonData(fileName) {
 let allSubjects = [];
 let allProfessors = [];
 let allPrograms = [];
+let allRazredi = []; // New: store all razredi
+
+let tempAssignments = []; // Store temporarily added assignments
+let tempAssignmentIdCounter = 1; // Counter for temporary IDs
 
 export async function prikaziKurikulum() {
   const modalContent = document.querySelector(".korak-prozor .modal-content");
-  console.log(modalContent);
+  const newItemsDisplay = document.querySelector(
+    ".korak-prozor .new-items-display",
+  ); // Get newItemsDisplay
 
   // Fetch all necessary base data only once when modal is opened
   allSubjects = await fetchJsonData("predmeti");
   allProfessors = await fetchJsonData("profesori");
   allPrograms = await fetchJsonData("program");
+  allRazredi = await fetchJsonData("razredi"); // Fetch all razredi
 
   const razredAutocompleteHTML = createStrictAutocompleteInput(
     "Odaberi Razred",
@@ -67,10 +74,8 @@ export async function prikaziKurikulum() {
   const razredInput = modalContent.querySelector(
     "#razred-selector-wrapper input",
   );
-  const razrediPrijedlozi = await dohvatiPrijedloge(
-    "razredi",
-    (razred) => razred.oznaka,
-  );
+  // razrediPrijedlozi now derived from allRazredi
+  const razrediPrijedlozi = allRazredi.map((razred) => razred.oznaka);
   initializeAutocomplete(razredInput, razrediPrijedlozi, true);
 
   const programInput = modalContent.querySelector(
@@ -105,8 +110,116 @@ export async function prikaziKurikulum() {
     renderProgramSubjects(selectedProgram, programSubjectsContainer);
   });
 
-  // Initial render if program is already selected (e.g. on modal re-open with data)
-  // This part is for later, when we handle editing existing curriculum items.
+  // Render temporary assignments initially (e.g., when modal re-opens)
+  renderTempAssignments(newItemsDisplay);
+}
+
+// Function to add a new set of curriculum assignments based on form input
+export async function dodajNoviKurikulum(modalBody) {
+  const modalContent = modalBody.querySelector(".modal-content");
+  const newItemsDisplay = modalBody.querySelector(".new-items-display");
+
+  const razredInput = modalContent.querySelector(
+    "#razred-selector-wrapper input",
+  );
+  const programInput = modalContent.querySelector(
+    "#program-selector-wrapper input",
+  );
+  const programSubjectsContainer = modalContent.querySelector(
+    "#program-subjects-container",
+  );
+
+  const selectedRazredOznaka = razredInput.value.trim();
+  const selectedProgramNaziv = programInput.value.trim();
+
+  // 1. Validation
+  if (!selectedRazredOznaka) {
+    displayError("Molimo odaberite razred.");
+    return;
+  }
+  if (!selectedProgramNaziv) {
+    displayError("Molimo odaberite program.");
+    return;
+  }
+
+  const razred = allRazredi.find(
+    (r) => r.oznaka.toLowerCase() === selectedRazredOznaka.toLowerCase(),
+  );
+  if (!razred) {
+    displayError(`Razred "${selectedRazredOznaka}" nije pronađen.`);
+    return;
+  }
+
+  const selectedProgram = allPrograms.find(
+    (p) => p.naziv.toLowerCase() === selectedProgramNaziv.toLowerCase(),
+  );
+  if (!selectedProgram) {
+    displayError(`Program "${selectedProgramNaziv}" nije pronađen.`);
+    return;
+  }
+
+  const assignmentsToAdd = [];
+  const professorInputs = programSubjectsContainer.querySelectorAll(
+    ".program-subject-entry input",
+  );
+
+  if (professorInputs.length === 0) {
+    displayError("Nema predmeta za dodjelu profesora u odabranom programu.");
+    return;
+  }
+
+  for (const input of professorInputs) {
+    const selectedProfessorName = input.value.trim();
+    const subjectEntryDiv = input.closest(".program-subject-entry");
+    const subjectId = parseInt(subjectEntryDiv.dataset.subjectId, 10);
+    const subject = allSubjects.find((s) => s.id === subjectId);
+
+    if (!selectedProfessorName) {
+      displayError(
+        `Molimo odaberite profesora za predmet "${subject ? subject.naziv : "nepoznat"}"`,
+      );
+      return;
+    }
+
+    const professor = allProfessors.find(
+      (p) =>
+        `${p.ime} ${p.prezime}`.toLowerCase() ===
+        selectedProfessorName.toLowerCase(),
+    );
+    if (!professor) {
+      displayError(`Profesor "${selectedProfessorName}" nije pronađen.`);
+      return;
+    }
+
+    const programSubject = selectedProgram.popis_predmeta.find(
+      (ps) => ps.predmet_id === subjectId,
+    );
+    if (!programSubject) {
+      console.error(`Program subject not found for subject ID: ${subjectId}`);
+      continue; // Should not happen if data is consistent
+    }
+
+    const newAssignment = {
+      id: tempAssignmentIdCounter++, // Assign a temporary ID
+      predmet_id: subjectId,
+      profesor_id: professor.id,
+      razredi_id: [razred.id], // Single class for now
+      sati_tjedno: programSubject.weekly_requirement,
+      paralelna_grupa_id: null, // Default for now
+      program_id: selectedProgram.id, // Add program_id for easier grouping
+    };
+    assignmentsToAdd.push(newAssignment);
+  }
+
+  // Add to temp storage
+  tempAssignments.push(...assignmentsToAdd);
+  renderTempAssignments(newItemsDisplay);
+
+  // 2. Clear form
+  razredInput.value = "";
+  programInput.value = "";
+  programSubjectsContainer.innerHTML = ""; // Clear rendered subjects
+  displayError(""); // Clear any previous error message
 }
 
 async function renderProgramSubjects(selectedProgram, container) {
@@ -149,4 +262,125 @@ async function renderProgramSubjects(selectedProgram, container) {
   subjectProfessorInputs.forEach((item) => {
     initializeAutocomplete(item.input, item.suggestions, true);
   });
+}
+
+function renderTempAssignments(container) {
+  container.innerHTML = ""; // Clear existing display
+
+  if (tempAssignments.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  container.style.display = "block"; // Show container if there are items
+
+  // Group assignments by class and program for display, as they conceptually belong together
+  const groupedAssignments = {}; // Key: "RazredOznaka - ProgramNaziv"
+
+  for (const assignment of tempAssignments) {
+    const razred = allRazredi.find((r) => r.id === assignment.razredi_id[0]);
+    const program = allPrograms.find((p) => p.id === assignment.program_id);
+    const subject = allSubjects.find((s) => s.id === assignment.predmet_id);
+    const professor = allProfessors.find(
+      (p) => p.id === assignment.profesor_id,
+    );
+
+    if (!razred || !program || !subject || !professor) {
+      console.warn("Could not find full details for assignment:", assignment);
+      continue;
+    }
+
+    const groupKey = `${razred.oznaka} - ${program.naziv}`;
+    if (!groupedAssignments[groupKey]) {
+      groupedAssignments[groupKey] = {
+        razredOznaka: razred.oznaka,
+        programNaziv: program.naziv,
+        assignments: [],
+        tempIds: [], // Store temp IDs for this group for deletion
+      };
+    }
+    groupedAssignments[groupKey].assignments.push({
+      subjectNaziv: subject.naziv,
+      professorName: `${professor.ime} ${professor.prezime}`,
+      sati_tjedno: assignment.sati_tjedno,
+    });
+    groupedAssignments[groupKey].tempIds.push(assignment.id);
+  }
+
+  for (const key in groupedAssignments) {
+    const group = groupedAssignments[key];
+    const groupDiv = document.createElement("div");
+    groupDiv.classList.add("new-item-tag", "kurikulum-group-tag");
+    groupDiv.innerHTML = `
+            <span>${group.razredOznaka} (${group.programNaziv})</span>
+            <button class="delete-temp-item-btn" data-group-temp-ids="${group.tempIds.join(",")}">X</button>
+            <ul>
+                ${group.assignments.map((a) => `<li>${a.subjectNaziv} (${a.sati_tjedno}h) - ${a.professorName}</li>`).join("")}
+            </ul>
+        `;
+    container.appendChild(groupDiv);
+  }
+
+  // Add event listeners for delete buttons
+  container.querySelectorAll(".delete-temp-item-btn").forEach((button) => {
+    button.addEventListener("click", (e) => {
+      const tempIdsToDelete = e.target.dataset.groupTempIds
+        .split(",")
+        .map(Number);
+      tempAssignments = tempAssignments.filter(
+        (a) => !tempIdsToDelete.includes(a.id),
+      );
+      renderTempAssignments(container);
+    });
+  });
+}
+export async function spremiKorakKurikulum() {
+  try {
+    let existingKurikulum = await fetchJsonData("kurikulum"); // Get existing data
+
+    // Filter out any tempAssignments that might be exact duplicates of existing ones
+    // A simple duplicate check for the sake of this task
+    const newAssignmentsFiltered = tempAssignments.filter(
+      (tempAssign) =>
+        !existingKurikulum.some(
+          (existingAssign) =>
+            existingAssign.predmet_id === tempAssign.predmet_id &&
+            existingAssign.profesor_id === tempAssign.profesor_id &&
+            existingAssign.razredi_id.every(
+              (id, idx) => id === tempAssign.razredi_id[idx],
+            ) &&
+            // Note: program_id is not part of the kurikulum.json schema, so don't compare it for existing
+            // This check is to avoid adding the exact same assignment if it was already saved
+            existingAssign.sati_tjedno === tempAssign.sati_tjedno &&
+            (existingAssign.paralelna_grupa_id ===
+              tempAssign.paralelna_grupa_id ||
+              (!existingAssign.paralelna_grupa_id &&
+                !tempAssign.paralelna_grupa_id)),
+        ),
+    );
+
+    let combinedKurikulum = [...existingKurikulum, ...newAssignmentsFiltered];
+
+    // Re-assign all IDs to ensure uniqueness and sequentiality
+    let currentId = 1;
+    combinedKurikulum = combinedKurikulum.map((assignment) => {
+      const { program_id, ...rest } = assignment; // Destructure to omit program_id
+      return { ...rest, id: currentId++ };
+    });
+
+    const result = await spremiJSON("kurikulum.json", combinedKurikulum);
+
+    if (result.success) {
+      tempAssignments = []; // Clear temporary state after successful save
+      tempAssignmentIdCounter = 1;
+      // Ideally, the UI should also be refreshed to show the newly saved items as "existing"
+      // For now, this is sufficient.
+      return { success: true };
+    } else {
+      return { success: false, message: result.message };
+    }
+  } catch (error) {
+    console.error("Greška pri spremanju koraka Kurikulum:", error);
+    return { success: false, message: error.message };
+  }
 }

@@ -1,4 +1,4 @@
-import { prikaziKurikulum } from "./koraciKomponente/kurikulum.js";
+import { prikaziKurikulum, dodajNoviKurikulum, spremiKorakKurikulum } from "./koraciKomponente/kurikulum.js";
 import {
   dodajNoviPredmet,
   prikaziKorakPredmeti,
@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalTitle = modal.querySelector("h3");
   const modalBody = modal.querySelector(".modal-body"); // The main container for both columns
   const exitButton = modal.querySelector(".exit");
-  const saveAndAddNewButton = modal.querySelector(".save-and-add-new-button");
-  const saveStepButton = modal.querySelector(".save-step");
+  const saveAndAddNewButton = modal.querySelector("button.save-and-add-new-button"); // Changed selector to be more specific
+  const saveStepButton = modal.querySelector("button.save-step"); // Changed selector to be more specific
 
   const closeModalAndRefresh = () => {
     closeModal();
@@ -131,6 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return await spremiKorakRazredi();
       case "programi":
         return await spremiNovePrograme();
+      case "kurikulum":
+        return await spremiKorakKurikulum();
       default:
         console.error("Nema definirane logike spremanja za korak:", step);
         return {
@@ -163,6 +165,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "programi":
         await dodajNoviProgram();
+        break;
+      case "kurikulum":
+        await dodajNoviKurikulum(modalBody);
         break;
     }
   };

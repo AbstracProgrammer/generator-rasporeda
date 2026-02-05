@@ -1,1 +1,12 @@
-[]
+[
+    {
+        "id": 1,
+        "predmet_id": 2,
+        "profesor_id": 1,
+        "razredi_id": [
+            1
+        ],
+        "sati_tjedno": 2,
+        "paralelna_grupa_id": null
+    }
+]

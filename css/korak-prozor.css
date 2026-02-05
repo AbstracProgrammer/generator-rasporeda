@@ -221,7 +221,6 @@
 .predmet-dodavanje .autocomplete-field {
   padding: 0;
   background-color: transparent;
-  margin-bottom: 0; /* Ensure no extra margin here */
 }
 
 .predmet-dodavanje .autocomplete-field .field-label {
