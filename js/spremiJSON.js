@@ -4,7 +4,7 @@
  * @param {object | Array} jsonData - The JavaScript object or array to be saved.
  * @returns {Promise<object>} A promise that resolves with the server's response.
  */
-async function spremiJSON(fileName, jsonData) {
+export async function spremiJSON(fileName, jsonData) {
   const url = "server/SaveJSON.php";
 
   try {

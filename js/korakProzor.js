@@ -8,7 +8,7 @@
  */
 let timeoutID = null;
 
-function displayError(message) {
+export function displayError(message) {
   const errorElement = document.querySelector(".korak-prozor .error");
   if (errorElement.textContent === message) {
     return;
@@ -29,11 +29,11 @@ function displayError(message) {
  * @param {string} [id=""] - Optional: An ID for the input element.
  * @returns {string} - The HTML string for the input field.
  */
-function createSimpleInput(labelText, placeholder, id = "") {
+export function createSimpleInput(labelText, placeholder, id = "") {
   return `
     <div class="input-field">
       <span class="field-label">${labelText}</span>
-      <input type="text" ${id ? `id="${id}"` : ''} placeholder="${placeholder || ""}">
+      <input type="text" ${id ? `id="${id}"` : ""} placeholder="${placeholder || ""}">
     </div>
   `;
 }
@@ -44,7 +44,7 @@ function createSimpleInput(labelText, placeholder, id = "") {
  * @param {string} placeholder - The placeholder text for the input.
  * @returns {string} - The HTML string for the autocomplete field.
  */
-function createAutocompleteInput(labelText, placeholder) {
+export function createAutocompleteInput(labelText, placeholder) {
   return `
     <div class="autocomplete-field">
       <span class="field-label">${labelText}</span>
@@ -63,17 +63,29 @@ function createAutocompleteInput(labelText, placeholder) {
  * @param {boolean} [strictMode=false] - If true, only values from suggestionsArray are allowed.
  * @param {HTMLElement} [suggestionsListElement=null] - Optional: A specific HTMLElement to use as the suggestions list container.
  */
-function initializeAutocomplete(inputElement, suggestionsArray, strictMode = false, suggestionsListElement = null) {
-  const suggestionsList = suggestionsListElement || inputElement.parentElement.querySelector(".suggestions-list");
+export function initializeAutocomplete(
+  inputElement,
+  suggestionsArray,
+  strictMode = false,
+  suggestionsListElement = null,
+) {
+  const suggestionsList =
+    suggestionsListElement ||
+    inputElement.parentElement.querySelector(".suggestions-list");
 
   if (!suggestionsList) {
-    console.warn("Nema 'suggestions-list' elementa za autocomplete input:", inputElement);
+    console.warn(
+      "Nema 'suggestions-list' elementa za autocomplete input:",
+      inputElement,
+    );
     return; // Cannot initialize if no suggestions list element is found
   }
 
   const showSuggestions = (filter = "") => {
     suggestionsList.innerHTML = "";
-    const filtered = suggestionsArray.filter(s => s.toLowerCase().includes(filter.toLowerCase()));
+    const filtered = suggestionsArray.filter((s) =>
+      s.toLowerCase().includes(filter.toLowerCase()),
+    );
 
     if (filtered.length > 0) {
       filtered.forEach((s) => {
@@ -95,7 +107,7 @@ function initializeAutocomplete(inputElement, suggestionsArray, strictMode = fal
   inputElement.addEventListener("input", () => {
     showSuggestions(inputElement.value);
   });
-  
+
   inputElement.addEventListener("click", () => {
     showSuggestions(inputElement.value);
   });
@@ -104,7 +116,12 @@ function initializeAutocomplete(inputElement, suggestionsArray, strictMode = fal
     inputElement.addEventListener("blur", () => {
       // Small delay to allow click on suggestion to register
       setTimeout(() => {
-        if (!suggestionsArray.some(s => s.toLowerCase() === inputElement.value.toLowerCase()) && inputElement.value.trim() !== '') {
+        if (
+          !suggestionsArray.some(
+            (s) => s.toLowerCase() === inputElement.value.toLowerCase(),
+          ) &&
+          inputElement.value.trim() !== ""
+        ) {
           displayError("Odabrana vrijednost mora biti s popisa. ");
           inputElement.value = ""; // Clear invalid input
         }
@@ -127,7 +144,7 @@ function initializeAutocomplete(inputElement, suggestionsArray, strictMode = fal
  * @param {string} placeholder - The placeholder text for the input.
  * @returns {string} - The HTML string for the strict autocomplete field.
  */
-function createStrictAutocompleteInput(labelText, placeholder) {
+export function createStrictAutocompleteInput(labelText, placeholder) {
   return `
     <div class="autocomplete-field strict-autocomplete">
       <span class="field-label">${labelText}</span>
@@ -145,7 +162,7 @@ function createStrictAutocompleteInput(labelText, placeholder) {
  * @param {string} placeholder - The placeholder text for the input.
  * @returns {string} - The HTML string for the multi-select autocomplete field.
  */
-function createMultiSelectAutocompleteInput(labelText, placeholder) {
+export function createMultiSelectAutocompleteInput(labelText, placeholder) {
   return `
     <div class="autocomplete-field multi-select-autocomplete">
       <span class="field-label">${labelText}</span>
@@ -166,17 +183,29 @@ function createMultiSelectAutocompleteInput(labelText, placeholder) {
  * @param {Function} onItemSelected - Callback function when an item is selected. Receives (itemText).
  * @param {Function} onItemRemoved - Callback function when an item is removed. Receives (itemText).
  */
-function initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selectedTagsContainer, onItemSelected, onItemRemoved) {
-  const suggestionsList = inputElement.parentElement.querySelector(".suggestions-list");
+export function initializeMultiSelectAutocomplete(
+  inputElement,
+  suggestionsArray,
+  selectedTagsContainer,
+  onItemSelected,
+  onItemRemoved,
+) {
+  const suggestionsList =
+    inputElement.parentElement.querySelector(".suggestions-list");
 
   if (!suggestionsList) {
-    console.warn("Nema 'suggestions-list' elementa za multi-select autocomplete input:", inputElement);
+    console.warn(
+      "Nema 'suggestions-list' elementa za multi-select autocomplete input:",
+      inputElement,
+    );
     return;
   }
 
   const showSuggestions = (filter = "") => {
     suggestionsList.innerHTML = "";
-    const filtered = suggestionsArray.filter(s => s.toLowerCase().includes(filter.toLowerCase()));
+    const filtered = suggestionsArray.filter((s) =>
+      s.toLowerCase().includes(filter.toLowerCase()),
+    );
 
     if (filtered.length > 0) {
       filtered.forEach((s) => {
@@ -200,7 +229,7 @@ function initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selec
   inputElement.addEventListener("input", () => {
     showSuggestions(inputElement.value);
   });
-  
+
   inputElement.addEventListener("click", () => {
     showSuggestions(inputElement.value);
   });
@@ -209,7 +238,12 @@ function initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selec
     setTimeout(() => {
       suggestionsList.style.display = "none";
       // Clear input if an invalid value is left (strict mode)
-      if (inputElement.value.trim() !== '' && !suggestionsArray.some(s => s.toLowerCase() === inputElement.value.toLowerCase())) {
+      if (
+        inputElement.value.trim() !== "" &&
+        !suggestionsArray.some(
+          (s) => s.toLowerCase() === inputElement.value.toLowerCase(),
+        )
+      ) {
         displayError("Odabrana vrijednost mora biti s popisa. ");
         inputElement.value = "";
       }
@@ -219,7 +253,7 @@ function initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selec
   // Function to render selected tags
   const renderSelectedTags = (selectedItems) => {
     selectedTagsContainer.innerHTML = "";
-    selectedItems.forEach(itemText => {
+    selectedItems.forEach((itemText) => {
       const tag = document.createElement("div");
       tag.classList.add("new-item-tag"); // Reusing this class for visual consistency
       tag.textContent = itemText;

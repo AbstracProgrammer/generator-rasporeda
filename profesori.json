@@ -27,7 +27,17 @@
         "struka_predmeti_id": [
             2
         ],
-        "nedostupan": [],
+        "nedostupan": {
+            "1": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+            ]
+        },
         "fiksna_ucionica_id": null
     }
 ]

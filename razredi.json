@@ -142,5 +142,23 @@
         "godina": 4,
         "odjeljenje": "gdsfdsfd",
         "oznaka": "4.gdsfdsfd"
+    },
+    {
+        "id": 25,
+        "godina": 1,
+        "odjeljenje": "1",
+        "oznaka": "1.1"
+    },
+    {
+        "id": 26,
+        "godina": 2,
+        "odjeljenje": "1",
+        "oznaka": "2.1"
+    },
+    {
+        "id": 27,
+        "godina": 3,
+        "odjeljenje": "1",
+        "oznaka": "3.1"
     }
 ]

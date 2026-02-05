@@ -6,15 +6,15 @@
  * @param {Function} propertyExtractor - A function that takes an item object and returns the property (or array of properties) to be used as suggestions.
  * @returns {Promise<string[]>} A promise that resolves to an array of unique suggestion strings.
  */
-async function dohvatiPrijedloge(fileName, propertyExtractor) {
+export async function dohvatiPrijedloge(fileName, propertyExtractor) {
   try {
     const response = await fetch(fileName);
     const text = await response.text();
     const data = text ? JSON.parse(text) : [];
-    
+
     // Use flatMap to handle cases where propertyExtractor returns an array (e.g., item.tip)
-    const sviPropertyji = data.flatMap(item => propertyExtractor(item) || []);
-    
+    const sviPropertyji = data.flatMap((item) => propertyExtractor(item) || []);
+
     // Filter out empty strings and return unique values
     return [...new Set(sviPropertyji)].filter(Boolean);
   } catch (error) {

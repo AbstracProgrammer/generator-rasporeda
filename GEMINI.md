@@ -80,38 +80,27 @@ This section of the documentation describes the purpose of each file within the 
 
 - **`index.js`:** The core of the application. It acts as the main orchestrator:
   - Manages opening and closing the modal window.
-  - Dispatches calls to step-specific functions (`displayClassroomStep`, `saveClassroomStep`, etc.).
+  - Dispatches calls to step-specific functions from the `koraciKomponente` modules.
   - Handles the global state of steps (which is `.active`, `.completed`, `.locked`) based on saved JSON files.
-  - Contains logic for checking unsaved data when closing the modal.
 - **`korakProzor.js`:** A library of generic UI components and helper functions:
   - `createSimpleInput(labelText, placeholder)`: Generates HTML for a simple text input field.
-  - `createAutocompleteInput(labelText, placeholder)`: Generates HTML for an autocomplete field with the ability to dynamically add new suggestions (no "+" button, but new input is added to the suggestions list).
-  - `createStrictAutocompleteInput(labelText, placeholder)`: Generates HTML for an autocomplete field that allows **only selection** of existing suggestions, without creating new ones.
-  - `createMultiSelectAutocompleteInput(labelText, placeholder)`: Generates HTML for a multi-select autocomplete field, allowing selection of multiple tags from suggestions.
-  - `initializeAutocomplete(inputElement, suggestionsArray, strictMode, suggestionsListElement)`: Initializes autocomplete functionality for a given input element.
-  - `initializeMultiSelectAutocomplete(inputElement, suggestionsArray, selectedTagsContainer, onItemSelected, onItemRemoved)`: Initializes multi-select autocomplete functionality, managing selected tags and their display.
+  - `createAutocompleteInput(labelText, placeholder)`: Generates HTML for an autocomplete field.
+  - `createStrictAutocompleteInput(labelText, placeholder)`: Generates HTML for an autocomplete field that only allows selection.
+  - `createMultiSelectAutocompleteInput(labelText, placeholder)`: Generates HTML for a multi-select autocomplete field.
+  - `initializeAutocomplete(...)`: Initializes autocomplete functionality.
+  - `initializeMultiSelectAutocomplete(...)`: Initializes multi-select autocomplete functionality.
   - `displayError(message)`: Displays a temporary error message within the modal window.
 - **`spremiJSON.js`:** Encapsulates the logic for communicating with the PHP backend to save JSON files to the server (`saveJSON(fileName, jsonData)` function).
 - **`upraviteljPrijedloga.js`:** A generic module for fetching and processing data:
-  - `fetchSuggestions(fileName, propertyExtractor)`: Fetches a JSON file and extracts unique values of a specific property for use as suggestions.
-- **`koraciUpravitelj.js`:** Contains specific data management logic (validation, saving, editing, deleting) for each step, along with some generic helper functions:
-  - `temporaryEntries`: A global object for storing temporarily added items before final saving (now includes `profesori` and `razredi`).
-  - `checkDuplicateName(...)`: A generic function for checking duplicate names.
-  - `findOrCreateId(fileName, itemName, nameField)`: A generic function that finds an item's ID by name in any JSON file, or creates a new item and returns its ID if it doesn't exist.
-  - **Classroom-specific functions:** `displayTemporaryClassroomEntries`, `validateAndCreateClassroom`, `addClassroomTemporarily`, `saveClassroomStep`, `editClassroom`, `deleteClassroom`.
-  - **Subject-specific functions:** `validateAndCreateSubject`, `addSubjectTemporarily`, `saveSubjectStep`, `editSubject`, `deleteSubject`, `displayTemporarySubjectEntries`.
-  - **Teacher-specific functions:** `displayTemporaryTeacherEntries`, `validateAndCreateTeacher`, `addTeacherTemporarily`, `saveTeacherStep`, `editTeacher`, `deleteTeacher`.
-  - **Class-specific functions:** `prikaziPrivremeneUnoseRazredi`, `dodajNovoOdjeljenje`, `spremiKorakRazredi`, `obrisiOdjeljenje`, `urediOdjeljenje`.
-- **`korakGeneriraj.js`:** Responsible for building the dynamic UI (forms) for each step within the modal window.
-  - `displayClassroomStep(modalBody)`: Builds the form for entering classrooms.
-  - `displaySubjectStep(modalBody)`: Builds the form for entering subjects.
-  - `displayTeacherStep(modalBody)`: Builds the form for entering teachers (including multi-select subjects).
-  - `prikaziKorakRazredi(modalBody)`: Builds the form for entering class sections.
-- **`korakPrikaziDodano.js`:** Responsible for rendering and managing interactions (editing/deleting) with existing data in the right-hand column of the modal window.
-  - **Classrooms:** `displayExistingClassrooms`, `renderClassroomDisplayMode`, `renderClassroomEditMode`.
-  - **Subjects:** `displayExistingSubjects`, `renderSubjectDisplayMode`, `renderSubjectEditMode`.
-  - **Teachers:** `displayExistingTeachers`, `renderTeacherDisplayMode`, `renderTeacherEditMode`.
-  - **Classes:** `prikaziPostojeceRazrede`, `renderRazredDisplayMode`, `renderRazredEditMode`.
+  - `dohvatiPrijedloge(fileName, propertyExtractor)`: Fetches a JSON file and extracts unique values for use as suggestions.
+- **`utils.js`:** Contains generic helper functions shared across different modules.
+  - `provjeriDupliNaziv(...)`: A generic function for checking duplicate names.
+  - `pronadjiIliStvoriId(fileName, itemName, nameField)`: A generic function that finds an item's ID by name or creates a new item if it doesn't exist.
+- **`koraciKomponente/` (directory):** This directory holds the modular logic for each step of the process. Each file is a self-contained component responsible for its own data management, form generation, and display logic.
+  - **`ucionice.js`:** Handles all logic for the "Učionice" (Classrooms) step.
+  - **`predmeti.js`:** Handles all logic for the "Predmeti" (Subjects) step.
+  - **`profesori.js`:** Handles all logic for the "Profesori" (Teachers) step.
+  - **`razredi.js`:** Handles all logic for the "Razredi" (Classes) step.
 
 #### **4. PHP Files (`server/` directory)**
 
