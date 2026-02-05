@@ -205,10 +205,8 @@
 /* Styles for Programi Step */
 .predmet-dodavanje {
   display: flex;
-  align-items: center; /* Changed from baseline to center for better alignment */
   gap: 10px;
   width: 100%;
-  margin-bottom: 20px; /* Add margin to separate from content below */
 }
 
 .predmet-dodavanje-input {

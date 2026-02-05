@@ -267,15 +267,15 @@ async function renderProgramSubjects(selectedProgram, container) {
 function renderTempAssignments(container) {
   container.innerHTML = ""; // Clear existing display
 
+  // Group assignments by class and program for display, as they conceptually belong together
+  const groupedAssignments = {}; // Key: "RazredOznaka - ProgramNaziv"
+
   if (tempAssignments.length === 0) {
-    container.style.display = "none";
+    container.style.display = "block"; // Ensure it's visible even if empty
     return;
   }
 
   container.style.display = "block"; // Show container if there are items
-
-  // Group assignments by class and program for display, as they conceptually belong together
-  const groupedAssignments = {}; // Key: "RazredOznaka - ProgramNaziv"
 
   for (const assignment of tempAssignments) {
     const razred = allRazredi.find((r) => r.id === assignment.razredi_id[0]);
