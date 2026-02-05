@@ -1,27 +1,17 @@
 [
     {
-        "id": 1770315184999,
+        "id": 1770316040940,
         "naziv": "123",
         "popis_predmeta": [
             {
-                "predmet_id": 2,
+                "predmet_id": 1,
                 "weekly_requirement": 1
             }
         ]
     },
     {
-        "id": 1770315247014,
+        "id": 1770316426038,
         "naziv": "321",
-        "popis_predmeta": [
-            {
-                "predmet_id": 2,
-                "weekly_requirement": 2
-            }
-        ]
-    },
-    {
-        "id": 1770315617035,
-        "naziv": "675",
         "popis_predmeta": [
             {
                 "predmet_id": 1,

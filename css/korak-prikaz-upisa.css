@@ -188,3 +188,20 @@ img.save-edit-btn {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+/* Styles for Program Card */
+.program-card .naziv {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 8px;
+}
+
+.program-predmeti-lista {
+  list-style: none;
+  padding-left: 15px;
+  margin: 0;
+}
+
+.program-predmeti-lista li {
+  padding: 2px 0;
+}

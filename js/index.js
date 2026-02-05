@@ -1,8 +1,28 @@
-import { prikaziKorakUcionice, spremiKorakUcionice, dodajNovuUcionicu } from './koraciKomponente/ucionice.js';
-import { prikaziKorakPredmeti, spremiKorakPredmeti, dodajNoviPredmet } from './koraciKomponente/predmeti.js';
-import { prikaziKorakProfesori, spremiKorakProfesori, dodajNovogProfesora } from './koraciKomponente/profesori.js';
-import { prikaziKorakRazredi, spremiKorakRazredi, dodajNovoOdjeljenje } from './koraciKomponente/razredi.js';
-import { prikaziProzorZaUnosPrograma, spremiNovePrograme, dodajNoviProgram } from './koraciKomponente/programi.js';
+import {
+  dodajNoviPredmet,
+  prikaziKorakPredmeti,
+  spremiKorakPredmeti,
+} from "./koraciKomponente/predmeti.js";
+import {
+  dodajNovogProfesora,
+  prikaziKorakProfesori,
+  spremiKorakProfesori,
+} from "./koraciKomponente/profesori.js";
+import {
+  dodajNoviProgram,
+  prikaziProzorZaUnosPrograma,
+  spremiNovePrograme,
+} from "./koraciKomponente/programi.js";
+import {
+  dodajNovoOdjeljenje,
+  prikaziKorakRazredi,
+  spremiKorakRazredi,
+} from "./koraciKomponente/razredi.js";
+import {
+  dodajNovuUcionicu,
+  prikaziKorakUcionice,
+  spremiKorakUcionice,
+} from "./koraciKomponente/ucionice.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const koraci = document.querySelectorAll(".korak");
@@ -27,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.dataset.step = step; // Set current step on the modal
 
     // Reset button text to default, then customize if needed
-    saveAndAddNewButton.textContent = "Spremi i dodaj novi";
+    saveAndAddNewButton.textContent = "Dodaj novi";
 
     switch (step) {
       case "ucionice":
@@ -43,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
         prikaziKorakRazredi(modalBody);
         break;
       case "programi":
-        saveAndAddNewButton.textContent = "Dodaj novi";
         prikaziProzorZaUnosPrograma(modalBody);
         break;
       // Add cases for other steps here in the future
