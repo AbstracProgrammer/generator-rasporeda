@@ -252,6 +252,10 @@ function renderProgramEditMode(card, program) {
       .join("");
     container.querySelectorAll(".delete-temp-item-btn").forEach((btn) => {
       btn.onclick = () => {
+        if (predmetiUredivanja.length <= 1) {
+          displayError("Program mora imati barem jedan predmet.");
+          return;
+        }
         predmetiUredivanja.splice(
           predmetiUredivanja.findIndex(
             (p) => p.predmet_id === parseInt(btn.dataset.id, 10),
