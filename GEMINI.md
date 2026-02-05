@@ -101,6 +101,7 @@ This section of the documentation describes the purpose of each file within the 
   - **`predmeti.js`:** Handles all logic for the "Predmeti" (Subjects) step.
   - **`profesori.js`:** Handles all logic for the "Profesori" (Teachers) step.
   - **`razredi.js`:** Handles all logic for the "Razredi" (Classes) step.
+  - **`programi.js`:** Handles all logic for the "Programi" (Programs) step.
 
 #### **4. PHP Files (`server/` directory)**
 
@@ -156,3 +157,5 @@ The generator must solve the **Timetabling Problem (NP-Hard)** using a backtrack
 - Use English language when writing code, classes, etc. However use Croatian when writing to JSON and writing comments.
 - Always use classes css/template.css when generating new HTML, for example if you generate a button, you have to use the .button
 - Make sure that the elements are always responsive, use methods like clamp() function in CSS
+- Make sure you use the functions, methods defined here. Don't write new functions if not needed.
+- Make sure the implementations of certain things match like the rest od the files like js/koraciKompotente/ucionice.js

@@ -1,3 +1,4 @@
+import { prikaziKurikulum } from "./koraciKomponente/kurikulum.js";
 import {
   dodajNoviPredmet,
   prikaziKorakPredmeti,
@@ -64,6 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "programi":
         prikaziProzorZaUnosPrograma(modalBody);
+        break;
+      case "kurikulum":
+        prikaziKurikulum(modalBody);
         break;
       // Add cases for other steps here in the future
       default:

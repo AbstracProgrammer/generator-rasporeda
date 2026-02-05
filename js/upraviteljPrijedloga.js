@@ -8,17 +8,26 @@
  */
 export async function dohvatiPrijedloge(fileName, propertyExtractor) {
   try {
-    const response = await fetch(fileName);
+    const response = await fetch(`${fileName}.json`); // It will fetch from the root
+    if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const text = await response.text();
     const data = text ? JSON.parse(text) : [];
 
-    // Use flatMap to handle cases where propertyExtractor returns an array (e.g., item.tip)
-    const sviPropertyji = data.flatMap((item) => propertyExtractor(item) || []);
+    if (!Array.isArray(data)) {
+      console.error(`Očekivani format za ${fileName}.json je polje.`);
+      return [];
+    }
 
-    // Filter out empty strings and return unique values
-    return [...new Set(sviPropertyji)].filter(Boolean);
+    const prijedlozi = data.map(propertyExtractor).filter(Boolean);
+    return [...new Set(prijedlozi)];
   } catch (error) {
     console.error(`Greška pri dohvatu prijedloga iz ${fileName}:`, error);
-    return []; // Return empty array on error
+    return []; // Vrati prazno polje u slučaju greške
   }
 }
