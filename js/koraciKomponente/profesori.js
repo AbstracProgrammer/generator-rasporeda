@@ -144,6 +144,12 @@ export async function validirajIStvoriProfesora(
     .map((name) => subjectMap.get(name.toLowerCase()))
     .filter(Boolean); // Filter out any subjects not found
 
+  if (strukaPredmetiId.length === 0) {
+    displayError("Profesor mora predavati barem jedan predmet.");
+    return null;
+  }
+
+
   // Process unavailable times
   const unavailableTimesToggle = modalContent.querySelector(
     "#teacher-unavailable-toggle",

@@ -39,5 +39,15 @@
             ]
         },
         "fiksna_ucionica_id": null
+    },
+    {
+        "id": 4,
+        "ime": "tes",
+        "prezime": "tes",
+        "struka_predmeti_id": [
+            1
+        ],
+        "nedostupan": [],
+        "fiksna_ucionica_id": null
     }
 ]

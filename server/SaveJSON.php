@@ -43,7 +43,7 @@ if (!in_array($fileName, $allowedFiles)) {
 }
 
 // The path to the file. We assume the PHP script is in /server/ and the JSON files are in the root.
-$filePath = '../' . $fileName;
+$filePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . $fileName;
 
 // Convert the data back to a nicely formatted JSON string
 $jsonString = json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

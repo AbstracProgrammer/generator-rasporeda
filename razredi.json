@@ -146,19 +146,25 @@
     {
         "id": 25,
         "godina": 1,
-        "odjeljenje": "1",
-        "oznaka": "1.1"
+        "odjeljenje": "5",
+        "oznaka": "1.5"
     },
     {
         "id": 26,
         "godina": 2,
-        "odjeljenje": "1",
-        "oznaka": "2.1"
+        "odjeljenje": "5",
+        "oznaka": "2.5"
     },
     {
         "id": 27,
         "godina": 3,
-        "odjeljenje": "1",
-        "oznaka": "3.1"
+        "odjeljenje": "5",
+        "oznaka": "3.5"
+    },
+    {
+        "id": 28,
+        "godina": 4,
+        "odjeljenje": "5",
+        "oznaka": "4.5"
     }
 ]
