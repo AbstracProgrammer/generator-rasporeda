@@ -187,7 +187,7 @@ export async function urediUcionicu(ucionicaId, noviPodaci) {
     }
 
     const tipId = await pronadjiIliStvoriId(
-      "tipoviUcionica",
+      "tipoviUcionica.json",
       noviPodaci.nazivTipa,
     );
 

@@ -126,8 +126,8 @@ export async function validirajIStvoriProfesora(
   allTeachers,
   allSubjects,
 ) {
-  const imeInput = modalContent.querySelector("div:nth-of-type(1) input"); // First simple input
-  const prezimeInput = modalContent.querySelector("div:nth-of-type(2) input"); // Second simple input
+  const imeInput = modalContent.querySelector("#teacher-ime");
+  const prezimeInput = modalContent.querySelector("#teacher-prezime");
   const ime = imeInput.value.trim();
   const prezime = prezimeInput.value.trim();
   const selectedSubjects = modalContent.selectedSubjectNames || []; // From multi-select autocomplete
