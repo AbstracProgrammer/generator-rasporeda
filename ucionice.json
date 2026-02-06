@@ -1,42 +1,38 @@
 [
-    {
-        "id": 1,
-        "naziv": "tea123",
-        "tipovi_id": [
-            6
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 2,
-        "naziv": "fds",
-        "tipovi_id": [
-            6
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 3,
-        "naziv": "fdsafd",
-        "tipovi_id": [
-            2
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 4,
-        "naziv": "inf",
-        "tipovi_id": [
-            7
-        ],
-        "prioritet": 0
-    },
-    {
-        "id": 5,
-        "naziv": "tea",
-        "tipovi_id": [
-            8
-        ],
-        "prioritet": 0
-    }
+  {
+    "id": 1,
+    "naziv": "U-1",
+    "tipovi_id": [1],
+    "prioritet": 1
+  },
+  {
+    "id": 2,
+    "naziv": "U-2",
+    "tipovi_id": [1],
+    "prioritet": 0
+  },
+  {
+    "id": 3,
+    "naziv": "U-3",
+    "tipovi_id": [1],
+    "prioritet": 0
+  },
+  {
+    "id": 4,
+    "naziv": "INFO-1",
+    "tipovi_id": [2],
+    "prioritet": 1
+  },
+  {
+    "id": 5,
+    "naziv": "KEM-LAB",
+    "tipovi_id": [3],
+    "prioritet": 1
+  },
+  {
+    "id": 6,
+    "naziv": "Dvorana",
+    "tipovi_id": [4],
+    "prioritet": 1
+  }
 ]

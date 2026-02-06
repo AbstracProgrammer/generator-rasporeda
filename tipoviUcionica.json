@@ -1,34 +1,18 @@
 [
-    {
-        "id": 1,
-        "naziv": "123"
-    },
-    {
-        "id": 2,
-        "naziv": "asdasd"
-    },
-    {
-        "id": 3,
-        "naziv": "321"
-    },
-    {
-        "id": 4,
-        "naziv": "tzert"
-    },
-    {
-        "id": 5,
-        "naziv": "test"
-    },
-    {
-        "id": 6,
-        "naziv": "ass"
-    },
-    {
-        "id": 7,
-        "naziv": "1234"
-    },
-    {
-        "id": 8,
-        "naziv": "1111"
-    }
+  {
+    "id": 1,
+    "naziv": "Opća"
+  },
+  {
+    "id": 2,
+    "naziv": "Informatička"
+  },
+  {
+    "id": 3,
+    "naziv": "Kemijski laboratorij"
+  },
+  {
+    "id": 4,
+    "naziv": "Sportska dvorana"
+  }
 ]

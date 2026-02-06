@@ -1,22 +1,21 @@
 [
-    {
-        "id": 1,
-        "predmet_id": 2,
-        "profesor_id": 1,
-        "razredi_id": [
-            1
-        ],
-        "sati_tjedno": 2,
-        "paralelna_grupa_id": null
-    },
-    {
-        "id": 2,
-        "predmet_id": 1,
-        "profesor_id": 1,
-        "razredi_id": [
-            1
-        ],
-        "sati_tjedno": 2,
-        "paralelna_grupa_id": null
-    }
+  { "id": 1, "predmet_id": 1, "profesor_id": 1, "razredi_id": [1], "sati_tjedno": 4, "paralelna_grupa_id": null },
+  { "id": 2, "predmet_id": 2, "profesor_id": 2, "razredi_id": [1], "sati_tjedno": 4, "paralelna_grupa_id": null },
+  { "id": 3, "predmet_id": 3, "profesor_id": 3, "razredi_id": [1], "sati_tjedno": 3, "paralelna_grupa_id": null },
+  { "id": 4, "predmet_id": 4, "profesor_id": 4, "razredi_id": [1], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 5, "predmet_id": 5, "profesor_id": 5, "razredi_id": [1], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 6, "predmet_id": 6, "profesor_id": 6, "razredi_id": [1], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 7, "predmet_id": 7, "profesor_id": 1, "razredi_id": [1], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 8, "predmet_id": 8, "profesor_id": 5, "razredi_id": [1], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 9, "predmet_id": 9, "profesor_id": 7, "razredi_id": [1], "sati_tjedno": 2, "paralelna_grupa_id": 101 },
+
+  { "id": 10, "predmet_id": 1, "profesor_id": 1, "razredi_id": [2], "sati_tjedno": 4, "paralelna_grupa_id": null },
+  { "id": 11, "predmet_id": 2, "profesor_id": 2, "razredi_id": [2], "sati_tjedno": 4, "paralelna_grupa_id": null },
+  { "id": 12, "predmet_id": 3, "profesor_id": 3, "razredi_id": [2], "sati_tjedno": 3, "paralelna_grupa_id": null },
+  { "id": 13, "predmet_id": 4, "profesor_id": 4, "razredi_id": [2], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 14, "predmet_id": 5, "profesor_id": 5, "razredi_id": [2], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 15, "predmet_id": 6, "profesor_id": 6, "razredi_id": [2], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 16, "predmet_id": 7, "profesor_id": 1, "razredi_id": [2], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 17, "predmet_id": 8, "profesor_id": 5, "razredi_id": [2], "sati_tjedno": 2, "paralelna_grupa_id": null },
+  { "id": 18, "predmet_id": 10, "profesor_id": 8, "razredi_id": [2], "sati_tjedno": 2, "paralelna_grupa_id": 101 }
 ]
