@@ -288,6 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const raspored = generator.getRaspored();
             await spremiJSON("raspored.json", raspored);
             alert("Raspored je uspješno generiran i spremljen!");
+            window.open('prikaz.html', '_blank');
         } else {
             alert("Nije moguće generirati raspored s trenutnim postavkama i ograničenjima.");
         }
