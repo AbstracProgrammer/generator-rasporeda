@@ -1,7 +1,9 @@
 import {
+  createMultiSelectAutocompleteInput,
   createStrictAutocompleteInput,
   displayError,
   initializeAutocomplete,
+  initializeMultiSelectAutocomplete,
 } from "../korakProzor.js";
 import { spremiJSON } from "../spremiJSON.js";
 
@@ -25,201 +27,405 @@ async function fetchJsonData(fileName) {
 let allSubjects = [];
 let allProfessors = [];
 let allPrograms = [];
-let allRazredi = []; // New: store all razredi
+let allRazredi = [];
 
 let tempAssignments = []; // Store temporarily added assignments
 let tempAssignmentIdCounter = 1; // Counter for temporary IDs
+
+// State for the current assignment being built
+let selectedClassesForAssignment = [];
+window.renderRazredTags = undefined; // Initialize globally to undefined
 
 export async function prikaziKurikulum() {
   const modalContent = document.querySelector(".korak-prozor .modal-content");
   const newItemsDisplay = document.querySelector(
     ".korak-prozor .new-items-display",
-  ); // Get newItemsDisplay
+  );
 
-  // Fetch all necessary base data only once when modal is opened
+  selectedClassesForAssignment = [];
+
   allSubjects = await fetchJsonData("predmeti");
   allProfessors = await fetchJsonData("profesori");
   allPrograms = await fetchJsonData("program");
-  allRazredi = await fetchJsonData("razredi"); // Fetch all razredi
+  allRazredi = await fetchJsonData("razredi");
 
-  const razredAutocompleteHTML = createStrictAutocompleteInput(
-    "Odaberi Razred",
-    "npr. 1.a",
-  );
-  const programAutocompleteHTML = createStrictAutocompleteInput(
-    "Odaberi Program",
-    "npr. Opća gimnazija",
+  const razredAutocompleteHTML = createMultiSelectAutocompleteInput(
+    "Odaberi Razrede",
+    "npr. 1.a, 1.b...",
   );
 
   modalContent.innerHTML = `
-        <div class="kurikulum-container">
-            <div class="kurikulum-left">
-                <div id="razred-selector-wrapper">
-                    ${razredAutocompleteHTML}
-                </div>
-                <div id="program-selector-wrapper">
-                    ${programAutocompleteHTML}
-                </div>
-            </div>
-            <div class="kurikulum-right">
-                <!-- Subjects and professor assignments will be rendered here -->
-                <h4>Predmeti programa:</h4>
-                <div id="program-subjects-container">
-                    <!-- Dynamic subject/professor inputs -->
+    <div class="kurikulum-container">
+        <div class="kurikulum-left">
+            <div id="razred-selector-wrapper">${razredAutocompleteHTML}</div>
+            <div id="assignment-type-wrapper" class="input-field" style="display: none;">
+                <span class="field-label">Tip Zadatka</span>
+                <div class="radio-group">
+                    <label><input type="radio" name="assignmentType" value="simple" checked> Jednostavan Zadatak</label>
+                    <label><input type="radio" name="assignmentType" value="parallel"> Paralelne Grupe</label>
                 </div>
             </div>
         </div>
-    `;
+        <div id="kurikulum-right-panel" class="kurikulum-right" style="display: none;">
+            <div id="simple-assignment-ui"></div>
+            <div id="parallel-assignment-ui" style="display: none;"></div>
+        </div>
+    </div>
+  `;
 
   const razredInput = modalContent.querySelector(
     "#razred-selector-wrapper input",
   );
-  // razrediPrijedlozi now derived from allRazredi
-  const razrediPrijedlozi = allRazredi.map((razred) => razred.oznaka);
-  initializeAutocomplete(razredInput, razrediPrijedlozi, true);
-
-  const programInput = modalContent.querySelector(
-    "#program-selector-wrapper input",
+  const razredTagsContainer = modalContent.querySelector(
+    "#razred-selector-wrapper .selected-tags-container",
   );
-  const programiPrijedlozi = allPrograms.map((p) => p.naziv); // Use already fetched programs
-  initializeAutocomplete(programInput, programiPrijedlozi, true);
+  const razrediPrijedlozi = allRazredi.map((r) => r.oznaka);
 
-  const programSubjectsContainer = modalContent.querySelector(
-    "#program-subjects-container",
-  );
+  window.renderRazredTags = initializeMultiSelectAutocomplete(
+    razredInput,
+    razrediPrijedlozi,
+    razredTagsContainer,
+    (selectedItem) => {
+      if (!selectedClassesForAssignment.includes(selectedItem)) {
+        selectedClassesForAssignment.push(selectedItem);
+        window.renderRazredTags(selectedClassesForAssignment);
+        updateAssignmentUI(modalContent);
+      }
+    },
+    (removedItem) => {
+      selectedClassesForAssignment = selectedClassesForAssignment.filter(
+        (item) => item !== removedItem,
+      );
+      window.renderRazredTags(selectedClassesForAssignment);
+      updateAssignmentUI(modalContent);
+    },
+  ).renderSelectedTags;
 
-  // Event listener for program selection
-  programInput.addEventListener("blur", () => {
-    const selectedProgramName = programInput.value.trim();
-    if (selectedProgramName === "") {
-      programSubjectsContainer.innerHTML = ""; // Clear if nothing selected
-      return;
-    }
+  modalContent
+    .querySelectorAll('input[name="assignmentType"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", () => updateAssignmentUI(modalContent));
+    });
 
-    const selectedProgram = allPrograms.find(
-      (p) => p.naziv.toLowerCase() === selectedProgramName.toLowerCase(),
-    );
-
-    if (!selectedProgram) {
-      // This should ideally not happen due to strictMode, but as a safeguard
-      programSubjectsContainer.innerHTML = "";
-      displayError("Odabrani program ne postoji.");
-      return;
-    }
-
-    renderProgramSubjects(selectedProgram, programSubjectsContainer);
-  });
-
-  // Render temporary assignments initially (e.g., when modal re-opens)
   renderTempAssignments(newItemsDisplay);
+}
+
+function updateAssignmentUI(modalContent) {
+  const typeWrapper = modalContent.querySelector("#assignment-type-wrapper");
+  const rightPanel = modalContent.querySelector("#kurikulum-right-panel");
+  const simpleUIArea = modalContent.querySelector("#simple-assignment-ui");
+  const parallelUIArea = modalContent.querySelector("#parallel-assignment-ui");
+  const simpleRadio = modalContent.querySelector('input[value="simple"]');
+
+  const numSelected = selectedClassesForAssignment.length;
+
+  if (numSelected === 0) {
+    typeWrapper.style.display = "none";
+    rightPanel.style.display = "none";
+    return;
+  }
+
+  rightPanel.style.display = "block";
+
+  if (numSelected === 1) {
+    typeWrapper.style.display = "block";
+  } else {
+    // numSelected > 1 (udruživanje)
+    typeWrapper.style.display = "none";
+    simpleRadio.checked = true;
+  }
+
+  const selectedType = modalContent.querySelector(
+    'input[name="assignmentType"]:checked',
+  ).value;
+
+  if (selectedType === "simple") {
+    simpleUIArea.style.display = "block";
+    parallelUIArea.style.display = "none";
+    // Pass mode to renderer
+    const mode = numSelected > 1 ? "multi-class" : "single-class";
+    renderSimpleAssignmentUI(simpleUIArea, mode);
+  } else {
+    // parallel
+    simpleUIArea.style.display = "none";
+    parallelUIArea.style.display = "block";
+    if (!parallelUIArea.hasChildNodes()) {
+      renderParallelAssignmentUI(parallelUIArea);
+    }
+  }
+}
+
+function renderSimpleAssignmentUI(container, mode) {
+  container.innerHTML = ""; // Clear previous content
+
+  if (mode === "single-class") {
+    // --- UI for assigning a whole PROGRAM to a SINGLE CLASS ---
+    const programAutocompleteHTML = createStrictAutocompleteInput(
+      "Odaberi Program",
+      "npr. Opća gimnazija",
+    );
+    container.innerHTML = `
+      <div id="program-selector-wrapper">${programAutocompleteHTML}</div>
+      <h4>Predmeti programa:</h4>
+      <div id="program-subjects-container"></div>
+    `;
+
+    const programInput = container.querySelector(
+      "#program-selector-wrapper input",
+    );
+    const programiPrijedlozi = allPrograms.map((p) => p.naziv);
+    initializeAutocomplete(programInput, programiPrijedlozi, true);
+
+    const programSubjectsContainer = container.querySelector(
+      "#program-subjects-container",
+    );
+    programInput.addEventListener("blur", () => {
+      const selectedProgramName = programInput.value.trim();
+      const selectedProgram = allPrograms.find(
+        (p) => p.naziv.toLowerCase() === selectedProgramName.toLowerCase(),
+      );
+      if (selectedProgram) {
+        renderProgramSubjects(selectedProgram, programSubjectsContainer);
+      } else {
+        programSubjectsContainer.innerHTML = "";
+      }
+    });
+  } else {
+    // mode === 'multi-class'
+    // --- UI for assigning a SINGLE SUBJECT to MULTIPLE CLASSES ---
+    const subjectAutocompleteHTML = createStrictAutocompleteInput(
+      "Odaberi Predmet",
+      "npr. Informatika",
+    );
+    container.innerHTML = `
+      <div id="subject-selector-wrapper">${subjectAutocompleteHTML}</div>
+      <div id="single-professor-container"></div>
+    `;
+
+    const subjectInput = container.querySelector(
+      "#subject-selector-wrapper input",
+    );
+    const subjectSuggestions = allSubjects.map((s) => s.naziv);
+    initializeAutocomplete(subjectInput, subjectSuggestions, true);
+
+    const professorContainer = container.querySelector(
+      "#single-professor-container",
+    );
+    subjectInput.addEventListener("blur", () => {
+      const selectedSubjectName = subjectInput.value.trim();
+      const selectedSubject = allSubjects.find(
+        (s) => s.naziv.toLowerCase() === selectedSubjectName.toLowerCase(),
+      );
+      if (selectedSubject) {
+        const qualifiedProfessors = allProfessors.filter((prof) =>
+          prof.struka_predmeti_id.includes(selectedSubject.id),
+        );
+        const professorSuggestions = qualifiedProfessors.map(
+          (p) => `${p.ime} ${p.prezime}`,
+        );
+        const professorHTML = createStrictAutocompleteInput(
+          `Profesor za ${selectedSubject.naziv}`,
+          "Odaberite profesora",
+        );
+
+        professorContainer.innerHTML = professorHTML;
+        const professorInput = professorContainer.querySelector("input");
+        initializeAutocomplete(professorInput, professorSuggestions, true);
+      } else {
+        professorContainer.innerHTML = "";
+      }
+    });
+  }
+}
+
+function renderParallelAssignmentUI(container) {
+  container.innerHTML = `
+        <p>Funkcionalnost za paralelne grupe još nije implementirana.</p>
+        <button type="button" class="button" id="add-group-btn">+ Dodaj Grupu</button>
+        <div id="group-cards-container"></div>
+    `;
 }
 
 // Function to add a new set of curriculum assignments based on form input
 export async function dodajNoviKurikulum(modalBody) {
   const modalContent = modalBody.querySelector(".modal-content");
   const newItemsDisplay = modalBody.querySelector(".new-items-display");
-
   const razredInput = modalContent.querySelector(
     "#razred-selector-wrapper input",
   );
-  const programInput = modalContent.querySelector(
-    "#program-selector-wrapper input",
-  );
-  const programSubjectsContainer = modalContent.querySelector(
-    "#program-subjects-container",
-  );
 
-  const selectedRazredOznaka = razredInput.value.trim();
-  const selectedProgramNaziv = programInput.value.trim();
+  const assignmentType = modalContent.querySelector(
+    'input[name="assignmentType"]:checked',
+  ).value;
 
-  // 1. Validation
-  if (!selectedRazredOznaka) {
-    displayError("Molimo odaberite razred.");
+  if (selectedClassesForAssignment.length === 0) {
+    displayError("Molimo odaberite barem jedan razred.");
     return;
   }
-  if (!selectedProgramNaziv) {
-    displayError("Molimo odaberite program.");
-    return;
-  }
-
-  const razred = allRazredi.find(
-    (r) => r.oznaka.toLowerCase() === selectedRazredOznaka.toLowerCase(),
-  );
-  if (!razred) {
-    displayError(`Razred "${selectedRazredOznaka}" nije pronađen.`);
-    return;
-  }
-
-  const selectedProgram = allPrograms.find(
-    (p) => p.naziv.toLowerCase() === selectedProgramNaziv.toLowerCase(),
-  );
-  if (!selectedProgram) {
-    displayError(`Program "${selectedProgramNaziv}" nije pronađen.`);
+  const razredIds = selectedClassesForAssignment
+    .map((oznaka) => {
+      const r = allRazredi.find(
+        (r) => r.oznaka.toLowerCase() === oznaka.toLowerCase(),
+      );
+      return r ? r.id : null;
+    })
+    .filter((id) => id !== null);
+  if (razredIds.length !== selectedClassesForAssignment.length) {
+    displayError("Jedan ili više odabranih razreda nije pronađen.");
     return;
   }
 
   const assignmentsToAdd = [];
-  const professorInputs = programSubjectsContainer.querySelectorAll(
-    ".program-subject-entry input",
-  );
+  const mode =
+    selectedClassesForAssignment.length > 1 ? "multi-class" : "single-class";
 
-  if (professorInputs.length === 0) {
-    displayError("Nema predmeta za dodjelu profesora u odabranom programu.");
-    return;
-  }
+  if (assignmentType === "simple" && mode === "single-class") {
+    // --- Logic for Single Class, Program-based assignment ---
+    const programInput = modalContent.querySelector(
+      "#program-selector-wrapper input",
+    );
+    const programSubjectsContainer = modalContent.querySelector(
+      "#program-subjects-container",
+    );
+    const selectedProgramNaziv = programInput ? programInput.value.trim() : "";
 
-  for (const input of professorInputs) {
-    const selectedProfessorName = input.value.trim();
-    const subjectEntryDiv = input.closest(".program-subject-entry");
-    const subjectId = parseInt(subjectEntryDiv.dataset.subjectId, 10);
-    const subject = allSubjects.find((s) => s.id === subjectId);
-
-    if (!selectedProfessorName) {
-      displayError(
-        `Molimo odaberite profesora za predmet "${subject ? subject.naziv : "nepoznat"}"`,
-      );
+    if (!selectedProgramNaziv) {
+      displayError("Molimo odaberite program.");
+      return;
+    }
+    const selectedProgram = allPrograms.find(
+      (p) => p.naziv.toLowerCase() === selectedProgramNaziv.toLowerCase(),
+    );
+    if (!selectedProgram) {
+      displayError(`Program "${selectedProgramNaziv}" nije pronađen.`);
       return;
     }
 
+    const professorInputs = programSubjectsContainer.querySelectorAll(
+      ".program-subject-entry input",
+    );
+    if (professorInputs.length === 0) {
+      displayError("Nema predmeta za dodjelu.");
+      return;
+    }
+
+    for (const input of professorInputs) {
+      const selectedProfessorName = input.value.trim();
+      const subjectEntryDiv = input.closest(".program-subject-entry");
+      const subjectId = parseInt(subjectEntryDiv.dataset.subjectId, 10);
+      const programSubject = selectedProgram.popis_predmeta.find(
+        (ps) => ps.predmet_id === subjectId,
+      );
+      const subject = allSubjects.find((s) => s.id === subjectId);
+
+      if (!selectedProfessorName) {
+        displayError(
+          `Molimo odaberite profesora za predmet "${subject.naziv}"`,
+        );
+        return;
+      }
+      const professor = allProfessors.find(
+        (p) =>
+          `${p.ime} ${p.prezime}`.toLowerCase() ===
+          selectedProfessorName.toLowerCase(),
+      );
+      if (!professor) {
+        displayError(`Profesor "${selectedProfessorName}" nije pronađen.`);
+        return;
+      }
+
+      assignmentsToAdd.push({
+        id: tempAssignmentIdCounter++,
+        predmet_id: subjectId,
+        profesor_id: professor.id,
+        razredi_id: razredIds,
+        sati_tjedno: programSubject.weekly_requirement,
+        paralelna_grupa_id: null,
+        program_id: selectedProgram.id,
+        temp_group_key: `${razredIds.join(",")}-${selectedProgram.id}`,
+      });
+    }
+    // Clear form
+    programInput.value = "";
+    programSubjectsContainer.innerHTML = "";
+  } else if (assignmentType === "simple" && mode === "multi-class") {
+    // --- Logic for Multi Class, Single Subject assignment ---
+    const subjectInput = modalContent.querySelector(
+      "#subject-selector-wrapper input",
+    );
+    const professorInput = modalContent.querySelector(
+      "#single-professor-container input",
+    );
+
+    const selectedSubjectName = subjectInput ? subjectInput.value.trim() : "";
+    const selectedProfessorName = professorInput
+      ? professorInput.value.trim()
+      : "";
+
+    if (!selectedSubjectName) {
+      displayError("Molimo odaberite predmet.");
+      return;
+    }
+    if (!selectedProfessorName) {
+      displayError("Molimo odaberite profesora.");
+      return;
+    }
+
+    const subject = allSubjects.find(
+      (s) => s.naziv.toLowerCase() === selectedSubjectName.toLowerCase(),
+    );
     const professor = allProfessors.find(
       (p) =>
         `${p.ime} ${p.prezime}`.toLowerCase() ===
         selectedProfessorName.toLowerCase(),
     );
+
+    if (!subject) {
+      displayError(`Predmet "${selectedSubjectName}" nije pronađen.`);
+      return;
+    }
     if (!professor) {
       displayError(`Profesor "${selectedProfessorName}" nije pronađen.`);
       return;
     }
 
-    const programSubject = selectedProgram.popis_predmeta.find(
-      (ps) => ps.predmet_id === subjectId,
-    );
-    if (!programSubject) {
-      console.error(`Program subject not found for subject ID: ${subjectId}`);
-      continue; // Should not happen if data is consistent
-    }
+    // For multi-class, we don't have a program to get hours from, ask user? For now, default to 1
+    const satiTjedno =
+      parseInt(
+        prompt(`Unesite broj sati tjedno za predmet "${subject.naziv}":`, "1"),
+        10,
+      ) || 1;
 
-    const newAssignment = {
-      id: tempAssignmentIdCounter++, // Assign a temporary ID
-      predmet_id: subjectId,
+    assignmentsToAdd.push({
+      id: tempAssignmentIdCounter++,
+      predmet_id: subject.id,
       profesor_id: professor.id,
-      razredi_id: [razred.id], // Single class for now
-      sati_tjedno: programSubject.weekly_requirement,
-      paralelna_grupa_id: null, // Default for now
-      program_id: selectedProgram.id, // Add program_id for easier grouping
-    };
-    assignmentsToAdd.push(newAssignment);
+      razredi_id: razredIds,
+      sati_tjedno: satiTjedno,
+      paralelna_grupa_id: null,
+      temp_group_key: `${razredIds.join(",")}-${subject.id}`,
+    });
+    // Clear form
+    subjectInput.value = "";
+    professorInput.value = "";
+    modalContent.querySelector("#single-professor-container").innerHTML = "";
+  } else {
+    displayError("Paralelne grupe još nisu podržane za dodavanje.");
+    return;
   }
 
-  // Add to temp storage
   tempAssignments.push(...assignmentsToAdd);
-  renderTempAssignments(newItemsDisplay);
 
-  // 2. Clear form
+  // Clear common parts and re-render
+  selectedClassesForAssignment = [];
+  if (window.renderRazredTags) {
+    window.renderRazredTags(selectedClassesForAssignment);
+  }
   razredInput.value = "";
-  programInput.value = "";
-  programSubjectsContainer.innerHTML = ""; // Clear rendered subjects
-  displayError(""); // Clear any previous error message
+  updateAssignmentUI(modalContent); // Hide the right panel again
+
+  renderTempAssignments(newItemsDisplay);
+  displayError("");
 }
 
 async function renderProgramSubjects(selectedProgram, container) {
@@ -231,7 +437,6 @@ async function renderProgramSubjects(selectedProgram, container) {
     const subject = allSubjects.find((s) => s.id === programSubject.predmet_id);
     if (!subject) continue; // Skip if subject not found (data inconsistency)
 
-    // Filter professors who can teach this subject
     const qualifiedProfessors = allProfessors.filter(
       (prof) =>
         prof.struka_predmeti_id && prof.struka_predmeti_id.includes(subject.id),
@@ -258,7 +463,6 @@ async function renderProgramSubjects(selectedProgram, container) {
     });
   }
 
-  // Initialize all professor autocompletes
   subjectProfessorInputs.forEach((item) => {
     initializeAutocomplete(item.input, item.suggestions, true);
   });
@@ -267,61 +471,64 @@ async function renderProgramSubjects(selectedProgram, container) {
 function renderTempAssignments(container) {
   container.innerHTML = ""; // Clear existing display
 
-  // Group assignments by class and program for display, as they conceptually belong together
-  const groupedAssignments = {}; // Key: "RazredOznaka - ProgramNaziv"
-
   if (tempAssignments.length === 0) {
-    container.style.display = "block"; // Ensure it's visible even if empty
+    container.style.display = "block";
     return;
   }
+  container.style.display = "block";
 
-  container.style.display = "block"; // Show container if there are items
-
+  const groupedByTempKey = {};
   for (const assignment of tempAssignments) {
-    const razred = allRazredi.find((r) => r.id === assignment.razredi_id[0]);
-    const program = allPrograms.find((p) => p.id === assignment.program_id);
-    const subject = allSubjects.find((s) => s.id === assignment.predmet_id);
-    const professor = allProfessors.find(
-      (p) => p.id === assignment.profesor_id,
-    );
-
-    if (!razred || !program || !subject || !professor) {
-      console.warn("Could not find full details for assignment:", assignment);
-      continue;
-    }
-
-    const groupKey = `${razred.oznaka} - ${program.naziv}`;
-    if (!groupedAssignments[groupKey]) {
-      groupedAssignments[groupKey] = {
-        razredOznaka: razred.oznaka,
-        programNaziv: program.naziv,
+    const key = assignment.temp_group_key || `ungrouped-${assignment.id}`;
+    if (!groupedByTempKey[key]) {
+      groupedByTempKey[key] = {
+        razredi_id: assignment.razredi_id,
+        program_id: assignment.program_id, // May be undefined for parallel groups
         assignments: [],
-        tempIds: [], // Store temp IDs for this group for deletion
+        tempIds: [],
       };
     }
-    groupedAssignments[groupKey].assignments.push({
-      subjectNaziv: subject.naziv,
-      professorName: `${professor.ime} ${professor.prezime}`,
-      sati_tjedno: assignment.sati_tjedno,
-    });
-    groupedAssignments[groupKey].tempIds.push(assignment.id);
+    groupedByTempKey[key].assignments.push(assignment);
+    groupedByTempKey[key].tempIds.push(assignment.id);
   }
 
-  for (const key in groupedAssignments) {
-    const group = groupedAssignments[key];
+  for (const key in groupedByTempKey) {
+    const group = groupedByTempKey[key];
+    const firstAssignment = group.assignments[0]; // Use first for common data
+
+    const razredOznake = group.razredi_id
+      .map((id) => {
+        const razred = allRazredi.find((r) => r.id === id);
+        return razred ? razred.oznaka : "Nepoznat";
+      })
+      .join(", ");
+
+    // For simple assignments, program is consistent. For parallel, it might differ.
+    const program = allPrograms.find(
+      (p) => p.id === firstAssignment.program_id,
+    );
+    const programNaziv = program ? program.naziv : "Paralelna grupa";
+
     const groupDiv = document.createElement("div");
     groupDiv.classList.add("new-item-tag", "kurikulum-group-tag");
     groupDiv.innerHTML = `
-            <span>${group.razredOznaka} (${group.programNaziv})</span>
-            <button class="delete-temp-item-btn" data-group-temp-ids="${group.tempIds.join(",")}">X</button>
-            <ul>
-                ${group.assignments.map((a) => `<li>${a.subjectNaziv} (${a.sati_tjedno}h) - ${a.professorName}</li>`).join("")}
-            </ul>
-        `;
+        <span>${razredOznake} (${programNaziv})</span>
+        <button class="delete-temp-item-btn" data-group-temp-ids="${group.tempIds.join(",")}">X</button>
+        <ul>
+            ${group.assignments
+              .map((a) => {
+                const subject = allSubjects.find((s) => s.id === a.predmet_id);
+                const professor = allProfessors.find(
+                  (p) => p.id === a.profesor_id,
+                );
+                return `<li>${subject.naziv} (${a.sati_tjedno}h) - ${professor.ime} ${professor.prezime}</li>`;
+              })
+              .join("")}
+        </ul>
+    `;
     container.appendChild(groupDiv);
   }
 
-  // Add event listeners for delete buttons
   container.querySelectorAll(".delete-temp-item-btn").forEach((button) => {
     button.addEventListener("click", (e) => {
       const tempIdsToDelete = e.target.dataset.groupTempIds

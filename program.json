@@ -6,6 +6,10 @@
             {
                 "predmet_id": 2,
                 "weekly_requirement": 2
+            },
+            {
+                "predmet_id": 3,
+                "weekly_requirement": 3
             }
         ]
     },

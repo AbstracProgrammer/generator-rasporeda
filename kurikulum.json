@@ -7,6 +7,52 @@
             1
         ],
         "sati_tjedno": 2,
-        "paralelna_grupa_id": null
+        "paralelna_grupa_id": null,
+        "temp_group_key": "1-1770316426038"
+    },
+    {
+        "id": 2,
+        "predmet_id": 2,
+        "profesor_id": 1,
+        "razredi_id": [
+            1,
+            2
+        ],
+        "sati_tjedno": 2,
+        "paralelna_grupa_id": null,
+        "temp_group_key": "1,2-1770318779495"
+    },
+    {
+        "id": 3,
+        "predmet_id": 3,
+        "profesor_id": 4,
+        "razredi_id": [
+            1
+        ],
+        "sati_tjedno": 3,
+        "paralelna_grupa_id": null,
+        "temp_group_key": "1-1770316426038"
+    },
+    {
+        "id": 4,
+        "predmet_id": 2,
+        "profesor_id": 1,
+        "razredi_id": [
+            3
+        ],
+        "sati_tjedno": 2,
+        "paralelna_grupa_id": null,
+        "temp_group_key": "3-1770316426038"
+    },
+    {
+        "id": 5,
+        "predmet_id": 3,
+        "profesor_id": 4,
+        "razredi_id": [
+            3
+        ],
+        "sati_tjedno": 3,
+        "paralelna_grupa_id": null,
+        "temp_group_key": "3-1770316426038"
     }
 ]
