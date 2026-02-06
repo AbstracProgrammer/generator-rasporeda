@@ -30,11 +30,12 @@ let allRazredi = []; // New: store all razredi
 let tempAssignments = []; // Store temporarily added assignments
 let tempAssignmentIdCounter = 1; // Counter for temporary IDs
 
-export async function prikaziKurikulum() {
-  const modalContent = document.querySelector(".korak-prozor .modal-content");
-  const newItemsDisplay = document.querySelector(
-    ".korak-prozor .new-items-display",
-  ); // Get newItemsDisplay
+export async function prikaziKurikulum(modalBody) {
+  const modalContent = modalBody.querySelector(".modal-content");
+  const newItemsDisplay = modalBody.querySelector(".new-items-display");
+  const existingItemsContainer = modalBody.querySelector(
+    ".existing-items-container",
+  );
 
   // Fetch all necessary base data only once when modal is opened
   allSubjects = await fetchJsonData("predmeti");
@@ -112,6 +113,7 @@ export async function prikaziKurikulum() {
 
   // Render temporary assignments initially (e.g., when modal re-opens)
   renderTempAssignments(newItemsDisplay);
+  prikaziPostojeciKurikulum(existingItemsContainer);
 }
 
 // Function to add a new set of curriculum assignments based on form input
@@ -334,6 +336,210 @@ function renderTempAssignments(container) {
     });
   });
 }
+async function prikaziPostojeciKurikulum(container) {
+  container.innerHTML = "Učitavanje...";
+
+  try {
+    const [existingKurikulum, allRazrediData, allSubjectsData, allProfessorsData] = await Promise.all([
+      fetchJsonData("kurikulum"),
+      fetchJsonData("razredi"),
+      fetchJsonData("predmeti"),
+      fetchJsonData("profesori")
+    ]);
+
+    // Make sure global variables are updated if they are empty
+    if (allRazredi.length === 0) allRazredi = allRazrediData;
+    if (allSubjects.length === 0) allSubjects = allSubjectsData;
+    if (allProfessors.length === 0) allProfessors = allProfessorsData;
+
+
+    if (existingKurikulum.length === 0) {
+      container.innerHTML = "Nema unesenog kurikuluma.";
+      return;
+    }
+
+    const groupedByClass = existingKurikulum.reduce((acc, assignment) => {
+      const classId = assignment.razredi_id[0];
+      if (!acc[classId]) {
+        acc[classId] = [];
+      }
+      acc[classId].push(assignment);
+      return acc;
+    }, {});
+
+    container.innerHTML = ""; // Clear loading message
+
+    for (const classId in groupedByClass) {
+      const assignments = groupedByClass[classId];
+      const razred = allRazredi.find((r) => r.id === parseInt(classId));
+      if (!razred) continue;
+
+      const card = document.createElement("div");
+      card.className = "existing-item-card kurikulum-card";
+      card.dataset.classId = classId;
+
+      renderKurikulumDisplayMode(card, razred, assignments);
+      container.appendChild(card);
+    }
+  } catch (error) {
+    console.error("Greška pri prikazivanju postojećeg kurikuluma:", error);
+    container.innerHTML = `<p style="color: red;">Nije moguće učitati podatke.</p>`;
+  }
+}
+
+function renderKurikulumDisplayMode(card, razred, assignments) {
+  let listItems = "";
+  for (const assignment of assignments) {
+    const subject = allSubjects.find((s) => s.id === assignment.predmet_id);
+    const professor = allProfessors.find((p) => p.id === assignment.profesor_id);
+    if (subject && professor) {
+      listItems += `<li>${subject.naziv} (${assignment.sati_tjedno}h) - ${professor.ime} ${professor.prezime}</li>`;
+    }
+  }
+
+  card.innerHTML = `
+    <div class="card-header">
+        <h4>${razred.oznaka}</h4>
+        <div class="card-actions">
+            <img src="assets/edit.png" alt="Uredi" class="edit-btn">
+            <img src="assets/delete.png" alt="Obriši" class="delete-btn">
+        </div>
+    </div>
+    <ul>${listItems}</ul>
+  `;
+
+  card.querySelector(".edit-btn").addEventListener("click", () => renderKurikulumEditMode(card, razred, assignments));
+  card.querySelector(".delete-btn").addEventListener("click", async () => {
+    if (confirm(`Jeste li sigurni da želite obrisati kurikulum za razred "${razred.oznaka}"?`)) {
+        const classIdToDelete = parseInt(card.dataset.classId, 10);
+        const currentKurikulum = await fetchJsonData("kurikulum");
+        const updatedKurikulum = currentKurikulum.filter(
+            (assignment) => !assignment.razredi_id.includes(classIdToDelete)
+        );
+
+        const finalKurikulum = updatedKurikulum.map((assignment, index) => ({
+            ...assignment,
+            id: index + 1,
+        }));
+
+        const result = await spremiJSON("kurikulum.json", finalKurikulum);
+        if (result.success) {
+            prikaziPostojeciKurikulum(card.parentElement);
+        } else {
+            displayError("Greška pri brisanju grupe.");
+        }
+    }
+  });
+}
+
+function renderKurikulumEditMode(card, razred, assignments) {
+    card.classList.add("edit-mode");
+
+    let editHtml = '';
+    const autocompleteInputs = [];
+
+    assignments.forEach(assignment => {
+        const subject = allSubjects.find(s => s.id === assignment.predmet_id);
+        const currentProfessor = allProfessors.find(p => p.id === assignment.profesor_id);
+        if (!subject) return;
+
+        const qualifiedProfessors = allProfessors.filter(
+            (prof) => prof.struka_predmeti_id && prof.struka_predmeti_id.includes(subject.id)
+        );
+        const professorSuggestions = qualifiedProfessors.map(
+            (prof) => `${prof.ime} ${prof.prezime}`
+        );
+
+        const inputId = `prof-edit-${assignment.id}`;
+        editHtml += `
+            <div class="program-subject-entry" data-assignment-id="${assignment.id}" data-subject-id="${subject.id}">
+                ${createStrictAutocompleteInput(
+                    `${subject.naziv} (${assignment.sati_tjedno}h)`,
+                    "Odaberite profesora"
+                )}
+            </div>`;
+        
+        autocompleteInputs.push({
+            assignmentId: assignment.id,
+            suggestions: professorSuggestions,
+            currentValue: currentProfessor ? `${currentProfessor.ime} ${currentProfessor.prezime}` : ''
+        });
+    });
+
+    card.innerHTML = `
+        <div class="card-header">
+            <h4>Uređivanje: ${razred.oznaka}</h4>
+        </div>
+        <div class="card-edit-form">${editHtml}</div>
+        <div class="card-actions">
+            <img src="assets/save.svg" alt="Spremi" class="save-edit-btn">
+            <button class="cancel-edit-btn delete-temp-item-btn">X</button>
+        </div>
+    `;
+
+    autocompleteInputs.forEach(ac => {
+        const entryDiv = card.querySelector(`[data-assignment-id="${ac.assignmentId}"]`);
+        const input = entryDiv.querySelector('input');
+        input.value = ac.currentValue;
+        initializeAutocomplete(input, ac.suggestions, true);
+    });
+
+    card.querySelector(".save-edit-btn").addEventListener("click", async () => {
+        const newAssignments = [];
+        const entries = card.querySelectorAll(".program-subject-entry");
+        let isValid = true;
+
+        for (const entry of entries) {
+            const assignmentId = parseInt(entry.dataset.assignmentId, 10);
+            const professorName = entry.querySelector('input').value.trim();
+            const professor = allProfessors.find(p => `${p.ime} ${p.prezime}`.toLowerCase() === professorName.toLowerCase());
+
+            if (!professor) {
+                const originalAssignment = assignments.find(a => a.id === assignmentId);
+                const subject = allSubjects.find(s => s.id === originalAssignment.predmet_id);
+                displayError(`Nije pronađen profesor za predmet ${subject.naziv}.`);
+                isValid = false;
+                break;
+            }
+            newAssignments.push({ assignmentId, professorId: professor.id });
+        }
+
+        if (isValid) {
+            const result = await urediKurikulumGrupu(newAssignments);
+            if (result.success) {
+                prikaziPostojeciKurikulum(card.parentElement);
+            }
+        }
+    });
+
+    card.querySelector(".cancel-edit-btn").addEventListener("click", () => {
+        card.classList.remove("edit-mode");
+        renderKurikulumDisplayMode(card, razred, assignments);
+    });
+}
+
+async function urediKurikulumGrupu(updatedAssignments) {
+    try {
+        const currentKurikulum = await fetchJsonData("kurikulum");
+
+        updatedAssignments.forEach(updated => {
+            const index = currentKurikulum.findIndex(k => k.id === updated.assignmentId);
+            if (index !== -1) {
+                currentKurikulum[index].profesor_id = updated.professorId;
+            }
+        });
+
+        const result = await spremiJSON("kurikulum.json", currentKurikulum);
+        if (!result.success) throw new Error(result.message);
+
+        return { success: true };
+    } catch (error) {
+        displayError("Greška pri spremanju izmjena: " + error.message);
+        return { success: false, message: error.message };
+    }
+}
+
+
 export async function spremiKorakKurikulum() {
   try {
     let existingKurikulum = await fetchJsonData("kurikulum"); // Get existing data

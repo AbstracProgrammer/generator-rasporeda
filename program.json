@@ -26,6 +26,10 @@
             {
                 "predmet_id": 2,
                 "weekly_requirement": 2
+            },
+            {
+                "predmet_id": 1,
+                "weekly_requirement": 2
             }
         ]
     },

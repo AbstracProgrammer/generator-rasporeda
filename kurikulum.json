@@ -8,5 +8,15 @@
         ],
         "sati_tjedno": 2,
         "paralelna_grupa_id": null
+    },
+    {
+        "id": 2,
+        "predmet_id": 1,
+        "profesor_id": 1,
+        "razredi_id": [
+            1
+        ],
+        "sati_tjedno": 2,
+        "paralelna_grupa_id": null
     }
 ]
