@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prikaz Rasporeda</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .schedule-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        td .subject {
+            font-weight: bold;
+            display: block;
+            font-size: 1.1em;
+        }
+        td .details {
+            font-size: 0.9em;
+            color: #555;
+            display: block;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Prikaz Generiranog Rasporeda</h1>
+    <div id="schedule-container" class="schedule-container">
+        <p>Učitavanje rasporeda...</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('raspored.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        document.getElementById('schedule-container').innerHTML = '<p>Datoteka raspored.json je prazna ili ne postoji.</p>';
+                        return;
+                    }
+                    generateScheduleViews(data);
+                })
+                .catch(error => {
+                    console.error('Greška pri dohvaćanju rasporeda:', error);
+                    document.getElementById('schedule-container').innerHTML = `<p style="color: red;">Nije moguće učitati raspored. ${error.message}</p>`;
+                });
+        });
+
+        function generateScheduleViews(scheduleData) {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = ''; // Clear loading message
+
+            // Group schedule by class
+            const schedulesByClass = scheduleData.reduce((acc, entry) => {
+                const className = entry.razred;
+                if (!acc[className]) {
+                    acc[className] = [];
+                }
+                acc[className].push(entry);
+                return acc;
+            }, {});
+
+            const days = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak"];
+            const maxHours = 8;
+
+            // Create a table for each class
+            for (const className in schedulesByClass) {
+                const classSchedule = schedulesByClass[className];
+
+                // Create a 2D grid for easy lookup
+                const grid = Array(maxHours).fill(null).map(() => Array(days.length).fill(null));
+                classSchedule.forEach(entry => {
+                    // dan and sat are 1-based in JSON
+                    const dayIndex = entry.dan - 1;
+                    const hourIndex = entry.sat - 1;
+                    if (dayIndex >= 0 && dayIndex < days.length && hourIndex >= 0 && hourIndex < maxHours) {
+                        grid[hourIndex][dayIndex] = entry;
+                    }
+                });
+
+                const classContainer = document.createElement('div');
+                const title = document.createElement('h2');
+                title.textContent = `Raspored za ${className}`;
+                classContainer.appendChild(title);
+
+                const table = document.createElement('table');
+                let tableHtml = `<thead><tr><th>Sat</th>`;
+                days.forEach(day => tableHtml += `<th>${day}</th>`);
+                tableHtml += `</tr></thead><tbody>`;
+
+                for (let hour = 0; hour < maxHours; hour++) {
+                    tableHtml += `<tr><td>${hour + 1}.</td>`;
+                    for (let day = 0; day < days.length; day++) {
+                        const entry = grid[hour][day];
+                        if (entry) {
+                            tableHtml += `<td>
+                                <span class="subject">${entry.predmet}</span>
+                                <span class="details">${entry.profesor}</span>
+                                <span class="details">(${entry.ucionica})</span>
+                            </td>`;
+                        } else {
+                            tableHtml += '<td></td>';
+                        }
+                    }
+                    tableHtml += `</tr>`;
+                }
+
+                tableHtml += `</tbody>`;
+                table.innerHTML = tableHtml;
+                classContainer.appendChild(table);
+                container.appendChild(classContainer);
+            }
+        }
+    </script>
+
+</body>
+</html>

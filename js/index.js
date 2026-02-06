@@ -1,4 +1,9 @@
-import { prikaziKurikulum, dodajNoviKurikulum, spremiKorakKurikulum } from "./koraciKomponente/kurikulum.js";
+import { GeneratorRasporeda } from "./generator.js";
+import {
+  dodajNoviKurikulum,
+  prikaziKurikulum,
+  spremiKorakKurikulum,
+} from "./koraciKomponente/kurikulum.js";
 import {
   dodajNoviPredmet,
   prikaziKorakPredmeti,
@@ -24,9 +29,7 @@ import {
   prikaziKorakUcionice,
   spremiKorakUcionice,
 } from "./koraciKomponente/ucionice.js";
-import { GeneratorRasporeda } from "./generator.js";
 import { spremiJSON } from "./spremiJSON.js";
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const koraci = document.querySelectorAll(".korak");
@@ -35,10 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalTitle = modal.querySelector("h3");
   const modalBody = modal.querySelector(".modal-body"); // The main container for both columns
   const exitButton = modal.querySelector(".exit");
-  const saveAndAddNewButton = modal.querySelector("button.save-and-add-new-button"); // Changed selector to be more specific
+  const saveAndAddNewButton = modal.querySelector(
+    "button.save-and-add-new-button",
+  ); // Changed selector to be more specific
   const saveStepButton = modal.querySelector("button.save-step"); // Changed selector to be more specific
-  const generirajButton = document.querySelector('.main-button');
-
+  const generirajButton = document.querySelector(".main-button");
 
   const closeModalAndRefresh = () => {
     closeModal();
@@ -215,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     const rezultati = await Promise.all(provjere);
-    
+
     let allCompleted = true;
     let prviNeZavrseniPronadjen = false;
     koraciConfig.forEach((config, index) => {
@@ -243,9 +247,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (allCompleted) {
-        generirajButton.classList.remove('locked');
+      generirajButton.classList.remove("locked");
     } else {
-        generirajButton.classList.add('locked');
+      generirajButton.classList.add("locked");
     }
 
     // If all are completed, make the last one active
@@ -259,50 +263,57 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   async function pokreniGenerator() {
-    if (generirajButton.classList.contains('locked')) return;
+    if (generirajButton.classList.contains("locked")) return;
 
-    generirajButton.textContent = 'Generiram...';
+    generirajButton.textContent = "Generiram...";
     generirajButton.disabled = true;
 
     try {
-        const [profesoriRes, ucioniceRes, razrediRes, kurikulumRes, predmetiRes] = await Promise.all([
-            fetch("profesori.json"),
-            fetch("ucionice.json"),
-            fetch("razredi.json"),
-            fetch("kurikulum.json"),
-            fetch("predmeti.json"),
+      const [profesoriRes, ucioniceRes, razrediRes, kurikulumRes, predmetiRes] =
+        await Promise.all([
+          fetch("profesori.json"),
+          fetch("ucionice.json"),
+          fetch("razredi.json"),
+          fetch("kurikulum.json"),
+          fetch("predmeti.json"),
         ]);
 
-        const skola = {
-            profesori: await profesoriRes.json(),
-            ucionice: await ucioniceRes.json(),
-            razredi: await razrediRes.json(),
-            kurikulum: await kurikulumRes.json(),
-            predmeti: await predmetiRes.json(),
-        };
+      const skola = {
+        profesori: await profesoriRes.json(),
+        ucionice: await ucioniceRes.json(),
+        razredi: await razrediRes.json(),
+        kurikulum: await kurikulumRes.json(),
+        predmeti: await predmetiRes.json(),
+      };
 
-        const generator = new GeneratorRasporeda(skola);
-        const success = generator.solve();
+      const generator = new GeneratorRasporeda(skola);
+      const success = generator.solve();
 
-        if (success) {
-            const raspored = generator.getRaspored();
-            await spremiJSON("raspored.json", raspored);
-            alert("Raspored je uspješno generiran i spremljen!");
-        } else {
-            alert("Nije moguće generirati raspored s trenutnim postavkama i ograničenjima.");
-        }
+      if (success) {
+        const raspored = generator.getRaspored();
+        await spremiJSON("raspored.json", raspored);
+        alert("Raspored je uspješno generiran i spremljen!");
+        window.open("prikaz.html", "_blank");
+      } else {
+        alert(
+          "Nije moguće generirati raspored s trenutnim postavkama i ograničenjima.",
+        );
+      }
     } catch (error) {
-        console.error("Došlo je do greške prilikom generiranja rasporeda:", error);
-        alert("Dogodila se greška. Provjerite konzolu za više informacija.");
+      console.error(
+        "Došlo je do greške prilikom generiranja rasporeda:",
+        error,
+      );
+      alert("Dogodila se greška. Provjerite konzolu za više informacija.");
     } finally {
-        generirajButton.textContent = 'Generiraj raspored';
-        generirajButton.disabled = false;
+      generirajButton.textContent = "Generiraj raspored";
+      generirajButton.disabled = false;
     }
-}
+  }
 
   // --- Event Listeners ---
 
-  generirajButton.addEventListener('click', pokreniGenerator);
+  generirajButton.addEventListener("click", pokreniGenerator);
 
   // "Spremi i zatvori" button event listener
   saveStepButton.addEventListener("click", async () => {
