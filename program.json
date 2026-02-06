@@ -1,17 +1,1 @@
-[
-  {
-    "id": 1,
-    "naziv": "Gimnazijski Program - 1. godina",
-    "popis_predmeta": [
-      { "predmet_id": 1, "weekly_requirement": 4 },
-      { "predmet_id": 2, "weekly_requirement": 4 },
-      { "predmet_id": 3, "weekly_requirement": 3 },
-      { "predmet_id": 4, "weekly_requirement": 2 },
-      { "predmet_id": 5, "weekly_requirement": 2 },
-      { "predmet_id": 6, "weekly_requirement": 2 },
-      { "predmet_id": 7, "weekly_requirement": 2 },
-      { "predmet_id": 8, "weekly_requirement": 2 },
-      { "predmet_id": 9, "weekly_requirement": 2 }
-    ]
-  }
-]
+[]

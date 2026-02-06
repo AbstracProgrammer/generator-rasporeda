@@ -1,12 +1,1 @@
-[
-  { "id": 1, "naziv": "Hrvatski jezik", "potreban_tip_ucionice_id": null },
-  { "id": 2, "naziv": "Matematika", "potreban_tip_ucionice_id": null },
-  { "id": 3, "naziv": "Engleski jezik", "potreban_tip_ucionice_id": null },
-  { "id": 4, "naziv": "Informatika", "potreban_tip_ucionice_id": 2 },
-  { "id": 5, "naziv": "Kemija", "potreban_tip_ucionice_id": 3 },
-  { "id": 6, "naziv": "Tjelesna i zdravstvena kultura", "potreban_tip_ucionice_id": 4 },
-  { "id": 7, "naziv": "Povijest", "potreban_tip_ucionice_id": null },
-  { "id": 8, "naziv": "Geografija", "potreban_tip_ucionice_id": null },
-  { "id": 9, "naziv": "Vjeronauk", "potreban_tip_ucionice_id": null },
-  { "id": 10, "naziv": "Etika", "potreban_tip_ucionice_id": null }
-]
+[]
